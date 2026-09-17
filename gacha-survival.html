@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>가챠머신 서바이벌</title>
+<style>
+:root{
+  --bg-deep:#0d0618;
+  --bg-mid:#1c0f33;
+  --panel:#1a1030;
+  --panel-2:#241a3d;
+  --border:#3a2a5c;
+  --text:#f0e9ff;
+  --text-dim:#a89bc9;
+  --accent:#ffd93d;
+  --danger:#ff3b5c;
+  --good:#4fe08a;
+  --player-color:#4fc3f7;
+  --ai1-color:#ff5c5c;
+  --ai2-color:#ffd93d;
+  --ai3-color:#a78bfa;
+  --empty-color:#4b3f6b;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;width:100%;height:100%;background:#000;color:var(--text);
+  font-family:'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif;overflow:hidden;}
+#stage-outer{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;}
+#app{position:relative;width:1920px;height:1080px;flex:0 0 auto;transform-origin:center center;
+  overflow:hidden;box-shadow:0 0 80px rgba(0,0,0,.8);}
+/* screens are authored at 1280x720 and upscaled 1.5x to exactly fill the 1920x1080 stage */
+#design{position:relative;width:1280px;height:720px;transform:scale(1.5);transform-origin:0 0;background:
+  radial-gradient(ellipse at 50% -10%, var(--bg-mid) 0%, var(--bg-deep) 65%);}
+.screen{display:none;width:100%;height:100%;position:relative;}
+.screen.active{display:flex;flex-direction:column;}
+button{font-family:inherit;cursor:pointer;border:none;outline:none;}
+.btn{padding:12px 26px;border-radius:10px;font-size:16px;font-weight:700;
+  transition:transform .12s ease, box-shadow .12s ease;letter-spacing:.5px;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+.btn-primary{background:linear-gradient(135deg,#ff8a3d,#ffd93d);color:#241205;
+  box-shadow:0 4px 0 #b5691f,0 6px 14px rgba(255,140,50,.35);}
+.btn-primary:hover:not(:disabled){box-shadow:0 4px 0 #b5691f,0 8px 20px rgba(255,180,60,.5);}
+.btn-secondary{background:var(--panel-2);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:hover:not(:disabled){background:#2d2150;}
+.btn-danger{background:linear-gradient(135deg,#ff5c5c,#c92a4a);color:#fff;
+  box-shadow:0 4px 0 #8a1c34;}
+.btn-small{padding:7px 14px;font-size:13px;border-radius:8px;}
+
+/* ---------- Title Screen ---------- */
+#screen-title{align-items:center;justify-content:center;}
+.floating-capsules{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+.floating-capsules span{position:absolute;font-size:28px;opacity:.35;
+  animation:floatUp linear infinite;}
+@keyframes floatUp{
+  0%{transform:translateY(110vh) rotate(0deg);}
+  100%{transform:translateY(-15vh) rotate(360deg);}
+}
+.title-wrap{position:relative;z-index:1;text-align:center;padding:20px;}
+.title-logo{font-size:52px;margin:0 0 6px;text-shadow:0 0 24px rgba(255,217,61,.6);
+  background:linear-gradient(135deg,#ffd93d,#ff8a3d);-webkit-background-clip:text;
+  background-clip:text;color:transparent;}
+.title-sub{color:var(--text-dim);font-size:15px;margin-bottom:36px;}
+.title-buttons{display:flex;gap:16px;justify-content:center;}
+
+/* ---------- VN Screen ---------- */
+#screen-vn{justify-content:flex-end;}
+.vn-bg{position:absolute;inset:0;background:
+  radial-gradient(circle at 30% 20%,#2a1a4a 0%,var(--bg-deep) 70%);}
+.vn-character{position:absolute;left:6%;bottom:220px;font-size:150px;
+  filter:drop-shadow(0 10px 20px rgba(0,0,0,.5));animation:bob 2.4s ease-in-out infinite;z-index:1;}
+@keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
+.vn-box{position:relative;z-index:2;margin:0 24px 28px;background:var(--panel);
+  border:2px solid var(--border);border-radius:16px;padding:22px 26px;
+  min-height:110px;box-shadow:0 12px 40px rgba(0,0,0,.5);}
+.vn-name{display:inline-block;background:linear-gradient(135deg,#ff8a3d,#ffd93d);
+  color:#241205;font-weight:800;padding:4px 16px;border-radius:20px;font-size:14px;
+  margin-bottom:10px;}
+.vn-text{font-size:18px;line-height:1.6;min-height:56px;}
+.vn-next{position:absolute;right:22px;bottom:18px;background:none;color:var(--accent);
+  font-size:22px;animation:pulse 1.2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:.4;}50%{opacity:1;}}
+.vn-skip{position:absolute;top:18px;right:22px;z-index:3;}
+
+.vn-diagram{position:absolute;left:50%;top:44%;width:380px;max-width:50%;
+  background:var(--panel);border:2px solid var(--border);border-radius:16px;
+  padding:18px 20px;box-shadow:0 12px 30px rgba(0,0,0,.5);
+  opacity:0;transform:translate(-50%,-50%) scale(.96);
+  transition:opacity .25s ease, transform .25s ease;z-index:1;pointer-events:none;}
+.vn-diagram.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.vn-diagram-title{font-size:12px;font-weight:700;color:var(--accent);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;text-align:center;}
+.vd-row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.vd-dome{position:relative;width:120px;height:96px;margin:0 auto 12px;
+  border-radius:60px 60px 10px 10px;background:radial-gradient(circle at 50% 30%,#2c2050,#150b28 75%);
+  border:3px solid #5b4a8a;overflow:hidden;}
+.vd-dot{position:absolute;width:14px;height:14px;border-radius:50%;
+  box-shadow:inset -2px -2px 3px rgba(0,0,0,.35), inset 1px 1px 2px rgba(255,255,255,.5);}
+.vd-legend{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--text-dim);}
+.vd-legend span{display:flex;align-items:center;gap:6px;}
+.vd-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.vd-arrow{font-size:20px;color:var(--accent);}
+.vd-chip{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;
+  padding:8px 12px;text-align:center;font-size:12px;color:var(--text-dim);min-width:76px;}
+.vd-chip .icon{font-size:18px;display:block;margin-bottom:4px;}
+.vd-chip .val{color:var(--accent);font-weight:800;font-size:14px;}
+.vd-gauge{width:100%;height:10px;border-radius:6px;background:var(--panel-2);
+  overflow:hidden;margin:8px 0;border:1px solid var(--border);}
+.vd-gauge-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--good),var(--accent),var(--danger));}
+.vd-cards{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.vd-card{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px;text-align:center;min-width:74px;}
+.vd-card .icon{font-size:22px;display:block;}
+.vd-card .label{font-size:11px;color:var(--text-dim);margin-top:5px;line-height:1.35;}
+.vd-vs{font-size:15px;font-weight:800;color:var(--accent);align-self:center;padding:0 2px;}
+
+/* ---------- Game Screen ---------- */
+#screen-game{flex-direction:column;}
+.topbar{display:flex;justify-content:space-between;align-items:center;
+  padding:10px 20px;background:var(--panel);border-bottom:1px solid var(--border);
+  flex-wrap:wrap;gap:10px;}
+.round-info{font-size:15px;font-weight:700;color:var(--accent);}
+.round-info small{display:block;color:var(--text-dim);font-weight:400;font-size:12px;}
+.players-row{display:flex;gap:10px;flex-wrap:wrap;}
+.player-chip{display:flex;align-items:center;gap:6px;background:var(--panel-2);
+  border:1px solid var(--border);border-radius:20px;padding:5px 12px 5px 6px;font-size:13px;}
+.player-chip .dot{width:14px;height:14px;border-radius:50%;box-shadow:0 0 8px currentColor;}
+.player-chip.dead{opacity:.35;text-decoration:line-through;}
+.player-chip .gold{font-weight:700;color:var(--accent);}
+.player-chip .lives{font-size:10px;letter-spacing:-1px;}
+.player-chip .badges{display:flex;gap:2px;}
+
+.main-area{flex:1;display:flex;min-height:0;}
+.machine-area{flex:1.3;position:relative;display:flex;align-items:center;justify-content:center;
+  padding:10px;}
+.item-sidebar{flex:0 0 168px;display:flex;flex-direction:column;gap:8px;padding:14px 10px;
+  border-right:1px solid var(--border);background:var(--panel);overflow-y:auto;}
+.item-sidebar-title{font-size:12px;font-weight:700;color:var(--text-dim);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
+.item-sidebar-empty{font-size:12px;color:var(--text-dim);text-align:center;margin-top:20px;line-height:1.5;}
+.item-slot{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;transition:border-color .15s ease;}
+.item-slot.expanded{border-color:var(--accent);}
+.item-slot-head{display:flex;align-items:center;gap:6px;padding:9px 10px;cursor:pointer;}
+.item-slot-icon{font-size:18px;}
+.item-slot-name{flex:1;font-size:12px;font-weight:700;}
+.item-slot-count{font-size:11px;color:var(--accent);font-weight:700;}
+.item-slot-detail{padding:0 10px 10px;}
+.item-slot-desc{font-size:10.5px;color:var(--text-dim);line-height:1.4;margin-bottom:8px;}
+.item-slot-hint{font-size:10px;color:var(--danger);margin-bottom:8px;line-height:1.4;}
+.item-slot-btns{display:flex;gap:6px;}
+.item-slot-btns button{flex:1;padding:6px 4px;font-size:10.5px;}
+.side-panel{flex:1;display:flex;flex-direction:column;min-width:280px;max-width:400px;
+  border-left:1px solid var(--border);background:var(--panel);}
+.control-panel{padding:16px;border-bottom:1px solid var(--border);}
+.log-panel{flex:1;min-height:0;max-height:260px;overflow-y:auto;padding:12px 16px;font-size:12.5px;color:var(--text-dim);
+  display:flex;flex-direction:column-reverse;}
+.log-entry{padding:5px 0;border-bottom:1px dashed rgba(255,255,255,.06);}
+.log-entry.hot{color:var(--accent);}
+.log-entry.bad{color:var(--danger);}
+.log-entry.good{color:var(--good);}
+
+.machine{position:relative;width:340px;text-align:center;transition:transform .08s ease;}
+.machine.shake{animation:shakeAnim .55s cubic-bezier(.36,.07,.19,.97);}
+@keyframes shakeAnim{
+  0%,100%{transform:translate(0,0) rotate(0);}
+  10%{transform:translate(-16px,7px) rotate(-2.5deg);}
+  22%{transform:translate(14px,-9px) rotate(2.5deg);}
+  34%{transform:translate(-13px,8px) rotate(-2deg);}
+  46%{transform:translate(12px,-7px) rotate(2deg);}
+  58%{transform:translate(-9px,5px) rotate(-1.4deg);}
+  70%{transform:translate(7px,-4px) rotate(1.2deg);}
+  82%{transform:translate(-4px,2px) rotate(-.6deg);}
+  92%{transform:translate(2px,-1px) rotate(.3deg);}
+}
+.capsule-drop-label{position:absolute;top:-54px;left:50%;transform:translateX(-50%);
+  font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;z-index:8;
+  background:rgba(26,16,48,.9);padding:5px 14px;border-radius:10px;border:1px solid var(--border);
+  opacity:0;transition:opacity .2s ease;pointer-events:none;}
+.capsule-drop-label.show{opacity:1;}
+.machine-siren{position:absolute;top:-26px;left:50%;transform:translateX(-50%);
+  width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,#ff3b5c,#7a0f22);
+  opacity:0;box-shadow:0 0 0 rgba(255,59,92,0);}
+.machine.danger .machine-siren{opacity:1;animation:sirenSpin 1s linear infinite,sirenGlow .5s ease-in-out infinite alternate;}
+@keyframes sirenSpin{0%{filter:hue-rotate(0deg);}100%{filter:hue-rotate(40deg);}}
+@keyframes sirenGlow{0%{box-shadow:0 0 10px 2px rgba(255,59,92,.6);}100%{box-shadow:0 0 26px 10px rgba(255,59,92,.9);}}
+.machine-dome{position:relative;width:280px;height:230px;margin:34px auto 0;
+  border-radius:140px 140px 20px 20px;background:linear-gradient(160deg,rgba(255,255,255,.14),rgba(255,255,255,.02) 40%),
+  radial-gradient(circle at 50% 30%, #2c2050, #150b28 75%);
+  border:5px solid #5b4a8a;box-shadow:inset 0 0 40px rgba(0,0,0,.6), 0 8px 24px rgba(0,0,0,.5);
+  overflow:hidden;transition:transform .45s cubic-bezier(.4,0,.2,1), filter .3s ease;
+  transform-origin:50% 60%;}
+.machine.danger .machine-dome{border-color:var(--danger);animation:glitchBorder .18s steps(2) infinite;}
+@keyframes glitchBorder{
+  0%{box-shadow:inset 0 0 40px rgba(0,0,0,.6), 0 0 18px 2px rgba(255,59,92,.7);}
+  50%{box-shadow:inset 0 0 40px rgba(0,0,0,.6), 0 0 4px 0 rgba(255,59,92,.2);}
+  100%{box-shadow:inset 0 0 40px rgba(0,0,0,.6), 0 0 18px 2px rgba(255,59,92,.7);}
+}
+.machine-area.dim .machine-dome{filter:brightness(.4);}
+.machine.suspense .machine-dome{animation:suspenseGlow .5s ease-in-out infinite alternate;}
+@keyframes suspenseGlow{
+  0%{box-shadow:inset 0 0 40px rgba(0,0,0,.6), 0 0 6px 1px rgba(255,255,255,.15);}
+  100%{box-shadow:inset 0 0 40px rgba(0,0,0,.6), 0 0 30px 8px rgba(255,255,255,.55);}
+}
+.machine.suspense.danger .machine-dome{animation:suspenseGlowDanger .35s ease-in-out infinite alternate;}
+@keyframes suspenseGlowDanger{
+  0%{box-shadow:inset 0 0 40px rgba(0,0,0,.6), 0 0 10px 2px rgba(255,59,92,.5);}
+  100%{box-shadow:inset 0 0 40px rgba(0,0,0,.6), 0 0 38px 12px rgba(255,59,92,.95);}
+}
+.capsule-field{position:absolute;inset:0;}
+.capsule-field.jitter .capsule{animation:jitterAnim .12s linear infinite;}
+@keyframes jitterAnim{
+  0%{transform:translate(0,0);} 25%{transform:translate(2px,-2px);}
+  50%{transform:translate(-2px,2px);} 75%{transform:translate(2px,2px);}
+  100%{transform:translate(-1px,-1px);}
+}
+.capsule-field.spin{animation:domeSpin 0.5s linear infinite;}
+.capsule-field.spin-slow{animation:domeSpin 1.4s linear infinite;}
+@keyframes domeSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.capsule{position:absolute;width:20px;height:20px;border-radius:50%;
+  box-shadow:inset -3px -3px 4px rgba(0,0,0,.35), inset 2px 2px 3px rgba(255,255,255,.5), 0 2px 4px rgba(0,0,0,.4);}
+.capsule.empty{background:var(--empty-color);}
+.capsule.c-player{background:var(--player-color);}
+.capsule.c-ai1{background:var(--ai1-color);}
+.capsule.c-ai2{background:var(--ai2-color);}
+.capsule.c-ai3{background:var(--ai3-color);}
+.machine-neck{width:26px;height:26px;background:#5b4a8a;margin:0 auto;border-radius:0 0 8px 8px;}
+.machine-base{width:200px;height:70px;margin:0 auto;background:linear-gradient(160deg,#3a2a5c,#241a3d);
+  border-radius:14px;position:relative;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 10px 24px rgba(0,0,0,.5);}
+.draw-slot{width:60px;height:34px;background:#0d0618;border-radius:8px;border:2px solid #5b4a8a;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.crank-wrap{position:absolute;right:-96px;top:-6px;display:flex;flex-direction:column;align-items:center;
+  opacity:1;transition:opacity .3s ease;}
+.crank-wrap.done{opacity:0;pointer-events:none;}
+.crank-dial{position:relative;width:82px;height:82px;cursor:pointer;user-select:none;
+  -webkit-tap-highlight-color:transparent;}
+.crank-dial:active .crank-plate{transform:scale(.96);}
+.crank-progress{position:absolute;inset:0;transform:rotate(-90deg);}
+.crank-progress .crank-track{fill:none;stroke:rgba(255,255,255,.08);stroke-width:6;}
+.crank-progress .crank-fill{fill:none;stroke:var(--accent);stroke-width:6;stroke-linecap:round;
+  stroke-dasharray:264;stroke-dashoffset:264;transition:stroke-dashoffset .18s ease;
+  filter:drop-shadow(0 0 4px rgba(255,217,61,.7));}
+.crank-plate{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;
+  border-radius:50%;background:radial-gradient(circle at 35% 30%, #6b5a9a, #2c2050 70%);
+  border:3px solid #5b4a8a;box-shadow:0 4px 12px rgba(0,0,0,.5), inset 0 0 10px rgba(0,0,0,.4);
+  transition:transform .12s ease;}
+.crank-bolt{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;
+  border-radius:50%;background:#1a1030;box-shadow:0 1px 2px rgba(0,0,0,.6), inset 0 0 3px rgba(0,0,0,.8);}
+.crank-arm{position:absolute;left:50%;top:50%;width:34px;height:8px;margin-top:-4px;
+  transform-origin:0 50%;transform:rotate(0deg);transition:transform .16s cubic-bezier(.34,1.56,.64,1);}
+.crank-arm-bar{position:absolute;left:0;top:0;width:100%;height:100%;border-radius:4px;
+  background:linear-gradient(180deg,#ffe487,#c99a2e);box-shadow:0 2px 4px rgba(0,0,0,.4);}
+.crank-knob{position:absolute;right:-9px;top:50%;width:22px;height:22px;margin-top:-11px;
+  border-radius:50%;background:radial-gradient(circle at 35% 30%, #ff8a3d, #c94a1f 75%);
+  box-shadow:0 3px 8px rgba(0,0,0,.5), inset 0 0 4px rgba(255,255,255,.3);}
+.crank-dial.kick .crank-plate{animation:crankKick .16s ease;}
+@keyframes crankKick{0%{transform:scale(1);}40%{transform:scale(.9);}100%{transform:scale(1);}}
+.crank-label{font-size:11px;color:var(--text-dim);margin-top:8px;text-align:center;line-height:1.4;
+  max-width:100px;}
+.crank-label b{color:var(--accent);}
+.crank-hint{font-size:15px;margin-bottom:2px;animation:crankHintBounce 1s ease-in-out infinite;}
+@keyframes crankHintBounce{0%,100%{transform:translateX(0);}50%{transform:translateX(4px);}}
+
+.reveal-capsule{position:absolute;left:50%;top:50%;width:0;height:0;opacity:0;
+  transform:translate(-50%,-50%) scale(0);border-radius:50%;pointer-events:none;z-index:5;}
+.reveal-capsule.show{width:90px;height:90px;opacity:1;transform:translate(-50%,-50%) scale(1);
+  transition:all .25s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 0 40px 10px currentColor,inset -6px -6px 8px rgba(0,0,0,.35), inset 4px 4px 6px rgba(255,255,255,.5);}
+.reveal-emoji{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:38px;z-index:6;}
+
+.vignette{position:absolute;inset:0;pointer-events:none;z-index:4;
+  background:radial-gradient(ellipse at center, transparent 40%, rgba(255,0,40,0) 75%);
+  transition:background .15s ease;}
+.vignette.pulse{background:radial-gradient(ellipse at center, transparent 30%, rgba(255,0,40,.55) 100%);}
+.vignette.pulse-soft{background:radial-gradient(ellipse at center, transparent 34%, rgba(110,70,200,.4) 100%);}
+.vignette.hold{background:radial-gradient(ellipse at center, transparent 20%, rgba(255,0,40,.7) 100%);
+  transition:background .35s ease;}
+.vignette.hold-soft{background:radial-gradient(ellipse at center, transparent 24%, rgba(110,70,200,.55) 100%);
+  transition:background .35s ease;}
+.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:10;}
+.flash.pop{animation:flashPop .5s ease-out;}
+@keyframes flashPop{0%{opacity:0;}8%{opacity:1;}30%{opacity:.15;}45%{opacity:.85;}100%{opacity:0;}}
+
+.result-banner{position:absolute;left:50%;top:14%;transform:translate(-50%,-10px);
+  z-index:7;padding:10px 28px;border-radius:12px;font-size:22px;font-weight:800;
+  opacity:0;transition:all .3s ease;white-space:nowrap;text-align:center;}
+.result-banner.show{opacity:1;transform:translate(-50%,0);}
+.result-banner.safe{background:rgba(79,224,138,.15);color:var(--good);border:1px solid var(--good);}
+.result-banner.win{background:rgba(255,217,61,.15);color:var(--accent);border:1px solid var(--accent);}
+.result-banner.lose{background:rgba(255,59,92,.15);color:var(--danger);border:1px solid var(--danger);}
+
+/* betting UI */
+.bet-title{font-size:14px;font-weight:700;margin-bottom:8px;}
+.bet-title .sub{color:var(--text-dim);font-weight:400;font-size:12px;display:block;margin-top:2px;}
+.bet-controls{display:flex;align-items:center;gap:10px;margin:12px 0;}
+.bet-stepper{display:flex;align-items:center;gap:10px;background:var(--panel-2);
+  border-radius:10px;padding:8px 14px;border:1px solid var(--border);}
+.bet-stepper button{width:32px;height:32px;border-radius:8px;background:var(--border);color:var(--text);font-size:18px;}
+.bet-num{font-size:26px;font-weight:800;color:var(--accent);min-width:40px;text-align:center;}
+.bet-preview{font-size:12.5px;color:var(--text-dim);margin-bottom:10px;}
+.bet-preview b{color:var(--good);}
+input[type=range]{width:100%;accent-color:var(--accent);}
+
+.reveal-row{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.reveal-item{display:flex;justify-content:space-between;align-items:center;
+  background:var(--panel-2);border-radius:8px;padding:8px 12px;border:1px solid var(--border);
+  opacity:0;transform:translateX(14px);transition:all .35s ease;}
+.reveal-item.show{opacity:1;transform:translateX(0);}
+.reveal-item .n{font-weight:800;color:var(--accent);}
+.reveal-item.penalty{border-color:var(--danger);}
+.reveal-item .tag{font-size:10px;color:var(--danger);margin-left:6px;}
+
+.item-card{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px;margin-bottom:8px;}
+.item-card .head{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;font-weight:700;}
+.item-card .desc{font-size:11.5px;color:var(--text-dim);margin:4px 0 8px;line-height:1.4;}
+.target-select{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.target-chip{padding:4px 10px;border-radius:14px;font-size:11.5px;border:1px solid var(--border);
+  background:var(--panel);cursor:pointer;}
+.target-chip.sel{border-color:var(--accent);color:var(--accent);}
+
+/* toast */
+#toastWrap{position:absolute;top:70px;right:16px;z-index:20;display:flex;flex-direction:column;gap:8px;
+  align-items:flex-end;pointer-events:none;}
+.toast{background:var(--panel);border:1px solid var(--accent);border-radius:10px;padding:10px 16px;
+  font-size:12.5px;box-shadow:0 6px 18px rgba(0,0,0,.5);opacity:0;transform:translateX(30px);
+  transition:all .3s ease;max-width:260px;}
+.toast.show{opacity:1;transform:translateX(0);}
+
+/* Shop screen */
+#screen-shop{align-items:center;justify-content:center;}
+.shop-wrap{width:min(900px,92vw);max-height:90vh;overflow-y:auto;background:var(--panel);
+  border:1px solid var(--border);border-radius:18px;padding:26px 30px;}
+.shop-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.shop-head h2{margin:0;font-size:22px;}
+.shop-gold{font-size:18px;font-weight:800;color:var(--accent);}
+.shop-section-title{font-size:13px;color:var(--text-dim);margin:18px 0 10px;text-transform:uppercase;letter-spacing:1px;}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.shop-card{background:var(--panel-2);border:1px solid var(--border);border-radius:12px;padding:14px;
+  display:flex;flex-direction:column;gap:8px;}
+.shop-card .icon{font-size:26px;}
+.shop-card .name{font-weight:700;font-size:14.5px;}
+.shop-card .desc{font-size:11.5px;color:var(--text-dim);line-height:1.4;min-height:44px;}
+.shop-card .cost{font-size:13px;color:var(--accent);font-weight:700;}
+.shop-log{margin-top:18px;font-size:12px;color:var(--text-dim);max-height:100px;overflow-y:auto;}
+.shop-footer{margin-top:22px;text-align:center;}
+
+/* Match end / game over */
+#screen-matchend{align-items:center;justify-content:center;}
+.matchend-wrap{text-align:center;padding:30px;}
+.matchend-wrap h2{font-size:34px;margin-bottom:8px;}
+.matchend-wrap p{color:var(--text-dim);margin-bottom:26px;font-size:15px;}
+
+.hidden{display:none !important;}
+::-webkit-scrollbar{width:8px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+</style>
+</head>
+<body>
+<div id="stage-outer">
+<div id="app">
+<div id="design">
+
+  <!-- TITLE SCREEN -->
+  <section id="screen-title" class="screen active">
+    <div class="floating-capsules" id="floatingCapsules"></div>
+    <div class="title-wrap">
+      <h1 class="title-logo">🎰 가챠머신 서바이벌</h1>
+      <p class="title-sub">마지막까지 살아남거나, 먼저 목표 금액을 달성하라!</p>
+      <div class="title-buttons">
+        <button id="btn-newgame" class="btn btn-primary">게임 시작</button>
+        <button id="btn-continue" class="btn btn-secondary">이어하기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- VN SCREEN -->
+  <section id="screen-vn" class="screen">
+    <button class="btn btn-secondary btn-small vn-skip" id="vnSkip">건너뛰기 ▶▶</button>
+    <div class="vn-bg"></div>
+    <div class="vn-diagram" id="vnDiagram"></div>
+    <div class="vn-character" id="vnCharacter">🐱</div>
+    <div class="vn-box" id="vnBox">
+      <div class="vn-name" id="vnName">MC 가챠냥</div>
+      <div class="vn-text" id="vnText"></div>
+      <button class="vn-next" id="vnNext">▶</button>
+    </div>
+  </section>
+
+  <!-- GAME SCREEN -->
+  <section id="screen-game" class="screen">
+    <div class="topbar">
+      <div class="round-info">라운드 <span id="roundNum">1</span>
+        <small id="matchLabel">MATCH 1 · 목표 50원 · 생존 인원 우승도 가능</small>
+      </div>
+      <div class="players-row" id="playersRow"></div>
+    </div>
+    <div class="main-area">
+      <div class="item-sidebar" id="itemSidebar"></div>
+      <div class="machine-area" id="machineArea">
+        <div id="toastWrap"></div>
+        <div class="result-banner" id="resultBanner"></div>
+        <div class="vignette" id="vignette"></div>
+        <div class="flash" id="flash"></div>
+        <div class="machine" id="machine">
+          <div class="capsule-drop-label" id="capsuleDropLabel"></div>
+          <div class="machine-siren" id="machineSiren"></div>
+          <div class="machine-dome" id="machineDome">
+            <div class="capsule-field" id="capsuleField"></div>
+            <div class="reveal-capsule" id="revealCapsule"></div>
+            <div class="reveal-emoji" id="revealEmoji"></div>
+          </div>
+          <div class="machine-neck"></div>
+          <div class="machine-base">
+            <div class="draw-slot" id="drawSlot"></div>
+            <div class="crank-wrap" id="crankWrap">
+              <div class="crank-dial" id="crankDial">
+                <svg class="crank-progress" viewBox="0 0 100 100">
+                  <circle class="crank-track" cx="50" cy="50" r="42"></circle>
+                  <circle class="crank-fill" id="crankFill" cx="50" cy="50" r="42"></circle>
+                </svg>
+                <div class="crank-plate">
+                  <div class="crank-arm" id="crankArm">
+                    <div class="crank-arm-bar"></div>
+                    <div class="crank-knob"></div>
+                  </div>
+                  <div class="crank-bolt"></div>
+                </div>
+              </div>
+              <div class="crank-label" id="crankLabel"><div class="crank-hint">👉</div>손잡이를 클릭해서<br>돌려보세요!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="side-panel">
+        <div class="control-panel" id="controlPanel"></div>
+        <div class="log-panel" id="logPanel"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOP SCREEN -->
+  <section id="screen-shop" class="screen">
+    <div class="shop-wrap">
+      <div class="shop-head">
+        <h2>🛒 상점</h2>
+        <div class="shop-gold" id="shopGold">0원</div>
+      </div>
+      <div class="shop-section-title">유물 (상시 발동, 1회 구매)</div>
+      <div class="shop-grid" id="shopRelics"></div>
+      <div class="shop-section-title">아이템 (소모품)</div>
+      <div class="shop-grid" id="shopItems"></div>
+      <div class="shop-log" id="shopLog"></div>
+      <div class="shop-footer">
+        <button class="btn btn-primary" id="btn-shop-next">다음 라운드로 ▶</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MATCH END SCREEN -->
+  <section id="screen-matchend" class="screen">
+    <div class="matchend-wrap">
+      <h2 id="matchendTitle">승리!</h2>
+      <p id="matchendDesc"></p>
+      <div class="title-buttons">
+        <button class="btn btn-primary" id="btn-matchend-continue">다음 매치 (다른 수치) ▶</button>
+        <button class="btn btn-secondary" id="btn-matchend-title">타이틀로</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================== DATA ============================== */
+const ROLES = ['player','ai1','ai2','ai3'];
+const COLOR = { player:'#4fc3f7', ai1:'#ff5c5c', ai2:'#ffd93d', ai3:'#a78bfa', empty:'#4b3f6b' };
+const NAME  = { player:'플레이어', ai1:'루디', ai2:'미미', ai3:'제타' };
+const EMOJI = { player:'🔵', ai1:'🔴', ai2:'🟡', ai3:'🟣' };
+const CCLASS= { player:'c-player', ai1:'c-ai1', ai2:'c-ai2', ai3:'c-ai3' };
+
+const MATCH_CONFIGS = [
+  { aiCount:1, emptyCapsules:9,  target:65,  minBet:1, maxBet:7, goldPerCapsule:3, label:'MATCH 1 · 튜토리얼' },
+  { aiCount:2, emptyCapsules:13, target:95,  minBet:1, maxBet:7, goldPerCapsule:3, label:'MATCH 2 · 혼돈의 3파전' },
+  { aiCount:3, emptyCapsules:17, target:130, minBet:1, maxBet:8, goldPerCapsule:3, label:'MATCH 3 · 최종 생존전' },
+];
+
+const RELICS = [
+  { id:'pressure', name:'압박의 낙인', icon:'⛓️', cost:6,
+    desc:'다른 플레이어들의 라운드 최소 투입 캡슐 수가 +1 됩니다.' },
+  { id:'greed', name:'탐욕의 손', icon:'🤑', cost:9,
+    desc:'캡슐을 넣을 때마다 얻는 골드가 개당 +2 증가합니다.' },
+  { id:'punish', name:'형벌의 눈', icon:'👁️', cost:8,
+    desc:'매 라운드 최소 투입자에게 페널티 캡슐이 1개 더 추가됩니다. (기본 2개 + 1개)' },
+];
+const ITEMS = [
+  { id:'trap', name:'함정 캡슐', icon:'🎯', cost:4, targeted:true,
+    desc:'상대 1명에게 이번 라운드 한정 캡슐 2개를 몰래 추가합니다. 라운드가 지나면 사라지며 보너스 골드는 없습니다.' },
+  { id:'ward', name:'회피의 부적', icon:'🛡️', cost:5, targeted:false,
+    desc:'이번 라운드, 내 캡슐 1개를 임시로 빈 캡슐 취급합니다. (라운드 종료 시 원상 복구)' },
+];
+
+const SAVE_KEY = 'gachaSurvivalSave_v1';
+
+/* ============================== AUDIO ============================== */
+const SFX = (function(){
+  let ctx = null;
+  let master = null;
+  function C(){
+    if(!ctx){
+      ctx = new (window.AudioContext||window.webkitAudioContext)();
+      master = ctx.createGain();
+      master.gain.value = 0.55; // overall SFX volume — turn down here to make everything quieter at once
+      master.connect(ctx.destination);
+    }
+    if(ctx.state==='suspended'){ ctx.resume(); }
+    return ctx;
+  }
+  function tone(freq,start,dur,type,gain,freqEnd){
+    const c = C();
+    const osc = c.createOscillator(); const g = c.createGain();
+    osc.type = type||'sine';
+    osc.frequency.setValueAtTime(freq, c.currentTime+start);
+    if(freqEnd) osc.frequency.linearRampToValueAtTime(freqEnd, c.currentTime+start+dur);
+    g.gain.setValueAtTime(0.0001, c.currentTime+start);
+    g.gain.linearRampToValueAtTime(gain||0.2, c.currentTime+start+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime+start+dur);
+    osc.connect(g); g.connect(master);
+    osc.start(c.currentTime+start); osc.stop(c.currentTime+start+dur+0.03);
+  }
+  function noise(start,dur,gain){
+    const c = C();
+    const n = Math.max(1, Math.floor(c.sampleRate*dur));
+    const buf = c.createBuffer(1,n,c.sampleRate);
+    const d = buf.getChannelData(0);
+    for(let i=0;i<n;i++) d[i] = (Math.random()*2-1) * (1 - i/n);
+    const src = c.createBufferSource(); src.buffer = buf;
+    const g = c.createGain();
+    g.gain.setValueAtTime(gain||0.15, c.currentTime+start);
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime+start+dur);
+    src.connect(g); g.connect(master);
+    src.start(c.currentTime+start);
+  }
+  // continuous low drone used to build dread through the spin, cut for the suspense beat
+  let drone = null; // {osc, gain, lfo, lfoGain}
+  return {
+    unlock(){ try{ C(); }catch(e){} },
+    click(){ try{ tone(720,0,0.05,'square',0.14,320); }catch(e){} },
+    heartbeat(strength){
+      const s = strength==null?1:strength;
+      try{ tone(64,0,0.13,'sine',0.28*s); tone(48,0.14,0.16,'sine',0.24*s); }catch(e){}
+    },
+    ratchet(pitch){ try{ noise(0,0.016,0.03); tone(pitch||600,0,0.022,'triangle',0.032); }catch(e){} },
+    danger(){ try{
+        const c=C(); const osc=c.createOscillator(); const g=c.createGain();
+        osc.type='sawtooth';
+        osc.frequency.setValueAtTime(420,c.currentTime);
+        osc.frequency.linearRampToValueAtTime(860,c.currentTime+0.3);
+        osc.frequency.linearRampToValueAtTime(420,c.currentTime+0.6);
+        g.gain.setValueAtTime(0.0001,c.currentTime);
+        g.gain.linearRampToValueAtTime(0.09,c.currentTime+0.05);
+        g.gain.linearRampToValueAtTime(0.0001,c.currentTime+0.6);
+        osc.connect(g); g.connect(master);
+        osc.start(); osc.stop(c.currentTime+0.65);
+    }catch(e){} },
+    dangerBlare(pitch){ try{
+        const c=C(); const osc=c.createOscillator(); const g=c.createGain();
+        osc.type='sawtooth';
+        osc.frequency.setValueAtTime(pitch||520,c.currentTime);
+        osc.frequency.linearRampToValueAtTime((pitch||520)*1.6,c.currentTime+0.13);
+        g.gain.setValueAtTime(0.0001,c.currentTime);
+        g.gain.linearRampToValueAtTime(0.075,c.currentTime+0.03);
+        g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+0.17);
+        osc.connect(g); g.connect(master);
+        osc.start(); osc.stop(c.currentTime+0.2);
+    }catch(e){} },
+    droneStart(){ try{
+        const c = C();
+        if(drone) return;
+        const osc = c.createOscillator(); const g = c.createGain();
+        const lfo = c.createOscillator(); const lfoGain = c.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(50, c.currentTime);
+        g.gain.setValueAtTime(0.0001, c.currentTime);
+        g.gain.linearRampToValueAtTime(0.032, c.currentTime+0.7);
+        lfo.type = 'sine'; lfo.frequency.setValueAtTime(4.5, c.currentTime);
+        lfoGain.gain.setValueAtTime(3, c.currentTime);
+        lfo.connect(lfoGain); lfoGain.connect(osc.frequency);
+        osc.connect(g); g.connect(master);
+        osc.start(); lfo.start();
+        drone = {osc, gain:g, lfo, lfoGain};
+    }catch(e){} },
+    droneRise(targetFreq, targetGain, dur){ try{
+        if(!drone) return;
+        const c = C();
+        drone.osc.frequency.linearRampToValueAtTime(targetFreq, c.currentTime+dur);
+        drone.gain.gain.linearRampToValueAtTime(targetGain, c.currentTime+dur);
+        drone.lfo.frequency.linearRampToValueAtTime(9, c.currentTime+dur);
+    }catch(e){} },
+    droneStop(fast){ try{
+        if(!drone) return;
+        const c = C();
+        const dur = fast ? 0.06 : 0.4;
+        const cur = drone.gain.gain.value;
+        drone.gain.gain.cancelScheduledValues(c.currentTime);
+        drone.gain.gain.setValueAtTime(cur, c.currentTime);
+        drone.gain.gain.linearRampToValueAtTime(0.0001, c.currentTime+dur);
+        const o = drone.osc, l = drone.lfo;
+        setTimeout(()=>{ try{ o.stop(); l.stop(); }catch(e){} }, (dur+0.05)*1000);
+        drone = null;
+    }catch(e){} },
+    suspenseTing(){ try{
+        tone(1760,0,0.55,'sine',0.15);
+        tone(2637,0.02,0.45,'sine',0.07);
+        tone(880,0,0.6,'sine',0.05);
+    }catch(e){} },
+    victory(){ try{ [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,i*0.14,0.32,'triangle',0.18)); }catch(e){} },
+    defeat(){ try{ tone(300,0,0.32,'sawtooth',0.18,150); tone(200,0.26,0.4,'sawtooth',0.14,70); }catch(e){} },
+    hit(){ try{ tone(260,0,0.16,'sawtooth',0.16,190); tone(700,0,0.05,'square',0.08); }catch(e){} },
+    safe(){ try{ tone(880,0,0.1,'sine',0.12); tone(1160,0.08,0.14,'sine',0.1); }catch(e){} },
+    flash(){ try{ tone(1300,0,0.08,'square',0.09); tone(1900,0.05,0.1,'square',0.06); }catch(e){} },
+    coin(){ try{ tone(1500,0,0.06,'square',0.08,2000); }catch(e){} },
+    buy(){ try{ tone(700,0,0.08,'triangle',0.14); tone(1000,0.06,0.1,'triangle',0.12); }catch(e){} },
+    crankTurn(progressRatio){ try{
+        const p = progressRatio==null?0:progressRatio;
+        noise(0,0.05,0.13);
+        tone(180+p*90,0,0.06,'square',0.1);
+        tone(520+p*260,0.01,0.05,'triangle',0.07);
+    }catch(e){} },
+    crankRelease(){ try{
+        tone(300,0,0.1,'square',0.14,180);
+        tone(900,0.08,0.14,'triangle',0.12,1300);
+    }catch(e){} },
+    capsuleDrop(){ try{
+        tone(480,0,0.045,'sine',0.09,340);
+        noise(0.03,0.02,0.05);
+    }catch(e){} },
+    talkBlip(){ try{
+        const f = 320 + Math.random()*200;
+        tone(f, 0, 0.032, 'triangle', 0.055, f*0.82);
+    }catch(e){} }
+  };
+})();
+
+/* ============================== UTIL ============================== */
+function $(sel){ return document.querySelector(sel); }
+function el(tag,cls,html){ const e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+function rand(a,b){ return a + Math.random()*(b-a); }
+function randi(a,b){ return Math.floor(rand(a,b+1)); }
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('#'+id).classList.add('active');
+}
+function weightedPick(weights){ // {key:weight}
+  const total = Object.values(weights).reduce((a,b)=>a+b,0);
+  let r = Math.random()*total;
+  for(const k in weights){ r -= weights[k]; if(r<=0) return k; }
+  return Object.keys(weights)[0];
+}
+
+/* ============================== GAME STATE ============================== */
+let G = null; // main state object
+
+const STARTING_LIVES = 2;
+function freshPlayers(cfg){
+  const roles = ['player'].concat(ROLES.filter(r=>r!=='player').slice(0,cfg.aiCount));
+  return roles.map(id=>({
+    id, name:NAME[id], color:COLOR[id], emoji:EMOJI[id], isAI: id!=='player',
+    alive:true, lives:STARTING_LIVES, gold:0, relics:[], items:{}
+  }));
+}
+
+const TUTORIAL_ROUND1_EMPTY = 5;
+function newMatch(matchIndex, carry){
+  const cfg = MATCH_CONFIGS[matchIndex];
+  const isTutorial = matchIndex===0;
+  G = {
+    matchIndex,
+    wins: carry && carry.wins || 0,
+    config: cfg,
+    round: 1,
+    players: freshPlayers(cfg),
+    // the tutorial match starts round 1 with a small, easy-to-read capsule count;
+    // the rest of the originally-planned empties are added in when round 2 begins
+    machine: { empty: isTutorial ? TUTORIAL_ROUND1_EMPTY : cfg.emptyCapsules, capsules: {} },
+    log: [],
+    firstRoundEver: matchIndex===0,
+    tutorialToppedUp: !isTutorial,
+  };
+  // starting capsule: each player has 1 capsule already in machine
+  G.players.forEach(p=> G.machine.capsules[p.id] = 1 );
+}
+
+function addLog(msg, cls){
+  G.log.push({msg, cls: cls||''});
+  renderLog();
+}
+
+/* ============================== SAVE / LOAD ============================== */
+function saveGame(){
+  try{
+    localStorage.setItem(SAVE_KEY, JSON.stringify({G, checkpoint:true}));
+  }catch(e){}
+}
+function loadGame(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return false;
+    const data = JSON.parse(raw);
+    G = data.G;
+    (G.players||[]).forEach(p=>{ if(p.lives==null) p.lives = STARTING_LIVES; });
+    if(G.tutorialToppedUp==null) G.tutorialToppedUp = true; // saves from before this feature already had the full capsule count
+    return true;
+  }catch(e){ return false; }
+}
+function hasSave(){
+  try{ return !!localStorage.getItem(SAVE_KEY); }catch(e){ return false; }
+}
+
+/* ============================== TITLE SCREEN ============================== */
+function initFloatingCapsules(){
+  const wrap = $('#floatingCapsules');
+  wrap.innerHTML = '';
+  const emojis = ['🔵','🔴','🟡','🟣','⚪'];
+  for(let i=0;i<18;i++){
+    const s = el('span', null, emojis[randi(0,emojis.length-1)]);
+    s.style.left = rand(0,100)+'%';
+    s.style.animationDuration = rand(9,20)+'s';
+    s.style.animationDelay = '-'+rand(0,20)+'s';
+    s.style.fontSize = randi(18,34)+'px';
+    wrap.appendChild(s);
+  }
+}
+
+$('#btn-newgame').addEventListener('click', ()=>{
+  SFX.unlock();
+  newMatch(0);
+  startIntroVN();
+});
+$('#btn-continue').addEventListener('click', ()=>{
+  SFX.unlock();
+  if(loadGame()){
+    renderGameScreen();
+    showScreen('screen-game');
+    beginRound(true);
+  } else {
+    alert('저장된 게임이 없습니다. 먼저 게임을 시작해주세요.');
+  }
+});
+function refreshContinueButton(){
+  $('#btn-continue').disabled = !hasSave();
+}
+refreshContinueButton();
+
+/* ============================== VN REFERENCE DIAGRAMS ============================== */
+function diagMachineLegend(){
+  return '<div class="vn-diagram-title">머신 속 캡슐</div>'+
+    '<div class="vd-dome">'+
+      '<span class="vd-dot" style="left:20%;top:18%;background:var(--player-color)"></span>'+
+      '<span class="vd-dot" style="left:55%;top:14%;background:var(--empty-color)"></span>'+
+      '<span class="vd-dot" style="left:36%;top:44%;background:var(--ai1-color)"></span>'+
+      '<span class="vd-dot" style="left:72%;top:48%;background:var(--empty-color)"></span>'+
+      '<span class="vd-dot" style="left:14%;top:62%;background:var(--empty-color)"></span>'+
+      '<span class="vd-dot" style="left:50%;top:70%;background:var(--ai1-color)"></span>'+
+    '</div>'+
+    '<div class="vd-legend">'+
+      '<span><i style="background:var(--player-color)"></i>내 캡슐 — 뽑히면 탈락!</span>'+
+      '<span><i style="background:var(--ai1-color)"></i>상대 캡슐</span>'+
+      '<span><i style="background:var(--empty-color)"></i>빈 캡슐 — 안전!</span>'+
+    '</div>';
+}
+function diagBetGold(maxBet){
+  return '<div class="vn-diagram-title">캡슐 투입 → 골드 획득</div>'+
+    '<div class="vd-row">'+
+      '<div class="vd-chip"><span class="icon">🔵🔵🔵</span>캡슐 3개</div>'+
+      '<div class="vd-arrow">→</div>'+
+      '<div class="vd-chip"><span class="icon">💰</span><span class="val">+9원</span></div>'+
+    '</div>'+
+    '<div class="vd-legend"><span>최대 '+maxBet+'개까지 넣을 수 있어요</span></div>';
+}
+function diagRisk(){
+  return '<div class="vn-diagram-title">많이 넣을수록... 위험!</div>'+
+    '<div class="vd-row" style="margin-bottom:2px;">'+
+      '<span style="font-size:12px;color:var(--good);">안전</span>'+
+      '<div class="vd-gauge" style="flex:1;"><div class="vd-gauge-fill"></div></div>'+
+      '<span style="font-size:12px;color:var(--danger);">위험</span>'+
+    '</div>'+
+    '<div class="vd-legend"><span>내 캡슐 개수 ↑ = 뽑힐 확률 ↑</span></div>';
+}
+function diagCrank(){
+  return '<div class="vn-diagram-title">손잡이를 돌려서 뽑기</div>'+
+    '<div class="vd-row" style="font-size:34px;">🖐️<span class="vd-arrow">↻</span>🎰</div>'+
+    '<div class="vd-legend"><span>플레이어가 직접 여러 번 돌려야 해요</span></div>';
+}
+function diagOutcomes(){
+  return '<div class="vn-diagram-title">뽑힌 결과에 따라...</div>'+
+    '<div class="vd-cards">'+
+      '<div class="vd-card"><span class="icon">🔵</span><div class="label">내 캡슐<br>💔 목숨 -1</div></div>'+
+      '<div class="vd-card"><span class="icon">🔴</span><div class="label">상대 캡슐<br>💔 상대 목숨 -1</div></div>'+
+      '<div class="vd-card"><span class="icon">⚪</span><div class="label">빈 캡슐<br>✅ 계속 진행</div></div>'+
+    '</div>'+
+    '<div class="vd-legend" style="margin-top:10px;text-align:center;"><span style="justify-content:center;">❤️❤️ 목숨 2개 — 전부 잃으면 진짜 탈락!</span></div>';
+}
+function diagGoldTarget(target){
+  return '<div class="vn-diagram-title">목표 금액 달성 = 즉시 승리</div>'+
+    '<div class="vd-gauge"><div class="vd-gauge-fill" style="width:72%;"></div></div>'+
+    '<div class="vd-row" style="justify-content:space-between;">'+
+      '<span style="font-size:12px;color:var(--text-dim);">0원</span>'+
+      '<span style="font-size:13px;color:var(--accent);font-weight:800;">🏆 '+target+'원</span>'+
+    '</div>';
+}
+function diagShop(){
+  return '<div class="vn-diagram-title">라운드 종료 후 상점</div>'+
+    '<div class="vd-cards">'+
+      '<div class="vd-card"><span class="icon">⛓️</span><div class="label">유물<br>상시 효과</div></div>'+
+      '<div class="vd-card"><span class="icon">🎯</span><div class="label">아이템<br>1회용 소모품</div></div>'+
+    '</div>';
+}
+function diagVersus(aiPlayers){
+  const chips = aiPlayers.map(p=>'<div class="vd-card"><span class="icon">'+p.emoji+'</span><div class="label">'+p.name+'</div></div>').join('');
+  return '<div class="vn-diagram-title">오늘의 상대</div>'+
+    '<div class="vd-cards">'+
+      '<div class="vd-card"><span class="icon">🔵</span><div class="label">나</div></div>'+
+      '<div class="vd-vs">VS</div>'+
+      chips+
+    '</div>';
+}
+function diagMatchInfo(cfg){
+  return '<div class="vn-diagram-title">이번 매치 정보</div>'+
+    '<div class="vd-cards">'+
+      '<div class="vd-card"><span class="icon">👥</span><div class="label">상대 '+cfg.aiCount+'명</div></div>'+
+      '<div class="vd-card"><span class="icon">🏆</span><div class="label">목표 '+cfg.target+'원</div></div>'+
+      '<div class="vd-card"><span class="icon">⚪</span><div class="label">빈 캡슐 '+cfg.emptyCapsules+'개</div></div>'+
+    '</div>';
+}
+function diagWinConditions(target){
+  return '<div class="vn-diagram-title">승리 조건 2가지</div>'+
+    '<div class="vd-cards">'+
+      '<div class="vd-card"><span class="icon">🏆</span><div class="label">목표 '+target+'원<br>먼저 달성</div></div>'+
+      '<div class="vd-card"><span class="icon">👑</span><div class="label">최후의<br>생존자</div></div>'+
+    '</div>';
+}
+
+/* ============================== VN SYSTEM ============================== */
+let vnResolve = null;
+let vnSkipAll = false;
+function vnLine(name, text){
+  return new Promise(res=>{
+    $('#vnName').textContent = name;
+    $('#vnText').textContent = '';
+    let i=0;
+    const speed = 18;
+    clearInterval(window.__vnTyper);
+    function type(){
+      $('#vnText').textContent = text.slice(0,i);
+      const ch = text[i-1];
+      if(ch && ch.trim()!=='' && i%2===0){ SFX.talkBlip(); }
+      i++;
+      if(i<=text.length){ window.__vnTyper = setTimeout(type, speed); }
+    }
+    type();
+    vnResolve = ()=>{
+      clearTimeout(window.__vnTyper);
+      $('#vnText').textContent = text;
+      vnResolve = null;
+      res();
+    };
+  });
+}
+$('#vnNext').addEventListener('click', ()=>{ if(vnResolve) vnResolve(); });
+$('#vnBox').addEventListener('click', ()=>{ if(vnResolve) vnResolve(); });
+
+async function playVN(lines){
+  showScreen('screen-vn');
+  vnSkipAll = false;
+  const diagEl = $('#vnDiagram');
+  for(const line of lines){
+    if(vnSkipAll) break;
+    if(line.diag){ diagEl.innerHTML = line.diag; diagEl.classList.add('show'); }
+    else { diagEl.classList.remove('show'); }
+    await vnLine(line.name, line.text);
+    if(vnSkipAll) break;
+    await new Promise(res=>{
+      vnResolve = ()=>{ clearTimeout(window.__vnTyper); $('#vnText').textContent=line.text; vnResolve=null; res(); };
+    });
+  }
+  vnSkipAll = false;
+  diagEl.classList.remove('show');
+}
+$('#vnSkip').addEventListener('click', ()=>{
+  vnSkipAll = true;
+  clearTimeout(window.__vnTyper);
+  if(vnResolve) vnResolve();
+});
+
+async function startIntroVN(){
+  const cfg = G.config;
+  await playVN([
+    {name:'MC 가챠냥', text:'어서 오라냥! 나는 오늘 진행을 맡은 MC 가챠냥이다냥 🐱 지금부터 「가챠머신 서바이벌」의 규칙을 설명해주겠다냥!'},
+    {name:'MC 가챠냥', text:'가운데 놓인 이 거대한 가챠 머신 안에는 참가자들의 색깔 캡슐이랑 빈 캡슐이 마구 섞여 들어있다냥.', diag: diagMachineLegend()},
+    {name:'MC 가챠냥', text:'매 라운드마다 여러분은 머신에 자기 색깔 캡슐을 원하는 만큼(1개~'+cfg.maxBet+'개) 넣을 수 있다냥. 넣은 개수만큼 골드도 챙길 수 있다냥!', diag: diagBetGold(cfg.maxBet)},
+    {name:'MC 가챠냥', text:'하지만! 캡슐을 넣으면 넣을수록 "내 캡슐이 뽑힐 확률"도 쑥쑥 올라간다는 거, 절대 잊으면 안 되냥.', diag: diagRisk()},
+    {name:'MC 가챠냥', text:'모두 넣을 개수를 정하면 한번에 짜잔 공개한다냥! 그 다음 저... 가 아니라 플레이어가 직접 머신 옆 손잡이를 돌려서 캡슐 하나를 뽑는다냥.', diag: diagCrank()},
+    {name:'MC 가챠냥', text:'다들 목숨은 2개씩이다냥! 뽑힌 캡슐이 자기 색깔이면 목숨을 하나 잃고, 목숨이 다 떨어지면 그제서야 진짜 탈락이다냥. 빈 캡슐이면 다음 라운드로 넘어간다냥. 마지막까지 살아남은 딱 한 명이 최종 승리다냥!', diag: diagOutcomes()},
+    {name:'MC 가챠냥', text:'아니면! 목표 금액인 '+cfg.target+'원을 누구보다 먼저 모아도 그 순간 바로 승리한다냥. 위험을 감수하고 팍팍 넣을지, 안전하게 살살 버틸지... 그건 전부 여러분 선택에 달렸다냥!', diag: diagGoldTarget(cfg.target)},
+    {name:'MC 가챠냥', text:'참, 라운드가 끝나면 상점에서 골드로 "유물"이랑 "아이템"도 살 수 있다냥. 유물은 계속 발동하는 효과고, 아이템은 한 번 쓰면 사라지는 소모품이라냥.', diag: diagShop()},
+    {name:'MC 가챠냥', text:'자, 오늘의 상대는 '+ G.players.filter(p=>p.isAI).map(p=>p.name).join(', ') +'다냥! 다들 준비됐냥? 가챠머신 서바이벌, 지금부터 시작한다냥!', diag: diagVersus(G.players.filter(p=>p.isAI))},
+  ]);
+  renderGameScreen();
+  showScreen('screen-game');
+  beginRound(true);
+}
+
+async function startBriefVN(){
+  const cfg = G.config;
+  await playVN([
+    {name:'MC 가챠냥', text:'다음 매치가 시작된다냥! 이번엔 상대가 '+ (cfg.aiCount) +'명으로 늘었다냥. 목표 금액은 '+cfg.target+'원이고, 머신엔 빈 캡슐 '+cfg.emptyCapsules+'개가 미리 준비되어 있다냥.', diag: diagMatchInfo(cfg)},
+    {name:'MC 가챠냥', text:'긴장 풀면 안 되냥. 규칙은 똑같다냥 — 목표 금액을 먼저 모으거나, 마지막까지 살아남으면 승리다냥!', diag: diagWinConditions(cfg.target)},
+  ]);
+  renderGameScreen();
+  showScreen('screen-game');
+  beginRound(true);
+}
+
+/* ============================== RENDER: GAME SCREEN HEADER ============================== */
+function renderGameScreen(){
+  $('#roundNum').textContent = G.round;
+  $('#matchLabel').textContent = G.config.label+' · 목표 '+G.config.target+'원';
+  renderPlayersRow();
+  renderMachineVisual();
+  renderLog();
+  renderItemSidebar();
+}
+function renderPlayersRow(){
+  const row = $('#playersRow');
+  row.innerHTML = '';
+  G.players.forEach(p=>{
+    const chip = el('div','player-chip'+(p.alive?'':' dead'));
+    const badgeStr = (p.relics||[]).map(r=>RELICS.find(x=>x.id===r).icon).join('') +
+      Object.keys(p.items||{}).filter(k=>p.items[k]>0).map(k=> ITEMS.find(x=>x.id===k).icon + (p.items[k]>1?p.items[k]:'') ).join(' ');
+    const livesStr = '❤️'.repeat(Math.max(0,p.lives)) + '🖤'.repeat(Math.max(0,STARTING_LIVES-p.lives));
+    chip.innerHTML = '<span class="dot" style="background:'+p.color+';color:'+p.color+'"></span>'+
+      '<span>'+p.emoji+' '+p.name+'</span><span class="lives">'+livesStr+'</span><span class="gold">'+p.gold+'원</span>'+
+      (badgeStr? '<span class="badges" style="margin-left:4px;">'+badgeStr+'</span>':'');
+    row.appendChild(chip);
+  });
+}
+function renderLog(){
+  const panel = $('#logPanel');
+  panel.innerHTML = '';
+  const recent = G.log.slice(-40).slice().reverse();
+  recent.forEach(l=>{
+    const d = el('div','log-entry'+(l.cls?(' '+l.cls):''), l.msg);
+    panel.appendChild(d);
+  });
+}
+function toast(msg, ms){
+  const wrap = $('#toastWrap');
+  const t = el('div','toast', msg);
+  wrap.appendChild(t);
+  requestAnimationFrame(()=> t.classList.add('show'));
+  setTimeout(()=>{
+    t.classList.remove('show');
+    setTimeout(()=> t.remove(), 350);
+  }, ms||3200);
+}
+
+/* ============================== MACHINE POOL / VISUAL ============================== */
+function getEffectivePool(tempCaps, wardActive){
+  const pool = { empty: G.machine.empty };
+  G.players.forEach(p=>{
+    let count = (G.machine.capsules[p.id]||0) + (tempCaps && tempCaps[p.id] || 0);
+    if(wardActive && wardActive[p.id] && count>0){ count -= 1; pool.empty += 1; }
+    pool[p.id] = count;
+  });
+  return pool;
+}
+function poolTotal(pool){ return Object.values(pool).reduce((a,b)=>a+b,0); }
+
+function renderMachineVisual(tempCaps, wardActive){
+  const field = $('#capsuleField');
+  field.innerHTML = '';
+  const pool = getEffectivePool(tempCaps, wardActive);
+  const items = [];
+  for(let i=0;i<pool.empty;i++) items.push({cls:'empty'});
+  G.players.forEach(p=>{
+    for(let i=0;i<pool[p.id];i++) items.push({cls:CCLASS[p.id]});
+  });
+  // shuffle for visual variety
+  for(let i=items.length-1;i>0;i--){ const j=randi(0,i); [items[i],items[j]]=[items[j],items[i]]; }
+  const cap = 90; // cap rendered dots for perf
+  const shown = items.slice(0, cap);
+  shown.forEach(it=>{
+    const c = el('div','capsule '+it.cls);
+    c.style.left = rand(6,86)+'%';
+    c.style.top = rand(10,78)+'%';
+    field.appendChild(c);
+  });
+  return pool;
+}
+
+/* ============================== ROUND FLOW ============================== */
+async function beginRound(isResume){
+  if(!G.tutorialToppedUp && G.round>=2){
+    const topUp = G.config.emptyCapsules - TUTORIAL_ROUND1_EMPTY;
+    if(topUp > 0){
+      G.machine.empty += topUp;
+      addLog('🎪 가챠 머신에 빈 캡슐이 '+topUp+'개 보충되었습니다! (총 '+G.machine.empty+'개)', 'good');
+    }
+    G.tutorialToppedUp = true;
+  }
+  saveGame();
+  renderGameScreen();
+  $('#resultBanner').className = 'result-banner';
+  $('#revealCapsule').className = 'reveal-capsule';
+  $('#revealEmoji').textContent = '';
+  $('#machine').classList.remove('danger','shake','suspense');
+  $('#vignette').className = 'vignette';
+  $('#flash').className = 'flash';
+  $('#machineDome').style.transform = '';
+  $('#capsuleField').style.animationPlayState = '';
+  SFX.droneStop(true);
+  resetCrank();
+  const dropLabel = $('#capsuleDropLabel');
+  dropLabel.textContent = '';
+  dropLabel.classList.remove('show');
+  G.itemWindowActive = false;
+  G.itemWindowCtx = null;
+  G.sidebarExpanded = null;
+  G.sidebarTarget = null;
+  renderItemSidebar();
+
+  if(G.firstRoundEver && G.round===1){
+    await showPenaltyExplainer();
+    G.firstRoundEver = false;
+  }
+
+  await runBettingPhase();
+}
+
+async function showPenaltyExplainer(){
+  return new Promise(res=>{
+    const panel = $('#controlPanel');
+    panel.innerHTML = '';
+    const box = el('div','item-card');
+    box.innerHTML = '<div class="head">⚠️ 패널티 가챠 안내</div>'+
+      '<div class="desc">라운드마다 캡슐을 <b>가장 적게 넣은 사람</b>에게는 강제로 페널티 캡슐 2개가 추가돼요! (보너스 골드 없음) 너무 소극적으로 굴면 오히려 위험해질 수 있으니 주의하세요.</div>';
+    const btn = el('button','btn btn-primary btn-small','이해했어요, 시작할게요');
+    panel.appendChild(box); panel.appendChild(btn);
+    btn.addEventListener('click', ()=>{ res(); });
+  });
+}
+
+/* ---- Betting Phase ---- */
+function computeMinFloor(player){
+  let floor = G.config.minBet;
+  G.players.forEach(p=>{
+    if(p.id!==player.id && p.alive && (p.relics||[]).includes('pressure')) floor += 1;
+  });
+  return clamp(floor, 1, G.config.maxBet);
+}
+
+async function runBettingPhase(){
+  const human = G.players.find(p=>p.id==='player');
+  if(!human.alive){ return; } // safety
+  const minFloor = computeMinFloor(human);
+  const maxBet = G.config.maxBet;
+
+  const bets = {};
+  // human input UI
+  await new Promise(res=>{
+    const panel = $('#controlPanel');
+    panel.innerHTML = '';
+    const title = el('div','bet-title','🎰 이번 라운드에 넣을 캡슐 수를 정하세요<span class="sub">최소 '+minFloor+'개 · 최대 '+maxBet+'개 · 1개당 '+goldPerCapsuleFor(human)+'원</span>');
+    panel.appendChild(title);
+
+    const stepperWrap = el('div','bet-controls');
+    const stepper = el('div','bet-stepper');
+    const minusBtn = el('button',null,'−');
+    const numSpan = el('div','bet-num', String(minFloor));
+    const plusBtn = el('button',null,'+');
+    stepper.appendChild(minusBtn); stepper.appendChild(numSpan); stepper.appendChild(plusBtn);
+    stepperWrap.appendChild(stepper);
+    panel.appendChild(stepperWrap);
+
+    const range = el('input',null);
+    range.type='range'; range.min=minFloor; range.max=maxBet; range.value=minFloor;
+    panel.appendChild(range);
+
+    const preview = el('div','bet-preview');
+    panel.appendChild(preview);
+
+    let val = minFloor;
+    function updatePreview(){
+      numSpan.textContent = val;
+      range.value = val;
+      const pool = getEffectivePool();
+      const total = poolTotal(pool) + val; // approximate: own added
+      const ownAfter = (pool[human.id]||0) + val;
+      const prob = (ownAfter/total*100).toFixed(1);
+      preview.innerHTML = '예상 획득: <b>'+(val*goldPerCapsuleFor(human))+'원</b> · 내 캡슐 예상 확률 약 <b>'+prob+'%</b>';
+    }
+    updatePreview();
+    minusBtn.addEventListener('click', ()=>{ val = clamp(val-1,minFloor,maxBet); updatePreview(); });
+    plusBtn.addEventListener('click', ()=>{ val = clamp(val+1,minFloor,maxBet); updatePreview(); });
+    range.addEventListener('input', ()=>{ val = clamp(parseInt(range.value||minFloor,10),minFloor,maxBet); updatePreview(); });
+
+    const confirmBtn = el('button','btn btn-primary','확정하고 공개하기');
+    confirmBtn.style.marginTop='14px'; confirmBtn.style.width='100%';
+    panel.appendChild(confirmBtn);
+    confirmBtn.addEventListener('click', ()=>{
+      bets[human.id] = val;
+      res();
+    });
+  });
+
+  // AI decisions
+  const pool = getEffectivePool();
+  const total = poolTotal(pool);
+  G.players.forEach(p=>{
+    if(p.id==='player' || !p.alive) return;
+    const floor = computeMinFloor(p);
+    bets[p.id] = aiDecideBet(p, floor, total, pool);
+  });
+
+  await revealBets(bets);
+}
+
+function goldPerCapsuleFor(player){
+  let g = G.config.goldPerCapsule;
+  if((player.relics||[]).includes('greed')) g += 2;
+  return g;
+}
+
+function aiDecideBet(ai, floor, total, pool){
+  const cfg = G.config;
+  let base = randi(floor, Math.min(cfg.maxBet, floor+3));
+  const goldRatio = ai.gold / cfg.target;
+  if(goldRatio < 0.5 && Math.random()<0.55) base += randi(1,2);
+  if(goldRatio > 0.65 && Math.random()<0.75) base += randi(2,4); // rushing for the win — the closer, the greedier
+  const ownFrac = total>0 ? (pool[ai.id]||0)/total : 0;
+  if(ownFrac > 0.3 && goldRatio < 0.8 && Math.random()<0.55) base -= randi(1,2); // pulls back only if not about to win
+  if(Math.random()<0.12) base = randi(floor, cfg.maxBet); // wildcard
+  return clamp(base, floor, cfg.maxBet);
+}
+
+/* ---- Reveal bets ---- */
+async function revealBets(bets){
+  const panel = $('#controlPanel');
+  panel.innerHTML = '';
+  const title = el('div','bet-title','📢 캡슐 개수 공개!');
+  panel.appendChild(title);
+  const row = el('div','reveal-row');
+  panel.appendChild(row);
+
+  const minVal = Math.min(...G.players.filter(p=>p.alive).map(p=>bets[p.id]));
+  const minPlayers = G.players.filter(p=>p.alive && bets[p.id]===minVal).map(p=>p.id);
+
+  for(const p of G.players.filter(p=>p.alive)){
+    await sleep(260);
+    SFX.click();
+    const isPenalty = minPlayers.includes(p.id);
+    const item = el('div','reveal-item'+(isPenalty?' penalty':''));
+    item.innerHTML = '<span>'+p.emoji+' '+p.name+'</span><span class="n">'+bets[p.id]+'개'+
+      (isPenalty?'<span class="tag">최소! 페널티</span>':'')+'</span>';
+    row.appendChild(item);
+    requestAnimationFrame(()=> item.classList.add('show'));
+  }
+  await sleep(500);
+
+  await applyBetsToMachine(bets, minPlayers);
+}
+
+/* ---- Apply bets, penalty, gold ---- */
+async function applyBetsToMachine(bets, minPlayers){
+  let penaltyAmount = 2;
+  if(G.players.some(p=>p.alive && (p.relics||[]).includes('punish'))) penaltyAmount = 3;
+
+  // show the machine as it stood before this round's capsules go in
+  renderMachineVisual();
+
+  const dropEntries = [];
+  G.players.forEach(p=>{
+    if(!p.alive) return;
+    const n = bets[p.id];
+    G.machine.capsules[p.id] = (G.machine.capsules[p.id]||0) + n;
+    const gain = n * goldPerCapsuleFor(p);
+    p.gold += gain;
+    addLog((p.id==='player'?'🔵 플레이어':p.emoji+' '+p.name)+'가 캡슐 '+n+'개 투입 → +'+gain+'원 (총 '+p.gold+'원)', p.id==='player'?'good':'');
+    dropEntries.push({id:p.id, count:n, penalty:false});
+  });
+  minPlayers.forEach(pid=>{
+    const p = G.players.find(x=>x.id===pid);
+    G.machine.capsules[pid] = (G.machine.capsules[pid]||0) + penaltyAmount;
+    addLog('⚠️ '+p.emoji+' '+p.name+'는 최소 투입자! 페널티 캡슐 '+penaltyAmount+'개 추가 (보너스 골드 없음)', 'bad');
+    dropEntries.push({id:pid, count:penaltyAmount, penalty:true});
+  });
+
+  renderPlayersRow();
+  await animateCapsuleAdd(dropEntries);
+
+  // check gold win
+  const winner = G.players.find(p=>p.alive && p.gold >= G.config.target);
+  if(winner){
+    await sleep(400);
+    await matchWinByGold(winner);
+    return;
+  }
+
+  await runItemWindow();
+}
+
+/* ---- Capsule drop-in animation: capsules physically fall into the machine ---- */
+function spawnCapsuleDot(colorClass){
+  const field = $('#capsuleField');
+  const dot = document.createElement('div');
+  dot.className = 'capsule '+colorClass;
+  dot.style.left = rand(6,86)+'%';
+  dot.style.top = rand(8,78)+'%';
+  field.appendChild(dot);
+  try{
+    dot.animate([
+      {transform:'translateY(-170px) scale(.4)', opacity:0},
+      {transform:'translateY(9px) scale(1.2)', opacity:1, offset:.72},
+      {transform:'translateY(0) scale(1)', opacity:1}
+    ], {duration:380, easing:'cubic-bezier(.34,1.56,.64,1)'});
+  }catch(e){}
+  return dot;
+}
+async function animateCapsuleAdd(entries){
+  const totalCount = entries.reduce((s,e)=>s+e.count,0);
+  if(totalCount===0) return;
+  const stagger = totalCount>28 ? 32 : totalCount>16 ? 48 : 68;
+  const label = $('#capsuleDropLabel');
+  for(const entry of entries){
+    if(entry.count<=0) continue;
+    const cls = CCLASS[entry.id];
+    const p = G.players.find(x=>x.id===entry.id);
+    if(label && p){
+      label.textContent = (entry.penalty?'⚠️ 페널티! ':'')+p.emoji+' '+p.name+' 캡슐 투입 중...';
+      label.style.color = entry.penalty ? 'var(--danger)' : '';
+      label.classList.add('show');
+    }
+    for(let i=0;i<entry.count;i++){
+      SFX.capsuleDrop();
+      spawnCapsuleDot(cls);
+      await sleep(stagger);
+    }
+    await sleep(100);
+  }
+  if(label) label.classList.remove('show');
+}
+
+/* ---- Item usage window ---- */
+async function runItemWindow(){
+  const human = G.players.find(p=>p.id==='player');
+  const tempCaps = {}; // target playerId -> temp capsule count from trap items
+  const wardActive = {};
+
+  // AI item usage first (auto)
+  for(const ai of G.players.filter(p=>p.isAI && p.alive)){
+    if((ai.items['trap']||0) > 0 && Math.random() < 0.45){
+      const targets = G.players.filter(p=>p.alive && p.id!==ai.id);
+      if(targets.length){
+        const target = targets[randi(0,targets.length-1)];
+        ai.items['trap'] -= 1;
+        tempCaps[target.id] = (tempCaps[target.id]||0) + 2;
+        addLog('🎯 '+ai.emoji+' '+ai.name+'가 [함정 캡슐]을 사용! '+target.emoji+' '+target.name+'에게 임시 캡슐 2개 추가', 'bad');
+        toast('🎯 '+ai.name+'가 함정 캡슐 사용 → '+target.name+'에게 캡슐 2개!');
+      }
+    }
+    if((ai.items['ward']||0) > 0 && Math.random() < 0.35){
+      ai.items['ward'] -= 1;
+      wardActive[ai.id] = true;
+      addLog('🛡️ '+ai.emoji+' '+ai.name+'가 [회피의 부적]을 사용! 캡슐 1개를 임시로 빈 캡슐 처리', 'good');
+      toast('🛡️ '+ai.name+'가 회피의 부적 사용!');
+    }
+  }
+  renderPlayersRow();
+  renderMachineVisual(tempCaps, wardActive);
+
+  const humanUsable = ['trap','ward'].filter(id=> (human.items[id]||0) > 0);
+  if(humanUsable.length===0){
+    await sleep(300);
+    await finalizeAndDraw(tempCaps, wardActive);
+    return;
+  }
+
+  const panel = $('#controlPanel');
+  panel.innerHTML = '';
+  panel.appendChild(el('div','bet-title','🎒 아이템을 사용할 시간!<span class="sub">왼쪽 목록에서 아이템을 클릭해 사용하세요</span>'));
+  const skipBtn = el('button','btn btn-secondary','아이템 사용 안 함 / 계속하기');
+  skipBtn.style.width='100%'; skipBtn.style.marginTop='10px';
+  panel.appendChild(skipBtn);
+
+  G.itemWindowActive = true;
+  G.itemWindowCtx = {tempCaps, wardActive};
+  G.sidebarExpanded = null;
+  G.sidebarTarget = null;
+  renderItemSidebar();
+
+  await new Promise(res=>{ skipBtn.addEventListener('click', ()=> res(), {once:true}); });
+
+  G.itemWindowActive = false;
+  G.itemWindowCtx = null;
+  G.sidebarExpanded = null;
+  G.sidebarTarget = null;
+  renderItemSidebar();
+
+  await finalizeAndDraw(tempCaps, wardActive);
+}
+
+/* ---- Left-side item inventory: click an item to see use/sell options ---- */
+function renderItemSidebar(){
+  const wrap = $('#itemSidebar');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  wrap.appendChild(el('div','item-sidebar-title','🎒 보유 아이템'));
+  const human = G.players.find(p=>p.id==='player');
+  if(!human){ return; }
+  const owned = ITEMS.filter(it=> (human.items && human.items[it.id]||0) > 0);
+  if(owned.length===0){
+    wrap.appendChild(el('div','item-sidebar-empty','보유한 아이템이<br>없습니다'));
+    return;
+  }
+  owned.forEach(it=>{
+    const count = human.items[it.id];
+    const expanded = G.sidebarExpanded === it.id;
+    const slot = el('div','item-slot'+(expanded?' expanded':''));
+    const head = el('div','item-slot-head');
+    head.innerHTML = '<span class="item-slot-icon">'+it.icon+'</span>'+
+      '<span class="item-slot-name">'+it.name+'</span><span class="item-slot-count">x'+count+'</span>';
+    head.addEventListener('click', ()=>{
+      G.sidebarExpanded = expanded ? null : it.id;
+      G.sidebarTarget = null;
+      renderItemSidebar();
+    });
+    slot.appendChild(head);
+    if(expanded){
+      const detail = el('div','item-slot-detail');
+      detail.appendChild(el('div','item-slot-desc', it.desc));
+      if(it.targeted){
+        const targets = el('div','target-select');
+        G.players.filter(p=>p.alive && p.id!=='player').forEach(p=>{
+          const chip = el('div','target-chip'+(G.sidebarTarget===p.id?' sel':''), p.emoji+' '+p.name);
+          chip.addEventListener('click', ()=>{ G.sidebarTarget = p.id; renderItemSidebar(); });
+          targets.appendChild(chip);
+        });
+        detail.appendChild(targets);
+      }
+      if(!G.itemWindowActive){
+        detail.appendChild(el('div','item-slot-hint','※ 아이템 사용은 라운드 중 사용 타이밍에만 가능해요'));
+      }
+      const btnRow = el('div','item-slot-btns');
+      const useBtn = el('button','btn btn-small btn-danger','사용');
+      const canUse = G.itemWindowActive && (!it.targeted || G.sidebarTarget);
+      useBtn.disabled = !canUse;
+      useBtn.addEventListener('click', ()=> useItemFromSidebar(it.id));
+      const sellBtn = el('button','btn btn-small btn-secondary','판매 +'+Math.floor(it.cost/2)+'원');
+      sellBtn.addEventListener('click', ()=> sellItemFromSidebar(it.id));
+      btnRow.appendChild(useBtn);
+      btnRow.appendChild(sellBtn);
+      detail.appendChild(btnRow);
+      slot.appendChild(detail);
+    }
+    wrap.appendChild(slot);
+  });
+}
+
+function useItemFromSidebar(itemId){
+  const human = G.players.find(p=>p.id==='player');
+  if(!G.itemWindowActive || !G.itemWindowCtx || (human.items[itemId]||0)<=0) return;
+  const info = ITEMS.find(x=>x.id===itemId);
+  if(info.targeted && !G.sidebarTarget) return;
+  const ctx = G.itemWindowCtx;
+  human.items[itemId] -= 1;
+  if(itemId==='trap'){
+    const targetId = G.sidebarTarget;
+    ctx.tempCaps[targetId] = (ctx.tempCaps[targetId]||0) + 2;
+    const t = G.players.find(p=>p.id===targetId);
+    addLog('🎯 플레이어가 [함정 캡슐] 사용! '+t.emoji+' '+t.name+'에게 임시 캡슐 2개 추가', 'good');
+    toast('🎯 함정 캡슐 사용! '+t.name+'에게 캡슐 2개 추가');
+  } else if(itemId==='ward'){
+    ctx.wardActive['player'] = true;
+    addLog('🛡️ 플레이어가 [회피의 부적] 사용! 내 캡슐 1개를 임시로 빈 캡슐 처리', 'good');
+    toast('🛡️ 회피의 부적 사용! 캡슐 1개 임시 무효화');
+  }
+  SFX.buy();
+  G.sidebarExpanded = null;
+  G.sidebarTarget = null;
+  renderPlayersRow();
+  renderMachineVisual(ctx.tempCaps, ctx.wardActive);
+  renderItemSidebar();
+}
+
+function sellItemFromSidebar(itemId){
+  const human = G.players.find(p=>p.id==='player');
+  if((human.items[itemId]||0)<=0) return;
+  const info = ITEMS.find(x=>x.id===itemId);
+  const refund = Math.floor(info.cost/2);
+  human.items[itemId] -= 1;
+  human.gold += refund;
+  addLog('💰 플레이어가 ['+info.name+']을 판매해 +'+refund+'원을 받았습니다.', 'good');
+  SFX.coin();
+  G.sidebarExpanded = null;
+  G.sidebarTarget = null;
+  renderPlayersRow();
+  renderItemSidebar();
+}
+
+/* ---- Finalize pool, danger check, draw sequence ---- */
+async function finalizeAndDraw(tempCaps, wardActive){
+  const panel = $('#controlPanel');
+  panel.innerHTML = '';
+  panel.appendChild(el('div','bet-title','🎬 운명의 순간<span class="sub">머신 옆의 손잡이를 클릭해서 직접 돌려보세요!</span>'));
+
+  const pool = renderMachineVisual(tempCaps, wardActive);
+  const total = poolTotal(pool);
+  const humanProb = total>0 ? (pool['player']||0)/total : 0;
+  const danger = humanProb > 0.35;
+  const machineEl = $('#machine');
+  if(danger){ machineEl.classList.add('danger'); }
+
+  await runCrankInteraction();
+  await runDrawAnimation(danger);
+
+  const outcomeId = weightedPick(pool); // 'empty' or player id
+  await resolveDraw(outcomeId, tempCaps, wardActive);
+}
+
+/* ---- Interactive crank: the player physically turns the machine's handle ---- */
+const CRANK_TURNS_REQUIRED = 5;
+function resetCrank(){
+  const wrap = $('#crankWrap');
+  wrap.classList.remove('done');
+  $('#crankArm').style.transform = 'rotate(0deg)';
+  $('#crankFill').style.strokeDashoffset = '264';
+  $('#crankDial').classList.remove('kick');
+  $('#crankLabel').innerHTML = '<div class="crank-hint">👉</div>손잡이를 클릭해서<br>돌려보세요!';
+}
+function runCrankInteraction(){
+  return new Promise(res=>{
+    const dial = $('#crankDial');
+    const arm = $('#crankArm');
+    const fill = $('#crankFill');
+    const label = $('#crankLabel');
+    const wrap = $('#crankWrap');
+    let turns = 0;
+    function onTurn(){
+      if(turns >= CRANK_TURNS_REQUIRED) return;
+      turns++;
+      const ratio = turns / CRANK_TURNS_REQUIRED;
+      arm.style.transform = 'rotate('+(ratio*360)+'deg)';
+      fill.style.strokeDashoffset = String(264 - 264*ratio);
+      SFX.crankTurn(ratio);
+      dial.classList.remove('kick'); void dial.offsetWidth; dial.classList.add('kick');
+      if(turns >= CRANK_TURNS_REQUIRED){
+        label.innerHTML = '<b>돌아간다!</b>';
+        dial.removeEventListener('click', onTurn);
+        SFX.crankRelease();
+        setTimeout(()=>{
+          wrap.classList.add('done');
+          res();
+        }, 220);
+      } else {
+        label.innerHTML = '손잡이 돌리는 중<br>(<b>'+turns+' / '+CRANK_TURNS_REQUIRED+'</b>)';
+      }
+    }
+    dial.addEventListener('click', onTurn);
+  });
+}
+
+async function runDrawAnimation(danger){
+  const field = $('#capsuleField');
+  const machineArea = $('#machineArea');
+  const vignette = $('#vignette');
+  const machineEl = $('#machine');
+  const dome = $('#machineDome');
+
+  SFX.droneStart();
+  await sleep(100);
+
+  // Phase 1: jitter — the machine starts rattling, dread begins to build
+  field.classList.add('jitter');
+  SFX.droneRise(68, 0.038, 0.9);
+  let tickTimer = setInterval(()=> SFX.ratchet(randi(400,900)), 120);
+  await sleep(900);
+  clearInterval(tickTimer);
+  field.classList.remove('jitter');
+
+  // Phase 2: fast spin — camera pushes in, drone rises
+  field.classList.add('spin');
+  machineArea.classList.add('dim');
+  dome.style.transform = 'scale(1.06)';
+  SFX.droneRise(95, 0.055, 0.9);
+  tickTimer = setInterval(()=> SFX.ratchet(randi(350,700)), 100);
+  await sleep(900);
+  clearInterval(tickTimer);
+  field.classList.remove('spin');
+
+  // Phase 3: slow spin + accelerating heartbeat — the longest, most agonizing stretch
+  field.classList.add('spin-slow');
+  dome.style.transform = 'scale(1.13)';
+  SFX.droneRise(danger?165:112, danger?0.09:0.06, 1.5);
+  if(danger) machineEl.classList.add('danger');
+
+  let hbActive = true, hbCount = 0, hbTimeoutId = null;
+  const hbFloor = danger ? 145 : 230;
+  let hbCur = danger ? 320 : 470;
+  function hbTick(){
+    if(!hbActive) return;
+    hbCount++;
+    const strength = 0.65 + Math.min(1.1, hbCount*0.13);
+    SFX.heartbeat(strength);
+    if(danger){
+      vignette.classList.add('pulse');
+      setTimeout(()=> vignette.classList.remove('pulse'), 140);
+      if(hbCount%2===0) SFX.dangerBlare(480+hbCount*25);
+    } else {
+      vignette.classList.add('pulse-soft');
+      setTimeout(()=> vignette.classList.remove('pulse-soft'), 160);
+    }
+    hbCur = Math.max(hbFloor, hbCur - 24);
+    hbTimeoutId = setTimeout(hbTick, hbCur);
+  }
+  hbTimeoutId = setTimeout(hbTick, hbCur);
+  let tickTimer2 = setInterval(()=> SFX.ratchet(randi(250,500)), 190);
+  await sleep(1500);
+  hbActive = false;
+  clearTimeout(hbTimeoutId);
+  clearInterval(tickTimer2);
+
+  // Phase 4: the freeze — everything stops dead, silence, one suspended beat
+  field.style.animationPlayState = 'paused';
+  SFX.droneStop(false);
+  dome.style.transform = 'scale(1.24)';
+  machineEl.classList.add('suspense');
+  vignette.classList.remove('pulse','pulse-soft');
+  vignette.classList.add(danger ? 'hold' : 'hold-soft');
+  await sleep(260);
+  SFX.suspenseTing();
+  await sleep(440);
+
+  // Phase 5: climax — sudden shake, double flash, reveal
+  machineEl.classList.remove('suspense','danger');
+  vignette.classList.remove('hold','hold-soft');
+  field.classList.remove('spin-slow');
+  field.style.animationPlayState = '';
+  dome.style.transform = 'scale(1)';
+  machineEl.classList.add('shake');
+  $('#flash').classList.add('pop');
+  SFX.flash();
+  if(danger) SFX.dangerBlare(700);
+  await sleep(550);
+  machineEl.classList.remove('shake');
+  machineArea.classList.remove('dim');
+}
+
+/* ---- Resolve outcome ---- */
+async function resolveDraw(outcomeId, tempCaps, wardActive){
+  const banner = $('#resultBanner');
+  const revealCap = $('#revealCapsule');
+  const revealEmoji = $('#revealEmoji');
+  $('#machine').classList.remove('danger');
+
+  let colorVar = outcomeId==='empty' ? COLOR.empty : COLOR[outcomeId];
+  revealCap.style.background = colorVar;
+  revealCap.style.color = colorVar;
+  revealEmoji.textContent = outcomeId==='empty' ? '⚪' : EMOJI[outcomeId];
+  revealCap.classList.add('show');
+  await sleep(120);
+
+  // remove temp trap capsules now (they vanish once round passes)
+  Object.keys(tempCaps||{}).forEach(pid=>{ /* not persisted in G.machine, nothing to clean */ });
+
+  let hitPlayer = null;        // took a hit but has lives left
+  let eliminatedPlayer = null; // lost their last life
+  if(outcomeId!=='empty'){
+    const target = G.players.find(p=>p.id===outcomeId);
+    if(target && target.alive){
+      target.lives -= 1;
+      if(target.lives <= 0){
+        target.alive = false;
+        eliminatedPlayer = target;
+      } else {
+        hitPlayer = target;
+      }
+    }
+  }
+
+  if(!hitPlayer && !eliminatedPlayer){
+    banner.textContent = outcomeId==='empty' ? '✅ 빈 캡슐! 다음 라운드로' : '✅ 이미 탈락한 참가자의 캡슐 - 다음 라운드로';
+    banner.classList.add('show','safe');
+    SFX.safe();
+    addLog('⚪ 빈 캡슐이 나왔습니다. 다음 라운드로 진행합니다.', 'good');
+  } else if(eliminatedPlayer && eliminatedPlayer.id==='player'){
+    banner.textContent = '💥 마지막 목숨까지 잃었습니다... 탈락';
+    banner.classList.add('show','lose');
+    SFX.defeat();
+    addLog('💥 플레이어의 마지막 목숨이 사라졌습니다! 탈락...', 'bad');
+  } else if(eliminatedPlayer){
+    banner.textContent = '🎉 '+eliminatedPlayer.name+' 탈락!';
+    banner.classList.add('show','win');
+    SFX.victory();
+    addLog('🎉 '+eliminatedPlayer.emoji+' '+eliminatedPlayer.name+'의 마지막 목숨이 사라졌습니다! 탈락!', 'hot');
+  } else if(hitPlayer.id==='player'){
+    banner.textContent = '💥 목숨을 하나 잃었습니다! (남은 목숨 '+hitPlayer.lives+')';
+    banner.classList.add('show','lose');
+    SFX.hit();
+    addLog('💥 플레이어의 캡슐이 뽑혔습니다! 목숨 하나를 잃었습니다. (남은 목숨 '+hitPlayer.lives+')', 'bad');
+  } else {
+    banner.textContent = '💥 '+hitPlayer.name+'가 목숨을 하나 잃었다! (남은 목숨 '+hitPlayer.lives+')';
+    banner.classList.add('show','win');
+    SFX.hit();
+    addLog('💥 '+hitPlayer.emoji+' '+hitPlayer.name+'의 캡슐이 뽑혔습니다! 목숨 하나를 잃었습니다. (남은 목숨 '+hitPlayer.lives+')', 'hot');
+  }
+
+  renderPlayersRow();
+  await sleep(1600);
+
+  if(eliminatedPlayer && eliminatedPlayer.id==='player'){
+    await matchLose();
+    return;
+  }
+
+  const aliveList = G.players.filter(p=>p.alive);
+  if(aliveList.length===1){
+    await matchWinLastStanding(aliveList[0]);
+    return;
+  }
+
+  G.round += 1;
+  goToShop();
+}
+
+/* ============================== SHOP ============================== */
+function goToShop(){
+  saveGame();
+  renderShopScreen();
+  showScreen('screen-shop');
+}
+
+function renderShopScreen(){
+  const human = G.players.find(p=>p.id==='player');
+  $('#shopGold').textContent = human.gold+'원';
+  const relicsGrid = $('#shopRelics');
+  const itemsGrid = $('#shopItems');
+  relicsGrid.innerHTML = ''; itemsGrid.innerHTML = '';
+  const shopLog = $('#shopLog');
+  shopLog.innerHTML = '';
+
+  RELICS.forEach(r=>{
+    const owned = (human.relics||[]).includes(r.id);
+    const card = el('div','shop-card');
+    card.innerHTML = '<div class="icon">'+r.icon+'</div><div class="name">'+r.name+'</div>'+
+      '<div class="desc">'+r.desc+'</div><div class="cost">'+r.cost+'원</div>';
+    const btn = el('button','btn btn-small '+(owned?'btn-secondary':'btn-primary'), owned?'보유중':'구매');
+    btn.disabled = owned || human.gold < r.cost;
+    btn.addEventListener('click', ()=>{
+      human.gold -= r.cost;
+      human.relics.push(r.id);
+      SFX.buy();
+      addLog('🛒 플레이어가 유물 ['+r.name+']을 구매했습니다.', 'good');
+      renderShopScreen();
+    });
+    card.appendChild(btn);
+    relicsGrid.appendChild(card);
+  });
+
+  ITEMS.forEach(it=>{
+    const count = (human.items||{})[it.id] || 0;
+    const card = el('div','shop-card');
+    card.innerHTML = '<div class="icon">'+it.icon+'</div><div class="name">'+it.name+(count>0?' (보유 '+count+')':'')+'</div>'+
+      '<div class="desc">'+it.desc+'</div><div class="cost">'+it.cost+'원</div>';
+    const btn = el('button','btn btn-small btn-primary','구매');
+    btn.disabled = human.gold < it.cost;
+    btn.addEventListener('click', ()=>{
+      human.gold -= it.cost;
+      human.items[it.id] = (human.items[it.id]||0) + 1;
+      SFX.buy();
+      addLog('🛒 플레이어가 아이템 ['+it.name+']을 구매했습니다.', 'good');
+      renderShopScreen();
+    });
+    card.appendChild(btn);
+    itemsGrid.appendChild(card);
+  });
+
+  // AI auto-shopping (once per shop visit)
+  if(!G._shoppedThisVisit){
+    G._shoppedThisVisit = true;
+    G.players.filter(p=>p.isAI && p.alive).forEach(ai=> aiShop(ai));
+  }
+  shopLog.innerHTML = (G._shopMsgs||[]).map(m=>'<div>'+m+'</div>').join('');
+}
+
+function aiShop(ai){
+  G._shopMsgs = G._shopMsgs || [];
+  let guard = 0;
+  while(guard++ < 4){
+    const affordableRelics = RELICS.filter(r=> !(ai.relics||[]).includes(r.id) && ai.gold >= r.cost);
+    const affordableItems = ITEMS.filter(it=> ai.gold >= it.cost);
+    const pool = [];
+    affordableRelics.forEach(r=> pool.push({type:'relic', data:r}));
+    affordableItems.forEach(it=> pool.push({type:'item', data:it}));
+    if(pool.length===0 || Math.random() < 0.35) break;
+    const pick = pool[randi(0,pool.length-1)];
+    ai.gold -= pick.data.cost;
+    if(pick.type==='relic'){
+      ai.relics.push(pick.data.id);
+      G._shopMsgs.unshift(ai.emoji+' '+ai.name+'가 유물 ['+pick.data.name+']을 구매했습니다.');
+      addLog('🛒 '+ai.emoji+' '+ai.name+'가 유물 ['+pick.data.name+']을 구매했습니다.');
+    } else {
+      ai.items[pick.data.id] = (ai.items[pick.data.id]||0)+1;
+      G._shopMsgs.unshift(ai.emoji+' '+ai.name+'가 아이템 ['+pick.data.name+']을 구매했습니다.');
+      addLog('🛒 '+ai.emoji+' '+ai.name+'가 아이템 ['+pick.data.name+']을 구매했습니다.');
+    }
+  }
+}
+
+$('#btn-shop-next').addEventListener('click', ()=>{
+  G._shoppedThisVisit = false;
+  G._shopMsgs = [];
+  renderGameScreen();
+  showScreen('screen-game');
+  beginRound(false);
+});
+
+/* ============================== MATCH END ============================== */
+async function matchWinByGold(winner){
+  await sleep(200);
+  if(winner.id==='player'){
+    addLog('🏆 목표 금액 달성! 플레이어 승리!', 'hot');
+    finishMatch(true, '목표 금액 '+G.config.target+'원을 먼저 달성했습니다!');
+  } else {
+    addLog('💀 '+winner.name+'가 먼저 목표 금액을 달성했습니다. 패배...', 'bad');
+    finishMatch(false, winner.name+'가 먼저 목표 금액 '+G.config.target+'원을 달성했습니다.');
+  }
+}
+async function matchWinLastStanding(winner){
+  if(winner.id==='player'){
+    addLog('🏆 최후의 생존자! 플레이어 승리!', 'hot');
+    finishMatch(true, '다른 모든 참가자가 탈락했습니다. 최후의 생존자!');
+  } else {
+    addLog('💀 '+winner.name+'가 최후의 생존자입니다. 패배...', 'bad');
+    finishMatch(false, winner.name+'만 살아남았습니다.');
+  }
+}
+async function matchLose(){
+  addLog('💀 게임 오버', 'bad');
+  finishMatch(false, '플레이어의 캡슐이 뽑혀 탈락했습니다.');
+}
+
+function finishMatch(won, desc){
+  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+  $('#matchendTitle').textContent = won ? '🏆 승리!' : '💀 게임 오버';
+  $('#matchendTitle').style.color = won ? 'var(--good)' : 'var(--danger)';
+  $('#matchendDesc').textContent = desc;
+  const nextIdx = G.matchIndex + 1;
+  const contBtn = $('#btn-matchend-continue');
+  if(won && nextIdx < MATCH_CONFIGS.length){
+    contBtn.classList.remove('hidden');
+    contBtn.textContent = '다음 매치 (다른 수치) ▶';
+    contBtn.onclick = ()=>{
+      const carry = { wins: G.wins+1 };
+      newMatch(nextIdx, carry);
+      startBriefVN();
+    };
+  } else if(won){
+    contBtn.classList.remove('hidden');
+    contBtn.textContent = '처음부터 다시 도전 ▶';
+    contBtn.onclick = ()=>{
+      newMatch(0);
+      startIntroVN();
+    };
+    $('#matchendDesc').textContent += ' 모든 매치를 클리어했습니다! 최종 우승자입니다 🎉';
+  } else {
+    contBtn.classList.add('hidden');
+  }
+  showScreen('screen-matchend');
+}
+$('#btn-matchend-title').addEventListener('click', ()=>{
+  refreshContinueButton();
+  showScreen('screen-title');
+});
+
+/* ============================== STAGE FIT (1920x1080 design, scaled to window) ============================== */
+const STAGE_W = 1920, STAGE_H = 1080;
+function fitStage(){
+  const scale = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
+  $('#app').style.transform = 'scale('+scale+')';
+}
+window.addEventListener('resize', fitStage);
+fitStage();
+
+/* ============================== INIT ============================== */
+initFloatingCapsules();
+})();
+</script>
+</body>
+</html>
