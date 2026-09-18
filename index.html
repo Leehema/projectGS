@@ -526,7 +526,6 @@ input[type=range]{width:100%;accent-color:var(--accent);}
     <div class="main-area">
       <div class="item-sidebar" id="itemSidebar"></div>
       <div class="machine-area" id="machineArea">
-        <!-- 캡슐 현황 보기 버튼 추가 -->
         <button class="btn capsule-status-btn" id="btnOpenCapsuleDrawer">🎒 내 캡슐 현황</button>
 
         <div id="toastWrap"></div>
@@ -949,11 +948,12 @@ function newMatch(matchIndex, carry){
     relicCurrency: carry && carry.relicCurrency || 0
   };
   
+  // 원래 파일 기획대로 각 플레이어는 머신에 기본 1개씩만 넣고 시작하며, 나머지 캡슐은 개인 보유고(upgrades)로 대기
   G.players.forEach(p=>{
     if(!p.capsuleUpgrades) p.capsuleUpgrades = { normal:TOTAL_CAPSULES_POOL, metal:0, holo:0 };
-    G.machine.capsules[p.id] = p.capsuleUpgrades.normal || 0;
-    G.machine.metal[p.id] = p.capsuleUpgrades.metal || 0;
-    G.machine.holo[p.id] = p.capsuleUpgrades.holo || 0;
+    G.machine.capsules[p.id] = 1;
+    G.machine.metal[p.id] = 0;
+    G.machine.holo[p.id] = 0;
   });
 }
 
