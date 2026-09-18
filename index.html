@@ -181,6 +181,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;}
 .item-sidebar-title{font-size:12px;font-weight:700;color:var(--text-dim);
   text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
 .item-sidebar-empty{font-size:12px;color:var(--text-dim);text-align:center;margin-top:20px;line-height:1.5;}
+.capsule-status-open{width:100%;justify-content:center;padding:9px 8px;font-size:12px;margin-bottom:4px;}
 .item-slot{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;
   overflow:hidden;transition:border-color .15s ease;}
 .item-slot.expanded{border-color:var(--accent);}
@@ -202,6 +203,36 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;}
 .log-entry.hot{color:var(--accent);}
 .log-entry.bad{color:var(--danger);}
 .log-entry.good{color:var(--good);}
+
+.capsule-drawer-overlay{position:absolute;inset:0;background:rgba(5,2,14,.55);backdrop-filter:blur(2px);
+  z-index:70;display:flex;align-items:stretch;justify-content:flex-start;opacity:0;pointer-events:none;
+  transition:opacity .22s ease;}
+.capsule-drawer-overlay.active{opacity:1;pointer-events:auto;}
+.capsule-drawer{width:min(380px,92vw);height:100%;background:linear-gradient(180deg,#21163d 0%,#12091f 100%);
+  border-right:2px solid var(--border);box-shadow:16px 0 48px rgba(0,0,0,.72);
+  transform:translateX(-100%);transition:transform .28s cubic-bezier(.22,1,.36,1);
+  padding:18px;display:flex;flex-direction:column;gap:14px;}
+.capsule-drawer-overlay.active .capsule-drawer{transform:translateX(0);}
+.capsule-drawer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  padding-bottom:12px;border-bottom:1px solid rgba(255,255,256,.1);}
+.capsule-drawer-title{font-size:18px;font-weight:800;color:var(--accent);line-height:1.2;}
+.capsule-drawer-sub{font-size:11.5px;color:var(--text-dim);line-height:1.45;margin-top:5px;}
+.capsule-drawer-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.capsule-summary-chip{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;
+  padding:8px 6px;text-align:center;font-size:11px;color:var(--text-dim);}
+.capsule-summary-chip b{display:block;color:var(--text);font-size:15px;margin-top:2px;}
+.capsule-grid-30{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));grid-template-rows:repeat(15, 1fr);
+  grid-auto-flow:column;gap:7px;min-height:0;overflow-y:auto;padding-right:2px;}
+.capsule-owned-icon{height:34px;background:var(--panel-2);border:1px solid var(--border);border-radius:9px;
+  display:flex;align-items:center;gap:8px;padding:5px 8px;font-size:12px;color:var(--text);
+  transition:opacity .15s ease, filter .15s ease;}
+.capsule-owned-icon.inactive{opacity:.34;filter:grayscale(.82);}
+.capsule-owned-icon .mini-cap{width:16px;height:16px;border-radius:50%;flex:0 0 16px;box-shadow:0 0 7px currentColor;}
+.capsule-owned-icon .mini-cap.normal{background:var(--player-color);color:var(--player-color);}
+.capsule-owned-icon .mini-cap.metal{background:linear-gradient(135deg,#f0f2f8,#9aa4b8 55%,#5c6478);color:#cbd3e8;}
+.capsule-owned-icon .mini-cap.holo{background:linear-gradient(120deg,#ff6ec7,#7afcff 45%,#ffe66d 90%);color:#7afcff;}
+.capsule-owned-icon .cap-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.capsule-owned-icon .cap-state{font-size:10px;color:var(--text-dim);}
 
 .machine{position:relative;width:340px;text-align:center;transition:transform .08s ease;}
 .machine.shake{animation:shakeAnim .55s cubic-bezier(.36,.07,.19,.97);}
@@ -415,6 +446,7 @@ input[type=range]{width:100%;accent-color:var(--accent);}
 .ingame-shop-head-right{display:flex;align-items:center;gap:14px;}
 .ingame-shop-body{overflow-y:auto;padding:14px 4px;display:flex;flex-direction:column;gap:12px;}
 .shop-section-label{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.6px;display:flex;align-items:center;gap:6px;}
+.ingame-shop-grid .shop-section-label,.relic-shop-grid .shop-section-label{grid-column:1/-1;}
 .shop-section-label::after{content:'';flex:1;height:1px;background:rgba(255,255,256,.1);margin-left:8px;}
 .ingame-shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;}
 .shop-card{background:var(--panel-2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;
@@ -428,27 +460,6 @@ input[type=range]{width:100%;accent-color:var(--accent);}
 .shop-empty-note{grid-column:1/-1;font-size:12px;color:var(--text-dim);text-align:center;padding:10px;}
 .ingame-shop-footer{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(255,255,256,.08);margin-top:4px;}
 .ingame-shop-ai-log{font-size:11.5px;color:var(--text-dim);max-height:38px;overflow-y:auto;flex:1;padding-right:16px;}
-
-/* ---------- 캡슐 현황 드로워 UI ---------- */
-.capsule-status-btn{position:absolute;top:10px;left:10px;z-index:30;background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:10px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,.4);transition:background .15s ease;}
-.capsule-status-btn:hover{background:#2d2150;border-color:var(--accent);}
-
-.capsule-drawer-overlay{position:absolute;inset:0;background:rgba(5,2,14,.6);backdrop-filter:blur(2px);z-index:60;display:flex;align-items:center;justify-content:flex-start;opacity:0;pointer-events:none;transition:opacity .25s ease;}
-.capsule-drawer-overlay.active{opacity:1;pointer-events:auto;}
-
-.capsule-drawer{width:360px;height:100%;background:linear-gradient(180deg, #1f143a 0%, #130a24 100%);border-right:2px solid var(--border);box-shadow:12px 0 50px rgba(0,0,0,.85);display:flex;flex-direction:column;padding:20px;transform:translateX(-100%);transition:transform .3s cubic-bezier(.22,1,.36,1);}
-.capsule-drawer-overlay.active .capsule-drawer{transform:translateX(0);}
-
-.capsule-drawer-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:1px solid rgba(255,255,256,.08);margin-bottom:14px;}
-.capsule-drawer-head h3{margin:0;font-size:18px;display:flex;align-items:center;gap:8px;color:var(--accent);}
-
-.capsule-drawer-body{flex:1;overflow-y:auto;padding-right:4px;}
-.capsule-grid-2cols{display:grid;grid-template-columns:repeat(2, 1fr);gap:8px;padding-bottom:10px;}
-.capsule-icon-item{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:8px;font-size:12px;}
-.capsule-icon-item.inactive{opacity:0.35;filter:grayscale(0.7);}
-.capsule-icon-item .dot-icon{width:14px;height:14px;border-radius:50%;flex-shrink:0;box-shadow:0 0 6px currentColor;}
-.capsule-icon-item .info{flex:1;display:flex;justify-content:space-between;align-items:center;}
-.capsule-icon-item .status-lbl{font-size:10px;color:var(--text-dim);}
 
 /* ---------- 매치 종료 후 유물 상점 화면 ---------- */
 #screen-relic-shop{align-items:center;justify-content:center;}
@@ -526,8 +537,6 @@ input[type=range]{width:100%;accent-color:var(--accent);}
     <div class="main-area">
       <div class="item-sidebar" id="itemSidebar"></div>
       <div class="machine-area" id="machineArea">
-        <button class="btn capsule-status-btn" id="btnOpenCapsuleDrawer">🎒 내 캡슐 현황</button>
-
         <div id="toastWrap"></div>
         <div class="item-use-popup-wrap" id="itemUsePopupWrap"></div>
         <div class="result-banner" id="resultBanner"></div>
@@ -571,6 +580,20 @@ input[type=range]{width:100%;accent-color:var(--accent);}
         <div class="log-panel" id="logPanel"></div>
       </div>
 
+      <div class="capsule-drawer-overlay" id="capsuleDrawerOverlay">
+        <div class="capsule-drawer">
+          <div class="capsule-drawer-head">
+            <div>
+              <div class="capsule-drawer-title">🔵 내 캡슐 30개</div>
+              <div class="capsule-drawer-sub">활성 캡슐은 아직 보유 중입니다. 흐리게 표시된 캡슐은 머신에 들어갔거나 이번 매치에서 이미 소모되었습니다.</div>
+            </div>
+            <button class="btn btn-secondary btn-small" id="btnCloseCapsuleDrawer">닫기</button>
+          </div>
+          <div class="capsule-drawer-summary" id="capsuleDrawerSummary"></div>
+          <div class="capsule-grid-30" id="capsuleDrawerGrid"></div>
+        </div>
+      </div>
+
       <!-- 하단 인게임 상점 팝업 (소모품 아이템 전용) -->
       <div class="ingame-shop-overlay" id="ingameShopOverlay">
         <div class="ingame-shop-wrap">
@@ -606,41 +629,21 @@ input[type=range]{width:100%;accent-color:var(--accent);}
     </div>
   </section>
 
-  <!-- 캡슐 현황 드로워 컴포넌트 -->
-  <div class="capsule-drawer-overlay" id="capsuleDrawerOverlay">
-    <div class="capsule-drawer">
-      <div class="capsule-drawer-head">
-        <h3>🔩 내 캡슐 30개 풀 현황</h3>
-        <button class="btn btn-secondary btn-small" id="btnCloseCapsuleDrawer">✕ 닫기</button>
-      </div>
-      <div class="capsule-drawer-body">
-        <div style="font-size:11.5px;color:var(--text-dim);margin-bottom:12px;line-height:1.4;">
-          총 30개의 캡슐 중 머신에 투입되어 대기 중이거나 소모된 캡슐은 <b>비활성화</b>로 표시됩니다.
-        </div>
-        <div class="capsule-grid-2cols" id="capsuleGridContainer"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- 매치 종료 후 유물 상점 화면 -->
   <section id="screen-relic-shop" class="screen">
     <div class="relic-shop-wrap">
       <div class="relic-shop-head">
         <div class="relic-shop-title">
-          <h2>🏛️ 유물 상점 & 캡슐 강화</h2>
-          <p>이전 매치 종료 시 머신에 남아있던 본인의 캡슐이 <b>캡슐 파편</b>으로 변환되었습니다! 파편으로 유물이나 특수 캡슐 강화를 구매하세요.</p>
+          <h2>🏛️ 유물 상점</h2>
+          <p>이전 매치 종료 시 머신에 남아있던 본인의 캡슐이 <b>캡슐 파편</b>으로 변환되었습니다!</p>
         </div>
         <div class="relic-currency-badge">
           <div class="relic-currency-label">보유 캡슐 파편</div>
           <div class="relic-currency-val" id="relicCurrencyVal">0개</div>
         </div>
       </div>
-      <div style="display:flex; gap:12px; margin-bottom:8px;">
-        <button class="btn btn-secondary btn-small" id="tabRelics" style="flex:1; border-color:var(--accent);">🏛️ 유물 상점</button>
-        <button class="btn btn-secondary btn-small" id="tabCapsules" style="flex:1;">🔩 캡슐 영구 강화</button>
-      </div>
       <div class="relic-shop-grid" id="relicShopGrid"></div>
-      <div class="relic-shop-footer" id="relicShopFooter">
+      <div class="relic-shop-footer">
         <button class="btn btn-secondary btn-small" id="btn-relic-shop-reroll">🎲 리롤 (1개)</button>
         <button class="btn btn-primary" id="btn-relic-shop-next">다음 매치 시작하기 ▶</button>
       </div>
@@ -726,9 +729,9 @@ const ITEMS = [
   { id:'aging', name:'숙성 캡슐', icon:'📈', cost:3, targeted:false, kind:'aging',
     desc:'사용 효과는 없지만, 판매하지 않고 보유할수록 라운드마다 판매 가치가 3원씩 오릅니다.' },
   { id:'metalcap', name:'메탈 캡슐화', icon:'🔩', cost:5, targeted:false, kind:'metal',
-    desc:'내 캡슐 3개를 메탈 캡슐로 바꿉니다. 메탈 캡슐이 뽑히면 목숨을 잃지 않고 5원을 획득하며, 효과는 라운드가 지나도 유지됩니다.', count:3 },
+    desc:'머신 속 내 일반 캡슐 3개를 메탈 캡슐로 바꿉니다. 뽑히면 목숨을 잃지 않고 5원을 획득하며, 효과는 이번 매치가 끝나면 초기화됩니다.', count:3 },
   { id:'holocap', name:'홀로그램 캡슐화', icon:'🌈', cost:5, targeted:false, kind:'holo',
-    desc:'내 캡슐 3개를 홀로그램 캡슐로 바꿉니다. 홀로그램 캡슐이 뽑히면 무작위 다른 플레이어의 캡슐로 취급됩니다.', count:3 },
+    desc:'머신 속 내 일반 캡슐 3개를 홀로그램 캡슐로 바꿉니다. 뽑히면 무작위 다른 플레이어의 캡슐로 취급되며, 효과는 이번 매치가 끝나면 초기화됩니다.', count:3 },
 ];
 
 const BASE_ITEM_MAX_STOCK = 3;
@@ -743,6 +746,13 @@ function getMaxItemStock(player){
 const SHOP_OFFER_SIZE = 4;
 const SHOP_REROLL_COST = 2;
 const SAVE_KEY = 'gachaSurvivalSave_v1';
+const PLAYER_CAPSULE_POOL = 30;
+const CAPSULE_UPGRADE_SHOP = [
+  { id:'metal', name:'메탈 캡슐 강화', icon:'🔩', cost:2,
+    desc:'보유 일반 캡슐 1개를 메탈 캡슐로 영구 강화합니다. 메탈 캡슐은 뽑혀도 목숨을 잃지 않고 5원을 획득합니다.' },
+  { id:'holo', name:'홀로그램 캡슐 강화', icon:'🌈', cost:3,
+    desc:'보유 일반 캡슐 1개를 홀로그램 캡슐로 영구 강화합니다. 홀로그램 캡슐은 뽑히면 무작위 다른 플레이어의 캡슐로 취급됩니다.' },
+];
 
 /* ============================== AUDIO ============================== */
 const SFX = (function(){
@@ -910,18 +920,30 @@ function weightedPick(weights){
 let G = null;
 
 const STARTING_LIVES = 2;
-const TOTAL_CAPSULES_POOL = 30;
-
+function normalizeCapsuleUpgrades(upgrades){
+  const u = upgrades || {};
+  const metal = clamp(parseInt(u.metal || 0, 10) || 0, 0, PLAYER_CAPSULE_POOL);
+  const holo = clamp(parseInt(u.holo || 0, 10) || 0, 0, PLAYER_CAPSULE_POOL - metal);
+  return { metal, holo };
+}
+function createCapsuleStock(upgrades){
+  const u = normalizeCapsuleUpgrades(upgrades);
+  return {
+    normal: PLAYER_CAPSULE_POOL - u.metal - u.holo,
+    metal: u.metal,
+    holo: u.holo
+  };
+}
 function freshPlayers(cfg, carry){
   const roles = ['player'].concat(ROLES.filter(r=>r!=='player').slice(0,cfg.aiCount));
   return roles.map(id=>{
-    const isHuman = (id === 'player');
-    const playerUpgrades = (isHuman && carry && carry.capsuleUpgrades) ? carry.capsuleUpgrades : { normal:TOTAL_CAPSULES_POOL, metal:0, holo:0 };
+    const capsuleUpgrades = id==='player' ? normalizeCapsuleUpgrades(carry && carry.capsuleUpgrades) : normalizeCapsuleUpgrades();
     return {
-      id, name:NAME[id], color:COLOR[id], emoji:EMOJI[id], isAI: !isHuman,
+      id, name:NAME[id], color:COLOR[id], emoji:EMOJI[id], isAI: id!=='player',
       alive:true, lives:STARTING_LIVES, gold:0,
-      relics:(isHuman && carry && carry.playerRelics) ? carry.playerRelics.slice() : [],
-      capsuleUpgrades: playerUpgrades,
+      relics:(id==='player' && carry && carry.playerRelics) ? carry.playerRelics.slice() : [],
+      capsuleUpgrades,
+      capsuleStock:createCapsuleStock(capsuleUpgrades),
       items:{}, itemAge:{}
     };
   });
@@ -947,13 +969,11 @@ function newMatch(matchIndex, carry){
     luckyTarget: 1,
     relicCurrency: carry && carry.relicCurrency || 0
   };
-  
-  // 원래 파일 기획대로 각 플레이어는 머신에 기본 1개씩만 넣고 시작하며, 나머지 캡슐은 개인 보유고(upgrades)로 대기
   G.players.forEach(p=>{
-    if(!p.capsuleUpgrades) p.capsuleUpgrades = { normal:TOTAL_CAPSULES_POOL, metal:0, holo:0 };
-    G.machine.capsules[p.id] = 1;
+    G.machine.capsules[p.id] = 0;
     G.machine.metal[p.id] = 0;
     G.machine.holo[p.id] = 0;
+    addCapsulesToMachineFromStock(p, 1);
   });
 }
 
@@ -976,8 +996,19 @@ function loadGame(){
     G = data.G;
     (G.players||[]).forEach(p=>{
       if(p.lives==null) p.lives = STARTING_LIVES;
+      p.capsuleUpgrades = normalizeCapsuleUpgrades(p.capsuleUpgrades);
+      const hadCapsuleStock = !!p.capsuleStock;
+      if(!p.capsuleStock) p.capsuleStock = createCapsuleStock(p.capsuleUpgrades);
+      if(!hadCapsuleStock && G.machine){
+        const alreadyInMachine = (G.machine.capsules && G.machine.capsules[p.id] || 0) +
+          (G.machine.metal && G.machine.metal[p.id] || 0) +
+          (G.machine.holo && G.machine.holo[p.id] || 0);
+        p.capsuleStock.normal = Math.max(0, (p.capsuleStock.normal || 0) - alreadyInMachine);
+      }
+      p.capsuleStock.normal = clamp(parseInt(p.capsuleStock.normal || 0, 10) || 0, 0, PLAYER_CAPSULE_POOL);
+      p.capsuleStock.metal = clamp(parseInt(p.capsuleStock.metal || 0, 10) || 0, 0, PLAYER_CAPSULE_POOL);
+      p.capsuleStock.holo = clamp(parseInt(p.capsuleStock.holo || 0, 10) || 0, 0, PLAYER_CAPSULE_POOL);
       if(!p.itemAge) p.itemAge = {};
-      if(!p.capsuleUpgrades) p.capsuleUpgrades = { normal:TOTAL_CAPSULES_POOL, metal:0, holo:0 };
       if(p.items){
         Object.keys(p.items).forEach(id=>{ if(!ITEMS.find(it=>it.id===id)) delete p.items[id]; });
       }
@@ -1041,6 +1072,15 @@ function refreshContinueButton(){
 }
 refreshContinueButton();
 
+$('#btnCloseCapsuleDrawer').addEventListener('click', ()=>{
+  $('#capsuleDrawerOverlay').classList.remove('active');
+});
+$('#capsuleDrawerOverlay').addEventListener('click', (ev)=>{
+  if(ev.target === $('#capsuleDrawerOverlay')){
+    $('#capsuleDrawerOverlay').classList.remove('active');
+  }
+});
+
 /* ============================== VN REFERENCE DIAGRAMS ============================== */
 function diagMachineLegend(){
   return '<div class="vn-diagram-title">머신 속 캡슐</div>'+
@@ -1065,7 +1105,7 @@ function diagBetGold(maxBet){
       '<div class="vd-chip"><span class="icon">🥈 2등</span><span class="val">3원</span></div>'+
       '<div class="vd-chip"><span class="icon">🥉 3등</span><span class="val">1원</span></div>'+
     '</div>'+
-    '<div class="vd-legend"><span>가장 많이 넣은 순서대로 차등 지급된다냥! (플레이어당 총 30개 한정 풀)</span></div>';
+    '<div class="vd-legend"><span>매치마다 보유 캡슐 30개 안에서 투입한다냥! (라운드 최대 '+maxBet+'개)</span></div>';
 }
 function diagRisk(){
   return '<div class="vn-diagram-title">많이 넣을수록... 위험!</div>'+
@@ -1099,10 +1139,11 @@ function diagGoldTarget(target){
     '</div>';
 }
 function diagRelicShop(){
-  return '<div class="vn-diagram-title">매치 종료 후 유물 상점 & 강화</div>'+
+  return '<div class="vn-diagram-title">매치 종료 후 유물 상점</div>'+
     '<div class="vd-cards">'+
       '<div class="vd-card"><span class="icon">🔵</span><div class="label">남은 내 캡슐<br>→ 캡슐 파편</div></div>'+
-      '<div class="vd-card"><span class="icon">🔩</span><div class="label">특수 캡슐 영구 강화<br>다음 매치로 계승</div></div>'+
+      '<div class="vd-card"><span class="icon">🎒</span><div class="label">유물 구매<br>다음 매치로 계승</div></div>'+
+      '<div class="vd-card"><span class="icon">🔩</span><div class="label">캡슐 강화<br>30개 풀에 영구 반영</div></div>'+
     '</div>';
 }
 function diagVersus(aiPlayers){
@@ -1190,18 +1231,22 @@ async function startIntroVN(){
     {name:'MC 가챠냥', text:'어서 오라냥!'},
     {name:'MC 가챠냥', text:'나는 오늘 진행을 맡은 MC 가챠냥이다냥 🐱'},
     {name:'MC 가챠냥', text:'지금부터 「가챠머신 서바이벌」의 규칙을 설명해주겠다냥!'},
-    {name:'MC 가챠냥', text:'모든 참가자는 각각 총 30개의 캡슐 풀을 가지고 게임에 임한다냥.', diag: diagMachineLegend()},
-    {name:'MC 가챠냥', text:'매 라운드마다 보유한 캡슐 한도 내에서 머신에 캡슐을 투입해 순위 경쟁을 벌인다냥.', diag: diagBetGold(cfg.maxBet)},
-    {name:'MC 가챠냥', text:'가장 많이 넣은 순서대로 1등 5원, 2등 3원, 3등 1원을 받는다냥! 만약 캡슐을 다 써서 부족하다면 0개 투입도 가능하다냥!'},
-    {name:'MC 가챠냥', text:'골드를 정산받으면 머신 바로 밑에 아이템 상점이 열려 소모품을 살 수 있다냥.'},
-    {name:'MC 가챠냥', text:'그리고 한 매치가 완전히 끝난 뒤 열리는 유물 상점에서는 남은 내 캡슐로 캡슐 파편을 얻어 특수 캡슐(메탈, 홀로그램)로 영구 강화할 수 있다냥!', diag: diagRelicShop()},
+    {name:'MC 가챠냥', text:'가운데 놓인 이 거대한 가챠 머신 안에는 참가자들의 색깔 캡슐이랑 빈 캡슐이 마구 섞여 들어있다냥.', diag: diagMachineLegend()},
+    {name:'MC 가챠냥', text:'각 참가자는 매치마다 자기 캡슐 30개를 들고 시작하고, 그 안에서 캡슐을 머신에 넣는다냥.', diag: diagBetGold(cfg.maxBet)},
+    {name:'MC 가챠냥', text:'캡슐을 다 쓰면 최소 투입량을 못 채워도 그 라운드는 0개로 패스할 수 있다냥.'},
+    {name:'MC 가챠냥', text:'이번 라운드에 가장 캡슐을 많이 넣은 순서대로 1등 5원, 2등 3원, 3등 1원을 받는다냥!'},
+    {name:'MC 가챠냥', text:'골드를 정산받으면, 머신 바로 밑에 아이템 상점이 열린다냥!'},
+    {name:'MC 가챠냥', text:'방금 번 돈으로 저렴한 아이템을 사서 곧바로 이어질 추첨에 대비할 수 있다냥!'},
+    {name:'MC 가챠냥', text:'그리고 강력한 "유물"과 보유 캡슐 강화는 한 매치가 완전히 끝난 뒤 열리는 전용 상점에서만 살 수 있다냥!', diag: diagRelicShop()},
+    {name:'MC 가챠냥', text:'상점에서는 골드가 아니라 "매치가 끝났을 때 머신에 남은 내 캡슐 개수"로 얻는 캡슐 파편을 쓴다냥.'},
     {name:'MC 가챠냥', text:'한 번 뽑힌 캡슐은 머신에서 즉시 제거된다는 점도 잊지 마라냥!'},
     {name:'MC 가챠냥', text:'상점을 닫으면 아이템 사용과 함께 손잡이를 돌려 캡슐을 뽑는다냥!', diag: diagCrank()},
     {name:'MC 가챠냥', text:'다들 목숨은 2개씩이다냥!', diag: diagOutcomes()},
     {name:'MC 가챠냥', text:'뽑힌 캡슐이 자기 색깔이면 목숨을 하나 잃지만, 위로 차원에서 아이템 1개를 무료로 선물한다냥!'},
     {name:'MC 가챠냥', text:'목숨이 다 떨어지면 그제서야 진짜 탈락이다냥.'},
+    {name:'MC 가챠냥', text:'빈 캡슐이면 다음 라운드로 넘어간다냥.'},
     {name:'MC 가챠냥', text:'마지막까지 살아남거나 목표 금액인 '+cfg.target+'원을 먼저 달성하면 매치 승리다냥!', diag: diagGoldTarget(cfg.target)},
-    {name:'MC 가챠냥', text:'매 라운드 끝날 때마다 무료 보너스 아이템 1종도 선물로 지급된다냥! 🎁'},
+    {name:'MC 가챠냥', text:'게다가 매 라운드가 끝날 때마다 참가자 전원에게 무료 보너스 아이템 1종이 선물로 지급된다냥! 🎁'},
     {name:'MC 가챠냥', text:'자, 오늘의 상대는 '+ G.players.filter(p=>p.isAI).map(p=>p.name).join(', ') +'다냥!', diag: diagVersus(G.players.filter(p=>p.isAI))},
     {name:'MC 가챠냥', text:'다들 준비됐냥?'},
     {name:'MC 가챠냥', text:'가챠머신 서바이벌, 지금부터 시작한다냥!'},
@@ -1216,7 +1261,7 @@ async function startBriefVN(){
   await playVN([
     {name:'MC 가챠냥', text:'다음 매치가 시작된다냥!', diag: diagMatchInfo(cfg)},
     {name:'MC 가챠냥', text:'이번엔 상대가 '+ (cfg.aiCount) +'명으로 늘었다냥.'},
-    {name:'MC 가챠냥', text:'이전에 강화한 특수 캡슐과 유물 효과는 그대로 유지되니 든든하게 싸울 수 있다냥!'},
+    {name:'MC 가챠냥', text:'이전에 획득했던 유물과 캡슐 강화는 그대로 유지되니 든든하게 싸울 수 있다냥!'},
     {name:'MC 가챠냥', text:'목표 금액은 '+cfg.target+'원이고, 머신엔 빈 캡슐 '+cfg.emptyCapsules+'개가 미리 준비되어 있다냥.'},
     {name:'MC 가챠냥', text:'긴장 풀면 안 되냥.', diag: diagWinConditions(cfg.target)},
     {name:'MC 가챠냥', text:'규칙은 똑같다냥 — 목표 금액을 먼저 모으거나, 마지막까지 살아남으면 승리다냥!'},
@@ -1264,12 +1309,10 @@ function renderPlayersRow(){
     const badgeStr = (p.relics||[]).map(r=>RELICS.find(x=>x.id===r)?.icon || '').join('') +
       Object.keys(p.items||{}).filter(k=>p.items[k]>0).map(k=> ITEMS.find(x=>x.id===k).icon + (p.items[k]>1?p.items[k]:'') ).join(' ');
     const livesStr = '❤️'.repeat(Math.max(0,p.lives)) + '🖤'.repeat(Math.max(0,STARTING_LIVES-p.lives));
-    
-    const currentLeft = (G.machine.capsules[p.id]||0) + (G.machine.metal[p.id]||0) + (G.machine.holo[p.id]||0);
-
+    const stockStr = countPlayerStock(p)+'/'+PLAYER_CAPSULE_POOL;
     chip.innerHTML = '<span class="dot" style="background:'+p.color+';color:'+p.color+'"></span>'+
       '<span>'+p.emoji+' '+p.name+'</span><span class="lives">'+livesStr+'</span><span class="gold">'+p.gold+'원</span>'+
-      '<span style="font-size:11px;color:var(--text-dim);margin-left:2px;">(보유 캡슐:'+currentLeft+'개)</span>'+
+      '<span class="badges" style="margin-left:4px;">캡슐 '+stockStr+'</span>'+
       (badgeStr? '<span class="badges" style="margin-left:4px;">'+badgeStr+'</span>':'');
     row.appendChild(chip);
   });
@@ -1350,12 +1393,130 @@ function getEffectivePool(tempCaps, wardCounts, swapPair, tempEmpty){
 }
 function poolTotal(pool){ return Object.values(pool).reduce((a,b)=>a+b,0); }
 
+function countPlayerStock(player){
+  if(!player || !player.capsuleStock) return 0;
+  return (player.capsuleStock.normal || 0) + (player.capsuleStock.metal || 0) + (player.capsuleStock.holo || 0);
+}
+
 function countPlayerOwnCapsules(playerId){
   let count = 0;
   count += (G.machine.capsules[playerId] || 0);
   count += (G.machine.metal[playerId] || 0);
   count += (G.machine.holo[playerId] || 0);
   return count;
+}
+
+function buildCapsuleDrawerItems(player){
+  const upgrades = normalizeCapsuleUpgrades(player && player.capsuleUpgrades);
+  const stock = player && player.capsuleStock ? player.capsuleStock : createCapsuleStock(upgrades);
+  const machineNormal = G.machine && G.machine.capsules ? (G.machine.capsules[player.id] || 0) : 0;
+  const machineMetal = G.machine && G.machine.metal ? (G.machine.metal[player.id] || 0) : 0;
+  const machineHolo = G.machine && G.machine.holo ? (G.machine.holo[player.id] || 0) : 0;
+
+  const counts = {
+    normal:{ active:stock.normal || 0, inactive:machineNormal },
+    metal:{ active:stock.metal || 0, inactive:machineMetal },
+    holo:{ active:stock.holo || 0, inactive:machineHolo }
+  };
+  const knownTotal = counts.normal.active + counts.normal.inactive +
+    counts.metal.active + counts.metal.inactive +
+    counts.holo.active + counts.holo.inactive;
+  const consumed = Math.max(0, PLAYER_CAPSULE_POOL - knownTotal);
+  const permanentNormal = PLAYER_CAPSULE_POOL - upgrades.metal - upgrades.holo;
+  const consumedMetal = Math.max(0, upgrades.metal - counts.metal.active - counts.metal.inactive);
+  const consumedHolo = Math.max(0, upgrades.holo - counts.holo.active - counts.holo.inactive);
+  const consumedNormal = Math.max(0, consumed - consumedMetal - consumedHolo);
+  counts.normal.inactive += Math.min(consumedNormal, permanentNormal);
+  counts.metal.inactive += consumedMetal;
+  counts.holo.inactive += consumedHolo;
+
+  const items = [];
+  ['normal','metal','holo'].forEach(kind=>{
+    for(let i=0;i<counts[kind].active;i++) items.push({kind, active:true});
+    for(let i=0;i<counts[kind].inactive;i++) items.push({kind, active:false});
+  });
+  while(items.length < PLAYER_CAPSULE_POOL) items.push({kind:'normal', active:false});
+  return items.slice(0, PLAYER_CAPSULE_POOL);
+}
+
+function capsuleKindLabel(kind){
+  if(kind==='metal') return '메탈';
+  if(kind==='holo') return '홀로';
+  return '일반';
+}
+
+function renderCapsuleDrawer(){
+  const overlay = $('#capsuleDrawerOverlay');
+  const grid = $('#capsuleDrawerGrid');
+  const summary = $('#capsuleDrawerSummary');
+  if(!overlay || !grid || !summary || !G) return;
+  const human = G.players.find(p=>p.id==='player');
+  if(!human) return;
+
+  const items = buildCapsuleDrawerItems(human);
+  const active = items.filter(x=>x.active).length;
+  const normal = items.filter(x=>x.kind==='normal').length;
+  const metal = items.filter(x=>x.kind==='metal').length;
+  const holo = items.filter(x=>x.kind==='holo').length;
+
+  summary.innerHTML = '';
+  [
+    {label:'보유', value:active+'/'+PLAYER_CAPSULE_POOL},
+    {label:'🔩 메탈', value:metal+'개'},
+    {label:'🌈 홀로', value:holo+'개'}
+  ].forEach(item=>{
+    const chip = el('div','capsule-summary-chip', item.label+'<b>'+item.value+'</b>');
+    summary.appendChild(chip);
+  });
+
+  grid.innerHTML = '';
+  items.forEach((item, idx)=>{
+    const row = el('div','capsule-owned-icon'+(item.active?'':' inactive'));
+    const state = item.active ? '보유' : '비활성';
+    row.innerHTML = '<span class="mini-cap '+item.kind+'"></span>'+
+      '<span class="cap-label">'+String(idx+1).padStart(2,'0')+' · '+capsuleKindLabel(item.kind)+'</span>'+
+      '<span class="cap-state">'+state+'</span>';
+    grid.appendChild(row);
+  });
+}
+
+function takeCapsuleKindFromStock(player){
+  const stock = player.capsuleStock || createCapsuleStock(player.capsuleUpgrades);
+  player.capsuleStock = stock;
+  const weights = {};
+  if(stock.normal > 0) weights.normal = stock.normal;
+  if(stock.metal > 0) weights.metal = stock.metal;
+  if(stock.holo > 0) weights.holo = stock.holo;
+  if(Object.keys(weights).length===0) return null;
+  const kind = weightedPick(weights);
+  stock[kind] -= 1;
+  return kind;
+}
+
+function addCapsulesToMachineFromStock(player, requestedCount){
+  const added = { normal:0, metal:0, holo:0 };
+  const limit = Math.max(0, requestedCount || 0);
+  for(let i=0;i<limit;i++){
+    const kind = takeCapsuleKindFromStock(player);
+    if(!kind) break;
+    added[kind] += 1;
+  }
+  G.machine.capsules[player.id] = (G.machine.capsules[player.id] || 0) + added.normal;
+  G.machine.metal[player.id] = (G.machine.metal[player.id] || 0) + added.metal;
+  G.machine.holo[player.id] = (G.machine.holo[player.id] || 0) + added.holo;
+  return added;
+}
+
+function capsuleAddTotal(added){
+  return (added.normal || 0) + (added.metal || 0) + (added.holo || 0);
+}
+
+function capsuleAddSummary(added){
+  const parts = [];
+  if(added.normal) parts.push('일반 '+added.normal+'개');
+  if(added.metal) parts.push('🔩메탈 '+added.metal+'개');
+  if(added.holo) parts.push('🌈홀로그램 '+added.holo+'개');
+  return parts.join(', ') || '0개';
 }
 
 function consumeCapsuleFromMachine(outcomeId){
@@ -1394,6 +1555,7 @@ function renderMachineVisual(tempCaps, wardCounts, swapPair, tempEmpty){
   });
 
   renderCapsuleStats(pool);
+  renderCapsuleDrawer();
   return pool;
 }
 
@@ -1417,6 +1579,7 @@ function renderCapsuleStats(pool){
     const metalCount = pool['metal:'+p.id] || 0;
     const holoCount = pool['holo:'+p.id] || 0;
     const sum = normalCount + metalCount + holoCount;
+    const stockLeft = countPlayerStock(p);
     
     let extra = '';
     if(metalCount > 0 || holoCount > 0){
@@ -1428,76 +1591,13 @@ function renderCapsuleStats(pool){
 
     const chip = el('div','capsule-stat-chip');
     chip.innerHTML = '<span class="dot" style="background:'+p.color+';color:'+p.color+'"></span>'+
-      p.emoji+' '+p.name+' <b>'+sum+'개</b>'+extra;
+      p.emoji+' '+p.name+' <b>'+sum+'개</b>'+extra+
+      ' <small style="opacity:.7;font-size:10px;">보유 '+stockLeft+'/'+PLAYER_CAPSULE_POOL+'</small>';
     list.appendChild(chip);
   });
 
   bar.appendChild(list);
 }
-
-/* ============================== 캡슐 현황 드로워 UI 로직 ============================== */
-function renderCapsuleDrawerState(){
-  const container = $('#capsuleGridContainer');
-  if(!container) return;
-  container.innerHTML = '';
-
-  const human = G.players.find(p=>p.id==='player');
-  if(!human) return;
-
-  const upgrades = human.capsuleUpgrades || { normal:TOTAL_CAPSULES_POOL, metal:0, holo:0 };
-  
-  const machineNormalLeft = G.machine.capsules['player'] || 0;
-  const machineMetalLeft = G.machine.metal['player'] || 0;
-  const machineHoloLeft = G.machine.holo['player'] || 0;
-
-  const capsulesList = [];
-  for(let i=0; i<upgrades.metal; i++) capsulesList.push({type:'metal', label:'메탈 캡슐'});
-  for(let i=0; i<upgrades.holo; i++) capsulesList.push({type:'holo', label:'홀로그램'});
-  for(let i=0; i<upgrades.normal; i++) capsulesList.push({type:'normal', label:'일반 캡슐'});
-
-  let usedMetal = Math.max(0, upgrades.metal - machineMetalLeft);
-  let usedHolo = Math.max(0, upgrades.holo - machineHoloLeft);
-  let usedNormal = Math.max(0, upgrades.normal - machineNormalLeft);
-
-  capsulesList.forEach((cap, index)=>{
-    let isInactive = false;
-    let statusText = '머신 대기중';
-
-    if(cap.type === 'metal'){
-      if(usedMetal > 0){ usedMetal--; isInactive = true; statusText = '사용/투입됨'; }
-    } else if(cap.type === 'holo'){
-      if(usedHolo > 0){ usedHolo--; isInactive = true; statusText = '사용/투입됨'; }
-    } else {
-      if(usedNormal > 0){ usedNormal--; isInactive = true; statusText = '사용/투입됨'; }
-    }
-
-    let dotColor = 'var(--player-color)';
-    let iconSymbol = '🔵';
-    if(cap.type === 'metal'){ dotColor = '#9aa4b8'; iconSymbol = '🔩'; }
-    else if(cap.type === 'holo'){ dotColor = '#ff6ec7'; iconSymbol = '🌈'; }
-
-    const item = el('div', 'capsule-icon-item' + (isInactive ? ' inactive' : ''));
-    item.innerHTML = 
-      '<span class="dot-icon" style="background:'+dotColor+';color:'+dotColor+'"></span>'+
-      '<div class="info"><span>#'+(index+1)+' '+iconSymbol+'</span><span class="status-lbl">'+statusText+'</span></div>';
-    container.appendChild(item);
-  });
-}
-
-const drawerOverlay = $('#capsuleDrawerOverlay');
-$('#btnOpenCapsuleDrawer').addEventListener('click', ()=>{
-  SFX.click();
-  renderCapsuleDrawerState();
-  drawerOverlay.classList.add('active');
-});
-$('#btnCloseCapsuleDrawer').addEventListener('click', ()=>{
-  SFX.click();
-  drawerOverlay.classList.remove('active');
-});
-drawerOverlay.addEventListener('click', (e)=>{
-  if(e.target === drawerOverlay) drawerOverlay.classList.remove('active');
-});
-
 
 /* ============================== ROUND FLOW ============================== */
 async function beginRound(isResume){
@@ -1607,8 +1707,8 @@ async function showPenaltyExplainer(){
   await playIngameCatLines([
     '잠깐! 시작하기 전에 한 가지만 알려줄게 있다냥.',
     '매 라운드마다 캡슐을 가장 적게 넣은 사람에게는 페널티가 있다냥!',
-    '강제로 페널티 캡슐이 추가되는데, 이건 보너스 골드도 없다냥.',
-    '보유한 캡슐이 부족해 최소 투입량을 채우지 못하면 0개 투입(패스)도 가능하니 참고하라냥!',
+    '강제로 페널티 캡슐 1개가 추가되는데, 이건 보너스 골드도 없다냥.',
+    '너무 소극적으로 버티기만 하면 위험해질 수 있으니 주의하라냥!',
   ]);
 }
 
@@ -1618,37 +1718,16 @@ function computeMinFloor(player){
   G.players.forEach(p=>{
     if(p.id!==player.id && p.alive && (p.relics||[]).includes('iron_chain')) floor += 2;
   });
-  return clamp(floor, 0, G.config.maxBet);
+  return clamp(floor, 1, G.config.maxBet);
 }
 
 async function runBettingPhase(){
   const human = G.players.find(p=>p.id==='player');
   if(!human.alive){ return; }
-
-  const availableCount = countPlayerOwnCapsules(human.id);
-  const minFloor = Math.min(computeMinFloor(human), availableCount);
-  const maxBetAllowed = Math.min(G.config.maxBet, availableCount);
-
-  if(availableCount === 0 || maxBetAllowed < minFloor){
-    toast('⚠️ 보유한 캡슐이 없어 이번 라운드는 투입 없이 패스(0개)합니다!', 3500);
-    addLog('🔵 플레이어가 보유 캡슐 부족으로 0개 투입(패스)했습니다.', 'bad');
-    await sleep(800);
-    const bets = {};
-    bets[human.id] = 0;
-    
-    const pool = getEffectivePool();
-    const total = poolTotal(pool);
-    G.players.forEach(p=>{
-      if(p.id==='player' || !p.alive) return;
-      const aiAvail = countPlayerOwnCapsules(p.id);
-      const aiFloor = Math.min(computeMinFloor(p), aiAvail);
-      const aiMax = Math.min(G.config.maxBet, aiAvail);
-      if(aiAvail === 0 || aiMax < aiFloor) bets[p.id] = 0;
-      else bets[p.id] = aiDecideBet(p, aiFloor, aiMax, total, pool);
-    });
-    await revealBets(bets);
-    return;
-  }
+  const humanStock = countPlayerStock(human);
+  const rawMinFloor = computeMinFloor(human);
+  const minFloor = humanStock >= rawMinFloor ? rawMinFloor : 0;
+  const maxBet = humanStock >= rawMinFloor ? Math.min(G.config.maxBet, humanStock) : 0;
 
   const bets = {};
   await new Promise(res=>{
@@ -1660,8 +1739,9 @@ async function runBettingPhase(){
       luckyNotice = '<div class="lucky-hint">🎯 행운의 숫자: <b>'+G.luckyTarget+'개</b> 투입 시 +5골드 추가!</div>';
     }
 
+    const passNotice = humanStock < rawMinFloor ? '<span class="sub" style="color:var(--accent);">보유 캡슐이 부족해 이번 라운드는 0개 패스가 가능합니다.</span>' : '';
     const title = el('div','bet-title','🎰 이번 라운드에 넣을 캡슐 수를 정하세요'+
-      '<span class="sub">최소 '+minFloor+'개 · 최대 '+maxBetAllowed+'개 (보유 캡슐: '+availableCount+'개) · 🥇1등 5원</span>'+luckyNotice);
+      '<span class="sub">보유 '+humanStock+'/'+PLAYER_CAPSULE_POOL+'개 · 최소 '+rawMinFloor+'개 · 최대 '+maxBet+'개 · 🥇1등 5원, 🥈2등 3원, 🥉3등 1원</span>'+passNotice+luckyNotice);
     panel.appendChild(title);
 
     const stepperWrap = el('div','bet-controls');
@@ -1674,7 +1754,7 @@ async function runBettingPhase(){
     panel.appendChild(stepperWrap);
 
     const range = el('input',null);
-    range.type='range'; range.min=minFloor; range.max=maxBetAllowed; range.value=minFloor;
+    range.type='range'; range.min=minFloor; range.max=maxBet; range.value=minFloor;
     panel.appendChild(range);
 
     const preview = el('div','bet-preview');
@@ -1687,7 +1767,7 @@ async function runBettingPhase(){
       const pool = getEffectivePool();
       const total = poolTotal(pool) + val;
       const ownAfter = (pool[human.id]||0) + val;
-      const prob = (ownAfter/total*100).toFixed(1);
+      const prob = total>0 ? (ownAfter/total*100).toFixed(1) : '0.0';
       const isLucky = (human.relics||[]).includes('lucky_bet') && val === G.luckyTarget;
       
       preview.innerHTML = '순위 경쟁: <b>1등 5원 / 2등 3원 / 3등 1원</b>' + 
@@ -1695,9 +1775,9 @@ async function runBettingPhase(){
         '<br>내 캡슐 예상 위험도: 약 <b>'+prob+'%</b>';
     }
     updatePreview();
-    minusBtn.addEventListener('click', ()=>{ val = clamp(val-1,minFloor,maxBetAllowed); updatePreview(); });
-    plusBtn.addEventListener('click', ()=>{ val = clamp(val+1,minFloor,maxBetAllowed); updatePreview(); });
-    range.addEventListener('input', ()=>{ val = clamp(parseInt(range.value||minFloor,10),minFloor,maxBetAllowed); updatePreview(); });
+    minusBtn.addEventListener('click', ()=>{ val = clamp(val-1,minFloor,maxBet); updatePreview(); });
+    plusBtn.addEventListener('click', ()=>{ val = clamp(val+1,minFloor,maxBet); updatePreview(); });
+    range.addEventListener('input', ()=>{ val = clamp(parseInt(range.value||minFloor,10),minFloor,maxBet); updatePreview(); });
 
     const confirmBtn = el('button','btn btn-primary','확정하고 공개하기');
     confirmBtn.style.marginTop='14px'; confirmBtn.style.width='100%';
@@ -1712,20 +1792,19 @@ async function runBettingPhase(){
   const total = poolTotal(pool);
   G.players.forEach(p=>{
     if(p.id==='player' || !p.alive) return;
-    const aiAvail = countPlayerOwnCapsules(p.id);
-    const aiFloor = Math.min(computeMinFloor(p), aiAvail);
-    const aiMax = Math.min(G.config.maxBet, aiAvail);
-    if(aiAvail === 0 || aiMax < aiFloor) bets[p.id] = 0;
-    else bets[p.id] = aiDecideBet(p, aiFloor, aiMax, total, pool);
+    const floor = computeMinFloor(p);
+    const stock = countPlayerStock(p);
+    bets[p.id] = aiDecideBet(p, stock >= floor ? floor : 0, Math.min(G.config.maxBet, stock), total, pool);
   });
 
   await revealBets(bets);
 }
 
-function aiDecideBet(ai, floor, maxAllowed, total, pool){
+function aiDecideBet(ai, floor, maxBet, total, pool){
+  if(maxBet <= 0) return 0;
   const cfg = G.config;
-  let base = randi(floor, Math.min(maxAllowed, floor+3));
-  if((ai.relics||[]).includes('lucky_bet') && G.luckyTarget >= floor && G.luckyTarget <= maxAllowed){
+  let base = randi(floor, Math.min(maxBet, floor+3));
+  if((ai.relics||[]).includes('lucky_bet') && G.luckyTarget >= floor && G.luckyTarget <= maxBet){
     if(Math.random()<0.65) base = G.luckyTarget;
   }
   const goldRatio = ai.gold / cfg.target;
@@ -1733,8 +1812,8 @@ function aiDecideBet(ai, floor, maxAllowed, total, pool){
   if(goldRatio > 0.7 && Math.random()<0.65) base += randi(2,4);
   const ownFrac = total>0 ? (pool[ai.id]||0)/total : 0;
   if(ownFrac > 0.3 && goldRatio < 0.8 && Math.random()<0.55) base -= randi(1,2);
-  if(Math.random()<0.1) base = randi(floor, maxAllowed);
-  return clamp(base, floor, maxAllowed);
+  if(Math.random()<0.1) base = randi(floor, maxBet);
+  return clamp(base, floor, maxBet);
 }
 
 /* ---- Reveal bets ---- */
@@ -1746,11 +1825,10 @@ async function revealBets(bets){
   const row = el('div','reveal-row');
   panel.appendChild(row);
 
-  const activeAlive = G.players.filter(p=>p.alive);
-  const minVal = activeAlive.length ? Math.min(...activeAlive.map(p=>bets[p.id])) : 0;
-  const minPlayers = activeAlive.filter(p=>bets[p.id]===minVal).map(p=>p.id);
+  const minVal = Math.min(...G.players.filter(p=>p.alive).map(p=>bets[p.id]));
+  const minPlayers = G.players.filter(p=>p.alive && bets[p.id]===minVal).map(p=>p.id);
 
-  for(const p of activeAlive){
+  for(const p of G.players.filter(p=>p.alive)){
     await sleep(260);
     SFX.click();
     const isPenalty = minPlayers.includes(p.id);
@@ -1779,7 +1857,7 @@ async function applyBetsToMachine(bets, minPlayers){
 
   const sortedAlive = G.players
     .filter(p => p.alive)
-    .map(p => ({ player: p, bet: bets[p.id] || 0 }))
+    .map(p => ({ player: p, bet: bets[p.id] }))
     .sort((a, b) => b.bet - a.bet);
 
   let currentRank = 0;
@@ -1791,12 +1869,12 @@ async function applyBetsToMachine(bets, minPlayers){
     const p = sortedAlive[i].player;
     const n = sortedAlive[i].bet;
 
-    if(n > 0){
-      G.machine.capsules[p.id] = (G.machine.capsules[p.id] || 0) + n;
-      G.roundCapsuleAdds[p.id] = (G.roundCapsuleAdds[p.id] || 0) + n;
-    }
+    const added = addCapsulesToMachineFromStock(p, n);
+    const actualAdded = capsuleAddTotal(added);
+    G.roundCapsuleAdds[p.id] = (G.roundCapsuleAdds[p.id] || 0) + actualAdded;
 
     let gain = rankIndex < RANK_REWARDS.length ? RANK_REWARDS[rankIndex] : 0;
+    if(actualAdded <= 0) gain = 0;
     let extraNotes = [];
 
     if(gain > 0 && (p.relics || []).includes('golden_die')){
@@ -1815,21 +1893,24 @@ async function applyBetsToMachine(bets, minPlayers){
     const noteStr = extraNotes.length ? ' (' + extraNotes.join(', ') + ')' : '';
     addLog(
       (p.id === 'player' ? '🔵 플레이어' : p.emoji + ' ' + p.name) +
-      '가 캡슐 ' + n + '개 투입 [' + rankLabel + '] → +' + gain + '원' + noteStr + ' (총 ' + p.gold + '원)',
+      '가 캡슐 ' + actualAdded + '개 투입 [' + rankLabel + '] ' + capsuleAddSummary(added) + ' → +' + gain + '원' + noteStr + ' (총 ' + p.gold + '원)',
       p.id === 'player' ? 'good' : ''
     );
 
-    if(n > 0){
-      dropEntries.push({ id: p.id, count: n, penalty: false });
-    }
+    dropEntries.push({ id: p.id, count: actualAdded, penalty: false });
   }
 
   minPlayers.forEach(pid=>{
     const p = G.players.find(x=>x.id===pid);
-    G.machine.capsules[pid] = (G.machine.capsules[pid]||0) + penaltyAmount;
-    G.roundCapsuleAdds[pid] = (G.roundCapsuleAdds[pid]||0) + penaltyAmount;
-    addLog('⚠️ '+p.emoji+' '+p.name+'는 최소 투입자! 페널티 캡슐 '+penaltyAmount+'개 추가 (보너스 골드 없음)', 'bad');
-    dropEntries.push({id:pid, count:penaltyAmount, penalty:true});
+    const added = addCapsulesToMachineFromStock(p, penaltyAmount);
+    const actualAdded = capsuleAddTotal(added);
+    G.roundCapsuleAdds[pid] = (G.roundCapsuleAdds[pid]||0) + actualAdded;
+    if(actualAdded > 0){
+      addLog('⚠️ '+p.emoji+' '+p.name+'는 최소 투입자! 페널티 캡슐 '+actualAdded+'개 추가 ('+capsuleAddSummary(added)+', 보너스 골드 없음)', 'bad');
+    } else {
+      addLog('⚠️ '+p.emoji+' '+p.name+'는 최소 투입자지만 보유 캡슐이 없어 페널티 캡슐을 추가하지 못했습니다.', 'bad');
+    }
+    dropEntries.push({id:pid, count:actualAdded, penalty:true});
   });
 
   renderPlayersRow();
@@ -1842,7 +1923,10 @@ async function applyBetsToMachine(bets, minPlayers){
     return;
   }
 
+  // 골드 정산 후 인게임 아이템 상점 팝업 오픈
   await openIngameShopPopup();
+
+  // 상점 종료 후 아이템 사용 단계로 진행
   await runItemWindow();
 }
 
@@ -1995,8 +2079,8 @@ function aiShop(ai){
 const RELIC_SHOP_OFFER_SIZE = 3;
 const RELIC_SHOP_REROLL_COST = 1;
 let nextMatchCarryState = null;
-let currentShopTab = 'relics';
 
+/* [변경 1] 유물 상점 3개 한정 슬롯 및 리롤 기능 */
 function rollRelicShopOffer(){
   if(!nextMatchCarryState) return;
   const availRelics = RELICS.filter(r => !nextMatchCarryState.playerRelics.includes(r.id));
@@ -2005,8 +2089,8 @@ function rollRelicShopOffer(){
 
 function showRelicShopScreen(carry){
   nextMatchCarryState = carry;
+  nextMatchCarryState.capsuleUpgrades = normalizeCapsuleUpgrades(nextMatchCarryState.capsuleUpgrades);
   rollRelicShopOffer();
-  currentShopTab = 'relics';
   renderRelicShopUI();
   showScreen('screen-relic-shop');
 }
@@ -2015,108 +2099,64 @@ function renderRelicShopUI(){
   const currencyVal = $('#relicCurrencyVal');
   currencyVal.textContent = nextMatchCarryState.relicCurrency + '개';
 
-  const tabRelics = $('#tabRelics');
-  const tabCapsules = $('#tabCapsules');
-  tabRelics.style.borderColor = currentShopTab === 'relics' ? 'var(--accent)' : 'var(--border)';
-  tabCapsules.style.borderColor = currentShopTab === 'capsules' ? 'var(--accent)' : 'var(--border)';
-
   const grid = $('#relicShopGrid');
   grid.innerHTML = '';
-  const footer = $('#relicShopFooter');
 
-  if(currentShopTab === 'relics'){
-    footer.style.display = 'flex';
-    const offeredRelics = (nextMatchCarryState.relicOffer || []).map(id => RELICS.find(r => r.id === id)).filter(Boolean);
-    const unownedTotal = RELICS.filter(r => !nextMatchCarryState.playerRelics.includes(r.id)).length;
+  const offeredRelics = (nextMatchCarryState.relicOffer || []).map(id => RELICS.find(r => r.id === id)).filter(Boolean);
+  const unownedTotal = RELICS.filter(r => !nextMatchCarryState.playerRelics.includes(r.id)).length;
 
-    if(offeredRelics.length === 0){
-      grid.appendChild(el('div','shop-empty-note','모든 유물을 이미 보유하고 있습니다!'));
-    } else {
-      offeredRelics.forEach(r=>{
-        const card = el('div','shop-card');
-        card.innerHTML = 
-          '<div class="card-top"><span class="icon">'+r.icon+'</span><span class="name">'+r.name+'</span><span class="cost" style="color:var(--accent);">파편 '+r.cost+'개</span></div>'+
-          '<div class="desc">'+r.desc+'</div>';
-        
-        const btn = el('button','btn btn-small btn-primary', '유물 획득');
-        btn.disabled = nextMatchCarryState.relicCurrency < r.cost;
-        btn.addEventListener('click', ()=>{
-          nextMatchCarryState.relicCurrency -= r.cost;
-          nextMatchCarryState.playerRelics.push(r.id);
-          nextMatchCarryState.relicOffer = nextMatchCarryState.relicOffer.filter(id => id !== r.id);
-          SFX.buy();
-          renderRelicShopUI();
-        });
-        card.appendChild(btn);
-        grid.appendChild(card);
-      });
-    }
-
-    const rerollBtn = $('#btn-relic-shop-reroll');
-    rerollBtn.disabled = nextMatchCarryState.relicCurrency < RELIC_SHOP_REROLL_COST || unownedTotal <= RELIC_SHOP_OFFER_SIZE;
+  if(offeredRelics.length === 0){
+    grid.appendChild(el('div','shop-empty-note','모든 유물을 이미 보유하고 있습니다!'));
   } else {
-    footer.style.display = 'flex';
-    const upgrades = nextMatchCarryState.capsuleUpgrades;
+    grid.appendChild(el('div','shop-section-label','✨ 유물'));
+    offeredRelics.forEach(r=>{
+      const card = el('div','shop-card');
+      card.innerHTML =
+        '<div class="card-top"><span class="icon">'+r.icon+'</span><span class="name">'+r.name+'</span><span class="cost" style="color:var(--accent);">파편 '+r.cost+'개</span></div>'+
+        '<div class="desc">'+r.desc+'</div>';
 
-    const infoBox = el('div','shop-empty-note', '현재 내 캡슐 구성: 일반 <b>'+upgrades.normal+'개</b> / 메탈 🔩<b>'+upgrades.metal+'개</b> / 홀로그램 🌈<b>'+upgrades.holo+'개</b> (총 30개)');
-    infoBox.style.gridColumn = '1/-1';
-    grid.appendChild(infoBox);
-
-    const metalCard = el('div','shop-card');
-    metalCard.innerHTML = 
-      '<div class="card-top"><span class="icon">🔩</span><span class="name">메탈 캡슐로 영구 강화</span><span class="cost" style="color:var(--accent);">파편 2개</span></div>'+
-      '<div class="desc">일반 캡슐 1개를 메탈 캡슐로 영구 업그레이드합니다. (뽑히면 목숨 보호 + 5원 획득)</div>';
-    const metalBtn = el('button','btn btn-small btn-primary', '메탈 강화 (파편 2개)');
-    metalBtn.disabled = nextMatchCarryState.relicCurrency < 2 || upgrades.normal <= 0;
-    metalBtn.addEventListener('click', ()=>{
-      if(nextMatchCarryState.relicCurrency < 2 || upgrades.normal <= 0) return;
-      nextMatchCarryState.relicCurrency -= 2;
-      upgrades.normal -= 1;
-      upgrades.metal += 1;
-      SFX.buy();
-      renderRelicShopUI();
+      const btn = el('button','btn btn-small btn-primary', '유물 획득');
+      btn.disabled = nextMatchCarryState.relicCurrency < r.cost;
+      btn.addEventListener('click', ()=>{
+        nextMatchCarryState.relicCurrency -= r.cost;
+        nextMatchCarryState.playerRelics.push(r.id);
+        nextMatchCarryState.relicOffer = nextMatchCarryState.relicOffer.filter(id => id !== r.id);
+        SFX.buy();
+        renderRelicShopUI();
+      });
+      card.appendChild(btn);
+      grid.appendChild(card);
     });
-    metalCard.appendChild(metalBtn);
-    grid.appendChild(metalCard);
-
-    const holoCard = el('div','shop-card');
-    holoCard.innerHTML = 
-      '<div class="card-top"><span class="icon">🌈</span><span class="name">홀로그램 캡슐로 영구 강화</span><span class="cost" style="color:var(--accent);">파편 2개</span></div>'+
-      '<div class="desc">일반 캡슐 1개를 홀로그램 캡슐로 영구 업그레이드합니다. (뽑히면 무작위 타인 캡슐로 취급)</div>';
-    const holoBtn = el('button','btn btn-small btn-primary', '홀로그램 강화 (파편 2개)');
-    holoBtn.disabled = nextMatchCarryState.relicCurrency < 2 || upgrades.normal <= 0;
-    holoBtn.addEventListener('click', ()=>{
-      if(nextMatchCarryState.relicCurrency < 2 || upgrades.normal <= 0) return;
-      nextMatchCarryState.relicCurrency -= 2;
-      upgrades.normal -= 1;
-      upgrades.holo += 1;
-      SFX.buy();
-      renderRelicShopUI();
-    });
-    holoCard.appendChild(holoBtn);
-    grid.appendChild(holoCard);
-
-    const downgradeCard = el('div','shop-card');
-    downgradeCard.innerHTML = 
-      '<div class="card-top"><span class="icon">🔄</span><span class="name">일반 캡슐로 복구</span><span class="cost" style="color:var(--good);">비용 무료</span></div>'+
-      '<div class="desc">특수 캡슐(메탈/홀로그램) 1개를 일반 캡슐로 되돌립니다.</div>';
-    const downBtn = el('button','btn btn-small btn-secondary', '일반 캡슐로 변경');
-    downBtn.disabled = (upgrades.metal + upgrades.holo) <= 0;
-    downBtn.addEventListener('click', ()=>{
-      if((upgrades.metal + upgrades.holo) <= 0) return;
-      if(upgrades.metal > 0) upgrades.metal -= 1;
-      else if(upgrades.holo > 0) upgrades.holo -= 1;
-      upgrades.normal += 1;
-      SFX.click();
-      renderRelicShopUI();
-    });
-    downgradeCard.appendChild(downBtn);
-    grid.appendChild(downgradeCard);
   }
-}
 
-$('#tabRelics').addEventListener('click', ()=>{ currentShopTab = 'relics'; renderRelicShopUI(); });
-$('#tabCapsules').addEventListener('click', ()=>{ currentShopTab = 'capsules'; renderRelicShopUI(); });
+  grid.appendChild(el('div','shop-section-label','🎛️ 캡슐 강화'));
+  const upgrades = normalizeCapsuleUpgrades(nextMatchCarryState.capsuleUpgrades);
+  const normalLeft = PLAYER_CAPSULE_POOL - upgrades.metal - upgrades.holo;
+  CAPSULE_UPGRADE_SHOP.forEach(u=>{
+    const current = upgrades[u.id] || 0;
+    const card = el('div','shop-card');
+    card.innerHTML =
+      '<div class="card-top"><span class="icon">'+u.icon+'</span><span class="name">'+u.name+' ('+current+'개)</span><span class="cost" style="color:var(--accent);">파편 '+u.cost+'개</span></div>'+
+      '<div class="desc">'+u.desc+'<br>남은 일반 캡슐: '+normalLeft+'개 / 전체 '+PLAYER_CAPSULE_POOL+'개</div>';
+    const btn = el('button','btn btn-small btn-primary', normalLeft > 0 ? '1개 강화' : '강화 완료');
+    btn.disabled = normalLeft <= 0 || nextMatchCarryState.relicCurrency < u.cost;
+    btn.addEventListener('click', ()=>{
+      if(nextMatchCarryState.relicCurrency < u.cost) return;
+      const latest = normalizeCapsuleUpgrades(nextMatchCarryState.capsuleUpgrades);
+      if(PLAYER_CAPSULE_POOL - latest.metal - latest.holo <= 0) return;
+      nextMatchCarryState.relicCurrency -= u.cost;
+      latest[u.id] = (latest[u.id] || 0) + 1;
+      nextMatchCarryState.capsuleUpgrades = normalizeCapsuleUpgrades(latest);
+      SFX.buy();
+      renderRelicShopUI();
+    });
+    card.appendChild(btn);
+    grid.appendChild(card);
+  });
+
+  const rerollBtn = $('#btn-relic-shop-reroll');
+  rerollBtn.disabled = nextMatchCarryState.relicCurrency < RELIC_SHOP_REROLL_COST || unownedTotal <= RELIC_SHOP_OFFER_SIZE;
+}
 
 $('#btn-relic-shop-reroll').addEventListener('click', ()=>{
   if(!nextMatchCarryState || nextMatchCarryState.relicCurrency < RELIC_SHOP_REROLL_COST) return;
@@ -2132,7 +2172,7 @@ $('#btn-relic-shop-next').addEventListener('click', ()=>{
     wins: nextMatchCarryState.wins,
     playerRelics: nextMatchCarryState.playerRelics,
     relicCurrency: nextMatchCarryState.relicCurrency,
-    capsuleUpgrades: nextMatchCarryState.capsuleUpgrades
+    capsuleUpgrades: normalizeCapsuleUpgrades(nextMatchCarryState.capsuleUpgrades)
   };
   newMatch(nextIdx, carry);
   startBriefVN();
@@ -2261,6 +2301,12 @@ function purgeRandomCapsules(n){
     G.players.forEach(p=>{
       const left = (G.machine.capsules[p.id]||0) - (removedCounts[p.id]||0);
       if(left>0) weights[p.id] = left;
+      const metalKey = 'metal:'+p.id;
+      const metalLeft = (G.machine.metal[p.id]||0) - (removedCounts[metalKey]||0);
+      if(metalLeft>0) weights[metalKey] = metalLeft;
+      const holoKey = 'holo:'+p.id;
+      const holoLeft = (G.machine.holo[p.id]||0) - (removedCounts[holoKey]||0);
+      if(holoLeft>0) weights[holoKey] = holoLeft;
     });
     if(Object.keys(weights).length===0) break;
     const key = weightedPick(weights);
@@ -2268,12 +2314,24 @@ function purgeRandomCapsules(n){
   }
   Object.keys(removedCounts).forEach(key=>{
     if(key==='empty') G.machine.empty -= removedCounts[key];
+    else if(key.indexOf('metal:')===0){
+      const id = key.slice(6);
+      G.machine.metal[id] = (G.machine.metal[id]||0) - removedCounts[key];
+    }
+    else if(key.indexOf('holo:')===0){
+      const id = key.slice(5);
+      G.machine.holo[id] = (G.machine.holo[id]||0) - removedCounts[key];
+    }
     else G.machine.capsules[key] = (G.machine.capsules[key]||0) - removedCounts[key];
   });
   return Object.keys(removedCounts).map(key=>{
     if(key==='empty') return '빈 캡슐 '+removedCounts[key]+'개';
-    const p = G.players.find(x=>x.id===key);
-    return (p? p.emoji+' '+p.name : key)+' '+removedCounts[key]+'개';
+    let kind = '';
+    let id = key;
+    if(key.indexOf('metal:')===0){ kind = ' 메탈'; id = key.slice(6); }
+    else if(key.indexOf('holo:')===0){ kind = ' 홀로그램'; id = key.slice(5); }
+    const p = G.players.find(x=>x.id===id);
+    return (p? p.emoji+' '+p.name : id)+kind+' '+removedCounts[key]+'개';
   }).join(', ');
 }
 
@@ -2365,6 +2423,12 @@ function renderItemSidebar(){
   if(!wrap) return;
   wrap.innerHTML = '';
   wrap.appendChild(el('div','item-sidebar-title','🎒 보유 아이템'));
+  const openCapsulesBtn = el('button','btn btn-secondary btn-small capsule-status-open','🔵 캡슐 현황');
+  openCapsulesBtn.addEventListener('click', ()=>{
+    renderCapsuleDrawer();
+    $('#capsuleDrawerOverlay').classList.add('active');
+  });
+  wrap.appendChild(openCapsulesBtn);
   const human = G.players.find(p=>p.id==='player');
   if(!human){ return; }
   const owned = ITEMS.filter(it=> (human.items && human.items[it.id]||0) > 0);
@@ -2763,7 +2827,9 @@ async function resolveOneDraw(outcomeId, ctx){
         if(target.lives === 1 && (target.relics||[]).includes('phoenix')){
           target.lives = 1;
           target.relics = target.relics.filter(r => r !== 'phoenix');
-          G.machine.capsules[target.id] = (G.machine.capsules[target.id] || 0) + 7;
+          const revivedCaps = addCapsulesToMachineFromStock(target, 7);
+          target._phoenixAdded = capsuleAddTotal(revivedCaps);
+          target._phoenixSummary = capsuleAddSummary(revivedCaps);
           phoenixRevived = target;
         } else {
           target.lives -= 1;
@@ -2781,11 +2847,14 @@ async function resolveOneDraw(outcomeId, ctx){
   if(holoNote) addLog(holoNote, 'hot');
 
   if(phoenixRevived){
-    banner.textContent = '🪶 불사조의 깃털 발동! '+phoenixRevived.name+' 생존 (+캡슐 7개, 유물 파괴)';
+    const revivedCount = phoenixRevived._phoenixAdded || 0;
+    banner.textContent = '🪶 불사조의 깃털 발동! '+phoenixRevived.name+' 생존 (+캡슐 '+revivedCount+'개, 유물 파괴)';
     banner.classList.add('show','safe');
     SFX.victory();
-    addLog('🪶 [불사조의 깃털] '+phoenixRevived.emoji+' '+phoenixRevived.name+'가 탈락 위기에서 부활하고 머신에 캡슐 7개를 추가했습니다! (유물 파괴)', 'hot');
-    await animateCapsuleAdd([{id:phoenixRevived.id, count:7, penalty:true}]);
+    addLog('🪶 [불사조의 깃털] '+phoenixRevived.emoji+' '+phoenixRevived.name+'가 탈락 위기에서 부활하고 머신에 캡슐 '+revivedCount+'개를 추가했습니다! ('+(phoenixRevived._phoenixSummary||'0개')+', 유물 파괴)', 'hot');
+    await animateCapsuleAdd([{id:phoenixRevived.id, count:revivedCount, penalty:true}]);
+    delete phoenixRevived._phoenixAdded;
+    delete phoenixRevived._phoenixSummary;
   } else if(shielded){
     banner.textContent = '💗 실드 발동! '+shielded.emoji+' '+shielded.name+'가 목숨 손실을 막았습니다! (캡슐 제거됨)';
     banner.classList.add('show','safe');
@@ -2876,24 +2945,16 @@ function finishMatch(won, desc){
     const ownCapsulesLeft = human ? countPlayerOwnCapsules(human.id) : 0;
     const totalFragments = (G.relicCurrency || 0) + ownCapsulesLeft;
 
-    if(human){
-      human.capsuleUpgrades = {
-        normal: G.machine.capsules[human.id] || 0,
-        metal: G.machine.metal[human.id] || 0,
-        holo: G.machine.holo[human.id] || 0
-      };
-    }
-
     $('#matchendDesc').textContent = desc + ' (머신 속 남은 내 캡슐 ' + ownCapsulesLeft + '개가 캡슐 파편으로 변환되었습니다!)';
     contBtn.classList.remove('hidden');
-    contBtn.textContent = '유물 상점 & 캡슐 강화로 가기 ▶';
+    contBtn.textContent = '유물 상점으로 가기 ▶';
     contBtn.onclick = ()=>{
       showRelicShopScreen({
         nextIdx,
         wins: G.wins + 1,
         playerRelics: human ? (human.relics || []).slice() : [],
         relicCurrency: totalFragments,
-        capsuleUpgrades: human ? human.capsuleUpgrades : { normal:TOTAL_CAPSULES_POOL, metal:0, holo:0 }
+        capsuleUpgrades: human ? normalizeCapsuleUpgrades(human.capsuleUpgrades) : normalizeCapsuleUpgrades()
       });
     };
   } else if(won){
