@@ -28,7 +28,6 @@ html,body{margin:0;padding:0;width:100%;height:100%;background:#000;color:var(--
 #stage-outer{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;}
 #app{position:relative;width:1920px;height:1080px;flex:0 0 auto;transform-origin:center center;
   overflow:hidden;box-shadow:0 0 80px rgba(0,0,0,.8);}
-/* screens are authored at 1280x720 and upscaled 1.5x to exactly fill the 1920x1080 stage */
 #design{position:relative;width:1280px;height:720px;transform:scale(1.5);transform-origin:0 0;background:
   radial-gradient(ellipse at 50% -10%, var(--bg-mid) 0%, var(--bg-deep) 65%);}
 .screen{display:none;width:100%;height:100%;position:relative;}
@@ -158,7 +157,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;}
   border-radius:12px;padding:5px 14px;box-shadow:0 4px 16px rgba(0,0,0,.6);z-index:2;
   white-space:nowrap;max-width:94%;overflow-x:auto;}
 .capsule-stats-total{font-size:12px;font-weight:700;color:var(--text);padding-right:8px;
-  border-right:1px solid rgba(255,255,255,.12);}
+  border-right:1px solid rgba(255,255,256,.12);}
 .capsule-stats-total b{color:var(--accent);font-size:13.5px;}
 .capsule-stats-list{display:flex;align-items:center;gap:10px;}
 .capsule-stat-chip{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-dim);}
@@ -174,7 +173,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;}
 .player-chip .lives{font-size:10px;letter-spacing:-1px;}
 .player-chip .badges{display:flex;gap:2px;}
 
-.main-area{flex:1;display:flex;min-height:0;}
+.main-area{flex:1;display:flex;min-height:0;position:relative;}
 .machine-area{flex:1.3;position:relative;display:flex;align-items:center;justify-content:center;
   padding:10px;}
 .item-sidebar{flex:0 0 168px;display:flex;flex-direction:column;gap:8px;padding:14px 10px;
@@ -398,25 +397,51 @@ input[type=range]{width:100%;accent-color:var(--accent);}
 .item-use-popup .sub{font-size:12.5px;color:var(--text);margin-top:5px;}
 .item-use-popup .desc{font-size:11px;color:var(--text-dim);line-height:1.4;margin-top:6px;}
 
-/* Shop screen */
-#screen-shop{align-items:center;justify-content:center;}
-.shop-wrap{width:min(900px,92vw);max-height:90vh;overflow-y:auto;background:var(--panel);
-  border:1px solid var(--border);border-radius:18px;padding:26px 30px;}
-.shop-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-.shop-head h2{margin:0;font-size:22px;}
-.shop-head-right{display:flex;align-items:center;gap:12px;}
-.shop-gold{font-size:18px;font-weight:800;color:var(--accent);}
-.shop-section-title{font-size:13px;color:var(--text-dim);margin:18px 0 10px;text-transform:uppercase;letter-spacing:1px;}
-.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
-.shop-card{background:var(--panel-2);border:1px solid var(--border);border-radius:12px;padding:14px;
-  display:flex;flex-direction:column;gap:8px;}
-.shop-card .icon{font-size:26px;}
-.shop-card .name{font-weight:700;font-size:14.5px;}
-.shop-card .desc{font-size:11.5px;color:var(--text-dim);line-height:1.4;min-height:44px;}
-.shop-card .cost{font-size:13px;color:var(--accent);font-weight:700;}
-.shop-log{margin-top:18px;font-size:12px;color:var(--text-dim);max-height:100px;overflow-y:auto;}
-.shop-empty-note{grid-column:1/-1;font-size:12.5px;color:var(--text-dim);text-align:center;padding:14px;}
-.shop-footer{margin-top:22px;text-align:center;}
+/* ---------- 하단 인게임 상점 팝업 (아이템 전용) ---------- */
+.ingame-shop-overlay{position:absolute;inset:0;background:rgba(5,2,14,.72);backdrop-filter:blur(3px);
+  z-index:45;display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .28s ease;}
+.ingame-shop-overlay.active{opacity:1;pointer-events:auto;}
+.ingame-shop-wrap{width:min(1160px, 96%);max-height:86%;background:linear-gradient(180deg, #1f143a 0%, #130a24 100%);
+  border:2px solid var(--border);border-bottom:none;border-radius:22px 22px 0 0;
+  box-shadow:0 -12px 50px rgba(0,0,0,.85), 0 0 30px rgba(255,217,61,.12);
+  display:flex;flex-direction:column;padding:16px 24px 20px;
+  transform:translateY(100%);transition:transform .32s cubic-bezier(.22,1,.36,1);}
+.ingame-shop-overlay.active .ingame-shop-wrap{transform:translateY(0);}
+.ingame-shop-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid rgba(255,255,256,.08);}
+.ingame-shop-head-left{display:flex;align-items:center;gap:12px;}
+.ingame-shop-head-left h3{margin:0;font-size:20px;display:flex;align-items:center;gap:8px;}
+.ingame-shop-subtitle{font-size:12px;color:var(--text-dim);}
+.ingame-shop-head-right{display:flex;align-items:center;gap:14px;}
+.ingame-shop-body{overflow-y:auto;padding:14px 4px;display:flex;flex-direction:column;gap:12px;}
+.shop-section-label{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.6px;display:flex;align-items:center;gap:6px;}
+.shop-section-label::after{content:'';flex:1;height:1px;background:rgba(255,255,256,.1);margin-left:8px;}
+.ingame-shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;}
+.shop-card{background:var(--panel-2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;
+  display:flex;flex-direction:column;gap:6px;transition:border-color .15s ease, transform .12s ease;}
+.shop-card:hover{border-color:rgba(255,217,61,.4);transform:translateY(-2px);}
+.shop-card .card-top{display:flex;align-items:center;gap:8px;}
+.shop-card .icon{font-size:24px;}
+.shop-card .name{font-weight:700;font-size:13.5px;flex:1;}
+.shop-card .cost{font-size:13px;color:var(--accent);font-weight:800;}
+.shop-card .desc{font-size:11px;color:var(--text-dim);line-height:1.4;min-height:36px;}
+.shop-empty-note{grid-column:1/-1;font-size:12px;color:var(--text-dim);text-align:center;padding:10px;}
+.ingame-shop-footer{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(255,255,256,.08);margin-top:4px;}
+.ingame-shop-ai-log{font-size:11.5px;color:var(--text-dim);max-height:38px;overflow-y:auto;flex:1;padding-right:16px;}
+
+/* ---------- 매치 종료 후 유물 상점 화면 ---------- */
+#screen-relic-shop{align-items:center;justify-content:center;}
+.relic-shop-wrap{width:min(940px,94vw);max-height:92vh;background:var(--panel);border:2px solid var(--accent);
+  border-radius:20px;padding:26px 32px;box-shadow:0 0 50px rgba(255,217,61,.18);display:flex;flex-direction:column;gap:16px;}
+.relic-shop-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:16px;}
+.relic-shop-title h2{margin:0 0 4px;font-size:24px;color:var(--accent);}
+.relic-shop-title p{margin:0;font-size:13px;color:var(--text-dim);}
+.relic-currency-badge{background:linear-gradient(135deg,rgba(255,217,61,.2),rgba(255,138,61,.12));
+  border:1.5px solid var(--accent);padding:8px 18px;border-radius:14px;text-align:right;}
+.relic-currency-label{font-size:10.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;}
+.relic-currency-val{font-size:22px;font-weight:800;color:var(--accent);}
+.relic-shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;overflow-y:auto;max-height:56vh;padding:4px;}
+.relic-shop-footer{display:flex;justify-content:flex-end;align-items:center;border-top:1px solid var(--border);padding-top:16px;gap:12px;}
 
 /* Match end / game over */
 #screen-matchend{align-items:center;justify-content:center;}
@@ -522,6 +547,31 @@ input[type=range]{width:100%;accent-color:var(--accent);}
         <div class="control-panel" id="controlPanel"></div>
         <div class="log-panel" id="logPanel"></div>
       </div>
+
+      <!-- 하단 인게임 상점 팝업 (소모품 아이템 전용) -->
+      <div class="ingame-shop-overlay" id="ingameShopOverlay">
+        <div class="ingame-shop-wrap">
+          <div class="ingame-shop-head">
+            <div class="ingame-shop-head-left">
+              <h3>🛒 라운드 아이템 상점</h3>
+              <span class="ingame-shop-subtitle">골드를 정산받았습니다! 추첨 전에 아이템을 보충하세요.</span>
+            </div>
+            <div class="ingame-shop-head-right">
+              <button class="btn btn-secondary btn-small" id="btn-popup-shop-reroll">🎲 리롤 (2원)</button>
+              <div class="shop-gold" id="popupShopGold" style="font-size:18px;font-weight:800;color:var(--accent);">0원</div>
+            </div>
+          </div>
+          <div class="ingame-shop-body">
+            <div class="shop-section-label">🎯 아이템 (소모품 · 라운드당 종류별 1회 구매)</div>
+            <div class="ingame-shop-grid" id="popupShopItems"></div>
+          </div>
+          <div class="ingame-shop-footer">
+            <div class="ingame-shop-ai-log" id="popupShopLog"></div>
+            <button class="btn btn-primary" id="btn-popup-shop-close">쇼핑 완료 · 아이템 사용 및 뽑기로 ▶</button>
+          </div>
+        </div>
+      </div>
+
     </div>
     <div class="ingame-vn-overlay" id="ingameVnOverlay">
       <div class="ingame-vn-character">🐱</div>
@@ -533,23 +583,22 @@ input[type=range]{width:100%;accent-color:var(--accent);}
     </div>
   </section>
 
-  <!-- SHOP SCREEN -->
-  <section id="screen-shop" class="screen">
-    <div class="shop-wrap">
-      <div class="shop-head">
-        <h2>🛒 상점</h2>
-        <div class="shop-head-right">
-          <button class="btn btn-secondary btn-small" id="btn-shop-reroll">🎲 리롤 (3원)</button>
-          <div class="shop-gold" id="shopGold">0원</div>
+  <!-- 매치 종료 후 유물 상점 화면 -->
+  <section id="screen-relic-shop" class="screen">
+    <div class="relic-shop-wrap">
+      <div class="relic-shop-head">
+        <div class="relic-shop-title">
+          <h2>🏛️ 유물 상점</h2>
+          <p>이전 매치 종료 시 머신에 남아있던 본인의 캡슐이 <b>캡슐 파편</b>으로 변환되었습니다!</p>
+        </div>
+        <div class="relic-currency-badge">
+          <div class="relic-currency-label">보유 캡슐 파편</div>
+          <div class="relic-currency-val" id="relicCurrencyVal">0개</div>
         </div>
       </div>
-      <div class="shop-section-title">유물 (상시 발동, 매치 간 영구 유지)</div>
-      <div class="shop-grid" id="shopRelics"></div>
-      <div class="shop-section-title">아이템 (소모품 · 라운드당 종류별 1회 구매 가능)</div>
-      <div class="shop-grid" id="shopItems"></div>
-      <div class="shop-log" id="shopLog"></div>
-      <div class="shop-footer">
-        <button class="btn btn-primary" id="btn-shop-next">다음 라운드로 ▶</button>
+      <div class="relic-shop-grid" id="relicShopGrid"></div>
+      <div class="relic-shop-footer">
+        <button class="btn btn-primary" id="btn-relic-shop-next">다음 매치 시작하기 ▶</button>
       </div>
     </div>
   </section>
@@ -560,7 +609,7 @@ input[type=range]{width:100%;accent-color:var(--accent);}
       <h2 id="matchendTitle">승리!</h2>
       <p id="matchendDesc"></p>
       <div class="title-buttons">
-        <button class="btn btn-primary" id="btn-matchend-continue">다음 매치 (다른 수치) ▶</button>
+        <button class="btn btn-primary" id="btn-matchend-continue">유물 상점으로 가기 ▶</button>
         <button class="btn btn-secondary" id="btn-matchend-title">타이틀로</button>
       </div>
     </div>
@@ -581,57 +630,62 @@ const NAME  = { player:'플레이어', ai1:'루디', ai2:'미미', ai3:'제타' 
 const EMOJI = { player:'🔵', ai1:'🔴', ai2:'🟡', ai3:'🟣' };
 const CCLASS= { player:'c-player', ai1:'c-ai1', ai2:'c-ai2', ai3:'c-ai3' };
 
-/* [수치 변경] 골드 획득 2원, 목표 금액 2배 상향 */
+/* 순위별 보상 테이블 (1등 5골드, 2등 3골드, 3등 1골드) */
+const RANK_REWARDS = [5, 3, 1];
+
 const MATCH_CONFIGS = [
-  { aiCount:1, emptyCapsules:9,  target:130, minBet:1, maxBet:7, goldPerCapsule:2, label:'MATCH 1 · 튜토리얼' },
-  { aiCount:2, emptyCapsules:13, target:190, minBet:1, maxBet:7, goldPerCapsule:2, label:'MATCH 2 · 혼돈의 3파전' },
-  { aiCount:3, emptyCapsules:17, target:260, minBet:1, maxBet:8, goldPerCapsule:2, label:'MATCH 3 · 최종 생존전' },
+  { aiCount:1, emptyCapsules:9,  target:30, minBet:1, maxBet:7, label:'MATCH 1 · 튜토리얼' },
+  { aiCount:2, emptyCapsules:13, target:48, minBet:1, maxBet:7, label:'MATCH 2 · 혼돈의 3파전' },
+  { aiCount:3, emptyCapsules:17, target:65, minBet:1, maxBet:8, label:'MATCH 3 · 최종 생존전' },
 ];
 
 const RELICS = [
-  { id:'pocket', name:'대용량 주머니', icon:'🎒', cost:7,
+  { id:'pocket', name:'대용량 주머니', icon:'🎒', cost:6,
     desc:'아이템 최대 보유 한도가 2개 증가합니다. (기본 3개 → 최대 5개)' },
-  { id:'iron_chain', name:'강철 사슬', icon:'⛓️', cost:8,
+  { id:'iron_chain', name:'강철 사슬', icon:'⛓️', cost:7,
     desc:'다른 플레이어들의 라운드 최소 투입 캡슐 수가 +2 증가합니다.' },
-  { id:'golden_die', name:'황금 주사위', icon:'🎲', cost:8,
-    desc:'플레이어가 캡슐을 넣을 때마다 얻는 골드가 개당 +1 증가합니다.' },
+  { id:'golden_die', name:'황금 주사위', icon:'🎲', cost:7,
+    desc:'라운드 순위 골드 보상을 받을 때 추가로 +2골드를 획득합니다.' },
   { id:'phoenix', name:'불사조의 깃털', icon:'🪶', cost:9,
     desc:'체력이 1 남았을 때 탈락 위기에서 한 번 살아남고, 머신에 내 캡슐 7개를 추가합니다. (1회 발동 후 파괴)' },
-  { id:'punish_heavy', name:'가혹한 형벌', icon:'👁️‍🗨️', cost:8,
-    desc:'라운드 최소 투입자에게 주어지는 페널티 캡슐의 수를 3개 늘립니다. (기본 2개 → 총 5개)' },
-  { id:'dividend', name:'황금 배당금', icon:'🏦', cost:7,
+  { id:'punish_heavy', name:'가혹한 형벌', icon:'👁️‍🗨️', cost:7,
+    desc:'라운드 최소 투입자에게 주어지는 페널티 캡슐의 수를 2개 늘립니다. (기본 1개 → 총 3개)' },
+  { id:'dividend', name:'황금 배당금', icon:'🏦', cost:6,
     desc:'매 라운드 시작 시, 머신 속 본인 캡슐 5개당 3골드를 정산하여 획득합니다.' },
-  { id:'lucky_bet', name:'행운의 숫자', icon:'🎯', cost:6,
+  { id:'lucky_bet', name:'행운의 숫자', icon:'🎯', cost:5,
     desc:'매 라운드 무작위 지정된 캡슐 수와 정확히 같은 수의 캡슐을 넣으면 5골드를 획득합니다.' },
 ];
 
+/* [변경 1] 빈 캡슐 투하: '이번 라운드에만' 10개 추가 */
 const ITEMS = [
-  { id:'double', name:'더블 트랩', icon:'🎯2️⃣', cost:7, targeted:true, kind:'targetDouble',
+  { id:'peek', name:'투시 안경', icon:'🔮', cost:4, targeted:false, kind:'peek',
+    desc:'이번 라운드에 바로 뽑히게 될 캡슐의 정체를 미리 내다봅니다.' },
+  { id:'double', name:'더블 트랩', icon:'🎯2️⃣', cost:3, targeted:true, kind:'targetDouble',
     desc:'상대 1명을 지목해 이번 라운드 넣은 캡슐 수를 2배로 만듭니다. (보너스 골드 없음, 라운드 종료 시 원상 복구)' },
-  { id:'purge', name:'캡슐 청소', icon:'🧹', cost:10, targeted:false, kind:'purge',
+  { id:'purge', name:'캡슐 청소', icon:'🧹', cost:4, targeted:false, kind:'purge',
     desc:'가챠 기계에서 무작위로 캡슐 10개를 영구히 제거합니다. 어떤 캡슐이 제거됐는지 공개됩니다.' },
-  { id:'emptydrop', name:'빈 캡슐 투하', icon:'⚪', cost:6, targeted:false, kind:'addEmpty',
-    desc:'가챠 기계에 빈 캡슐 10개를 영구히 추가합니다.', count:10 },
-  { id:'doubledraw', name:'더블 뽑기', icon:'🎰2️⃣', cost:9, targeted:false, kind:'doubleDraw',
+  { id:'emptydrop', name:'빈 캡슐 투하', icon:'⚪', cost:3, targeted:false, kind:'addEmpty',
+    desc:'이번 라운드 한정으로 가챠 기계에 빈 캡슐 10개를 추가합니다. (라운드 종료 시 원상 복구)', count:10 },
+  { id:'doubledraw', name:'더블 뽑기', icon:'🎰2️⃣', cost:3, targeted:false, kind:'doubleDraw',
     desc:'이번 라운드에는 캡슐을 2번 뽑습니다.' },
-  { id:'shield', name:'하트 실드', icon:'💗', cost:8, targeted:false, kind:'shield',
+  { id:'shield', name:'하트 실드', icon:'💗', cost:4, targeted:false, kind:'shield',
     desc:'이번 라운드에만, 목숨이 줄어드는 것을 1회 막아줍니다.' },
-  { id:'trap3', name:'함정 캡슐', icon:'🎯', cost:5, targeted:true, kind:'targetAdd',
+  { id:'trap3', name:'함정 캡슐', icon:'🎯', cost:3, targeted:true, kind:'targetAdd',
     desc:'상대 1명을 지목해 이번 라운드 한정 캡슐 3개를 몰래 추가합니다. (보너스 골드 없음, 라운드 종료 시 원상 복구)', count:3 },
-  { id:'ward3', name:'삼중 부적', icon:'🛡️', cost:6, targeted:false, kind:'selfWard',
+  { id:'ward3', name:'삼중 부적', icon:'🛡️', cost:3, targeted:false, kind:'selfWard',
     desc:'이번 라운드, 내 캡슐 3개를 빈 캡슐로 취급합니다. (라운드 종료 시 원상 복구)', count:3 },
-  { id:'matchgold', name:'캡슐 수당', icon:'💹', cost:5, targeted:false, kind:'matchGold',
+  { id:'matchgold', name:'캡슐 수당', icon:'💹', cost:3, targeted:false, kind:'matchGold',
     desc:'이번 라운드에 내가 넣게 된 캡슐 수(페널티·아이템 효과 포함)만큼 추가 골드를 획득합니다.' },
   { id:'gold10', name:'골드 캡슐', icon:'💰', cost:3, targeted:false, kind:'instantGold',
-    desc:'즉시 10원을 획득합니다.', count:10 },
-  { id:'swap', name:'캡슐 뒤바꿈', icon:'🔀', cost:6, targeted:true, kind:'swap',
+    desc:'즉시 8원을 획득합니다.', count:8 },
+  { id:'swap', name:'캡슐 뒤바꿈', icon:'🔀', cost:3, targeted:true, kind:'swap',
     desc:'상대 1명을 지목해, 이번 라운드 한정으로 서로의 캡슐을 뒤바꿉니다.' },
-  { id:'aging', name:'숙성 캡슐', icon:'📈', cost:4, targeted:false, kind:'aging',
+  { id:'aging', name:'숙성 캡슐', icon:'📈', cost:3, targeted:false, kind:'aging',
     desc:'사용 효과는 없지만, 판매하지 않고 보유할수록 라운드마다 판매 가치가 3원씩 오릅니다.' },
-  { id:'metalcap', name:'메탈 캡슐화', icon:'🔩', cost:12, targeted:false, kind:'metal',
-    desc:'내 캡슐 3개를 메탈 캡슐로 바꿉니다. 메탈 캡슐이 뽑히면 목숨을 잃지 않고 5원을 획득하며, 효과는 라운드가 지나도 유지됩니다. (다음 매치로 넘어가면 초기화)', count:3 },
-  { id:'holocap', name:'홀로그램 캡슐화', icon:'🌈', cost:12, targeted:false, kind:'holo',
-    desc:'내 캡슐 3개를 홀로그램 캡슐로 바꿉니다. 홀로그램 캡슐이 뽑히면 무작위 다른 플레이어의 캡슐로 취급됩니다. 효과는 라운드가 지나도 유지됩니다. (다음 매치로 넘어가면 초기화)', count:3 },
+  { id:'metalcap', name:'메탈 캡슐화', icon:'🔩', cost:5, targeted:false, kind:'metal',
+    desc:'내 캡슐 3개를 메탈 캡슐로 바꿉니다. 메탈 캡슐이 뽑히면 목숨을 잃지 않고 5원을 획득하며, 효과는 라운드가 지나도 유지됩니다.', count:3 },
+  { id:'holocap', name:'홀로그램 캡슐화', icon:'🌈', cost:5, targeted:false, kind:'holo',
+    desc:'내 캡슐 3개를 홀로그램 캡슐로 바꿉니다. 홀로그램 캡슐이 뽑히면 무작위 다른 플레이어의 캡슐로 취급됩니다.', count:3 },
 ];
 
 const BASE_ITEM_MAX_STOCK = 3;
@@ -643,8 +697,8 @@ function getMaxItemStock(player){
   return limit;
 }
 
-const SHOP_OFFER_SIZE = 2;
-const SHOP_REROLL_COST = 3;
+const SHOP_OFFER_SIZE = 4;
+const SHOP_REROLL_COST = 2;
 const SAVE_KEY = 'gachaSurvivalSave_v1';
 
 /* ============================== AUDIO ============================== */
@@ -714,7 +768,7 @@ const SFX = (function(){
         osc.frequency.linearRampToValueAtTime((pitch||520)*1.6,c.currentTime+0.13);
         g.gain.setValueAtTime(0.0001,c.currentTime);
         g.gain.linearRampToValueAtTime(0.075,c.currentTime+0.03);
-        g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+0.17);
+        g.exponentialRampToValueAtTime(0.0001,c.currentTime+0.17);
         osc.connect(g); g.connect(master);
         osc.start(); osc.stop(c.currentTime+0.2);
     }catch(e){} },
@@ -837,10 +891,11 @@ function newMatch(matchIndex, carry){
     log: [],
     firstRoundEver: matchIndex===0,
     tutorialToppedUp: !isTutorial,
-    shopOffer: { relics:[], items:[] },
+    shopOffer: { items:[] },
     shopBought: {},
     roundCapsuleAdds: {},
     luckyTarget: 1,
+    relicCurrency: carry && carry.relicCurrency || 0
   };
   G.players.forEach(p=>{ G.machine.capsules[p.id] = 1; G.machine.metal[p.id] = 0; G.machine.holo[p.id] = 0; });
 }
@@ -873,10 +928,11 @@ function loadGame(){
       }
     });
     if(G.tutorialToppedUp==null) G.tutorialToppedUp = true;
-    if(!G.shopOffer) G.shopOffer = { relics:[], items:[] };
+    if(!G.shopOffer) G.shopOffer = { items:[] };
     if(!G.shopBought) G.shopBought = {};
     if(!G.roundCapsuleAdds) G.roundCapsuleAdds = {};
     if(G.luckyTarget==null) G.luckyTarget = 1;
+    if(G.relicCurrency==null) G.relicCurrency = 0;
     if(G.machine){
       if(!G.machine.metal) G.machine.metal = {};
       if(!G.machine.holo) G.machine.holo = {};
@@ -945,13 +1001,13 @@ function diagMachineLegend(){
     '</div>';
 }
 function diagBetGold(maxBet){
-  return '<div class="vn-diagram-title">캡슐 투입 → 골드 획득</div>'+
+  return '<div class="vn-diagram-title">투입 순위 경쟁 → 골드 획득</div>'+
     '<div class="vd-row">'+
-      '<div class="vd-chip"><span class="icon">🔵🔵🔵</span>캡슐 3개</div>'+
-      '<div class="vd-arrow">→</div>'+
-      '<div class="vd-chip"><span class="icon">💰</span><span class="val">+6원</span></div>'+
+      '<div class="vd-chip"><span class="icon">🥇 1등</span><span class="val">5원</span></div>'+
+      '<div class="vd-chip"><span class="icon">🥈 2등</span><span class="val">3원</span></div>'+
+      '<div class="vd-chip"><span class="icon">🥉 3등</span><span class="val">1원</span></div>'+
     '</div>'+
-    '<div class="vd-legend"><span>최대 '+maxBet+'개까지 넣을 수 있어요 (1개당 2원)</span></div>';
+    '<div class="vd-legend"><span>가장 많이 넣은 순서대로 차등 지급된다냥! (최대 '+maxBet+'개)</span></div>';
 }
 function diagRisk(){
   return '<div class="vn-diagram-title">많이 넣을수록... 위험!</div>'+
@@ -970,11 +1026,11 @@ function diagCrank(){
 function diagOutcomes(){
   return '<div class="vn-diagram-title">뽑힌 결과에 따라...</div>'+
     '<div class="vd-cards">'+
-      '<div class="vd-card"><span class="icon">🔵</span><div class="label">내 캡슐<br>💔 목숨 -1</div></div>'+
+      '<div class="vd-card"><span class="icon">🔵</span><div class="label">내 캡슐<br>💔 목숨 -1 + 보상🎁</div></div>'+
       '<div class="vd-card"><span class="icon">🔴</span><div class="label">상대 캡슐<br>💔 상대 목숨 -1</div></div>'+
       '<div class="vd-card"><span class="icon">⚪</span><div class="label">빈 캡슐<br>✅ 계속 진행</div></div>'+
     '</div>'+
-    '<div class="vd-legend" style="margin-top:10px;text-align:center;"><span style="justify-content:center;">❤️❤️ 목숨 2개 — 전부 잃으면 진짜 탈락!</span></div>';
+    '<div class="vd-legend" style="margin-top:10px;text-align:center;"><span style="justify-content:center;">❤️❤️ 목숨 2개 — 캡슐이 뽑히면 위로 아이템이 지급된다냥!</span></div>';
 }
 function diagGoldTarget(target){
   return '<div class="vn-diagram-title">목표 금액 달성 = 즉시 승리</div>'+
@@ -984,11 +1040,11 @@ function diagGoldTarget(target){
       '<span style="font-size:13px;color:var(--accent);font-weight:800;">🏆 '+target+'원</span>'+
     '</div>';
 }
-function diagShop(){
-  return '<div class="vn-diagram-title">라운드 종료 후 상점</div>'+
+function diagRelicShop(){
+  return '<div class="vn-diagram-title">매치 종료 후 유물 상점</div>'+
     '<div class="vd-cards">'+
-      '<div class="vd-card"><span class="icon">🎒</span><div class="label">유물<br>영구 효과</div></div>'+
-      '<div class="vd-card"><span class="icon">🎯</span><div class="label">아이템<br>1회용 소모품</div></div>'+
+      '<div class="vd-card"><span class="icon">🔵</span><div class="label">남은 내 캡슐<br>→ 캡슐 파편</div></div>'+
+      '<div class="vd-card"><span class="icon">🎒</span><div class="label">영구 유물 구매<br>다음 매치로 계승</div></div>'+
     '</div>';
 }
 function diagVersus(aiPlayers){
@@ -1078,18 +1134,18 @@ async function startIntroVN(){
     {name:'MC 가챠냥', text:'지금부터 「가챠머신 서바이벌」의 규칙을 설명해주겠다냥!'},
     {name:'MC 가챠냥', text:'가운데 놓인 이 거대한 가챠 머신 안에는 참가자들의 색깔 캡슐이랑 빈 캡슐이 마구 섞여 들어있다냥.', diag: diagMachineLegend()},
     {name:'MC 가챠냥', text:'매 라운드마다 여러분은 머신에 자기 색깔 캡슐을 원하는 만큼(1개~'+cfg.maxBet+'개) 넣을 수 있다냥.', diag: diagBetGold(cfg.maxBet)},
-    {name:'MC 가챠냥', text:'넣은 개수당 2골드씩 챙길 수 있다냥!'},
-    {name:'MC 가챠냥', text:'하지만! 캡슐을 넣으면 넣을수록 "내 캡슐이 뽑힐 확률"도 쑥쑥 올라간다는 거, 절대 잊으면 안 되냥.', diag: diagRisk()},
-    {name:'MC 가챠냥', text:'모두 넣을 개수를 정하면 한번에 짜잔 공개한다냥!', diag: diagCrank()},
-    {name:'MC 가챠냥', text:'그 다음 저... 가 아니라 플레이어가 직접 머신 옆 손잡이를 돌려서 캡슐 하나를 뽑는다냥.'},
+    {name:'MC 가챠냥', text:'이번 라운드에 가장 캡슐을 많이 넣은 순서대로 1등 5원, 2등 3원, 3등 1원을 받는다냥!'},
+    {name:'MC 가챠냥', text:'골드를 정산받으면, 머신 바로 밑에 아이템 상점이 열린다냥!'},
+    {name:'MC 가챠냥', text:'방금 번 돈으로 저렴한 아이템을 사서 곧바로 이어질 추첨에 대비할 수 있다냥!'},
+    {name:'MC 가챠냥', text:'그리고 강력한 "유물"은 한 매치가 완전히 끝난 뒤 열리는 전용 유물 상점에서만 살 수 있다냥!', diag: diagRelicShop()},
+    {name:'MC 가챠냥', text:'유물은 골드가 아니라 "매치가 끝났을 때 머신에 남은 내 캡슐 개수"로 구매한다냥.'},
+    {name:'MC 가챠냥', text:'한 번 뽑힌 캡슐은 머신에서 즉시 제거된다는 점도 잊지 마라냥!'},
+    {name:'MC 가챠냥', text:'상점을 닫으면 아이템 사용과 함께 손잡이를 돌려 캡슐을 뽑는다냥!', diag: diagCrank()},
     {name:'MC 가챠냥', text:'다들 목숨은 2개씩이다냥!', diag: diagOutcomes()},
-    {name:'MC 가챠냥', text:'뽑힌 캡슐이 자기 색깔이면 목숨을 하나 잃고, 목숨이 다 떨어지면 그제서야 진짜 탈락이다냥.'},
+    {name:'MC 가챠냥', text:'뽑힌 캡슐이 자기 색깔이면 목숨을 하나 잃지만, 위로 차원에서 아이템 1개를 무료로 선물한다냥!'},
+    {name:'MC 가챠냥', text:'목숨이 다 떨어지면 그제서야 진짜 탈락이다냥.'},
     {name:'MC 가챠냥', text:'빈 캡슐이면 다음 라운드로 넘어간다냥.'},
-    {name:'MC 가챠냥', text:'마지막까지 살아남은 딱 한 명이 최종 승리다냥!'},
-    {name:'MC 가챠냥', text:'아니면! 목표 금액인 '+cfg.target+'원을 누구보다 먼저 모아도 그 순간 바로 승리한다냥.', diag: diagGoldTarget(cfg.target)},
-    {name:'MC 가챠냥', text:'위험을 감수하고 팍팍 넣을지, 안전하게 살살 버틸지... 그건 전부 여러분 선택에 달렸다냥!'},
-    {name:'MC 가챠냥', text:'참, 라운드가 끝나면 상점에서 골드로 "유물"이랑 "아이템"도 살 수 있다냥.', diag: diagShop()},
-    {name:'MC 가챠냥', text:'유물은 다음 매치로 넘어가도 영구 유지되는 강력한 상시 효과다냥!'},
+    {name:'MC 가챠냥', text:'마지막까지 살아남거나 목표 금액인 '+cfg.target+'원을 먼저 달성하면 매치 승리다냥!', diag: diagGoldTarget(cfg.target)},
     {name:'MC 가챠냥', text:'게다가 매 라운드가 끝날 때마다 참가자 전원에게 무료 보너스 아이템 1종이 선물로 지급된다냥! 🎁'},
     {name:'MC 가챠냥', text:'자, 오늘의 상대는 '+ G.players.filter(p=>p.isAI).map(p=>p.name).join(', ') +'다냥!', diag: diagVersus(G.players.filter(p=>p.isAI))},
     {name:'MC 가챠냥', text:'다들 준비됐냥?'},
@@ -1181,7 +1237,7 @@ function toast(msg, ms){
   }, ms||3200);
 }
 
-/* [기능 추가 1] 아이템 사용 팝업 순차 표시 큐 시스템 */
+/* 아이템 사용 팝업 순차 표시 큐 시스템 */
 const itemPopupQueue = [];
 let isItemPopupShowing = false;
 
@@ -1210,14 +1266,14 @@ function processItemPopupQueue(){
     setTimeout(()=>{
       card.remove();
       isItemPopupShowing = false;
-      processItemPopupQueue(); // 대기열의 다음 팝업 실행
+      processItemPopupQueue();
     }, 280);
-  }, 2400); // 팝업 노출 시간
+  }, 2400);
 }
 
 /* ============================== MACHINE POOL / VISUAL ============================== */
-function getEffectivePool(tempCaps, wardCounts, swapPair){
-  const pool = { empty: G.machine.empty };
+function getEffectivePool(tempCaps, wardCounts, swapPair, tempEmpty){
+  const pool = { empty: G.machine.empty + (tempEmpty || 0) };
   G.players.forEach(p=>{
     let count = (G.machine.capsules[p.id]||0) + (tempCaps && tempCaps[p.id] || 0);
     const wardN = (wardCounts && wardCounts[p.id]) || 0;
@@ -1235,10 +1291,33 @@ function getEffectivePool(tempCaps, wardCounts, swapPair){
 }
 function poolTotal(pool){ return Object.values(pool).reduce((a,b)=>a+b,0); }
 
-function renderMachineVisual(tempCaps, wardCounts, swapPair){
+/* [변경 2] 본인 캡슐 개수만 카운트하는 함수 */
+function countPlayerOwnCapsules(playerId){
+  let count = 0;
+  count += (G.machine.capsules[playerId] || 0);
+  count += (G.machine.metal[playerId] || 0);
+  count += (G.machine.holo[playerId] || 0);
+  return count;
+}
+
+function consumeCapsuleFromMachine(outcomeId){
+  if(outcomeId === 'empty'){
+    if(G.machine.empty > 0) G.machine.empty -= 1;
+  } else if(outcomeId.startsWith('metal:')){
+    const ownerId = outcomeId.slice(6);
+    if(G.machine.metal[ownerId] > 0) G.machine.metal[ownerId] -= 1;
+  } else if(outcomeId.startsWith('holo:')){
+    const ownerId = outcomeId.slice(5);
+    if(G.machine.holo[ownerId] > 0) G.machine.holo[ownerId] -= 1;
+  } else {
+    if(G.machine.capsules[outcomeId] > 0) G.machine.capsules[outcomeId] -= 1;
+  }
+}
+
+function renderMachineVisual(tempCaps, wardCounts, swapPair, tempEmpty){
   const field = $('#capsuleField');
   field.innerHTML = '';
-  const pool = getEffectivePool(tempCaps, wardCounts, swapPair);
+  const pool = getEffectivePool(tempCaps, wardCounts, swapPair, tempEmpty);
   const items = [];
   for(let i=0;i<pool.empty;i++) items.push({cls:'empty'});
   G.players.forEach(p=>{
@@ -1315,7 +1394,7 @@ async function beginRound(isResume){
     }
   });
 
-  // 유물 6: 황금 배당금
+  // 유물: 황금 배당금
   G.players.filter(p=>p.alive).forEach(p=>{
     if((p.relics||[]).includes('dividend')){
       const normalC = G.machine.capsules[p.id] || 0;
@@ -1332,7 +1411,7 @@ async function beginRound(isResume){
     }
   });
 
-  // 유물 7: 행운의 숫자
+  // 유물: 행운의 숫자
   G.luckyTarget = randi(G.config.minBet, G.config.maxBet);
 
   saveGame();
@@ -1406,8 +1485,8 @@ async function showPenaltyExplainer(){
   await playIngameCatLines([
     '잠깐! 시작하기 전에 한 가지만 알려줄게 있다냥.',
     '매 라운드마다 캡슐을 가장 적게 넣은 사람에게는 페널티가 있다냥!',
-    '강제로 페널티 캡슐이 추가되는데, 이건 보너스 골드도 없다냥.',
-    '너무 소극적으로 버티기만 하면 오히려 위험해질 수 있으니 주의하라냥!',
+    '강제로 페널티 캡슐 1개가 추가되는데, 이건 보너스 골드도 없다냥.',
+    '너무 소극적으로 버티기만 하면 위험해질 수 있으니 주의하라냥!',
   ]);
 }
 
@@ -1433,11 +1512,11 @@ async function runBettingPhase(){
     
     let luckyNotice = '';
     if((human.relics||[]).includes('lucky_bet')){
-      luckyNotice = '<div class="lucky-hint">🎯 행운의 숫자: <b>'+G.luckyTarget+'개</b> 투입 시 +5골드 보너스!</div>';
+      luckyNotice = '<div class="lucky-hint">🎯 행운의 숫자: <b>'+G.luckyTarget+'개</b> 투입 시 +5골드 추가!</div>';
     }
 
     const title = el('div','bet-title','🎰 이번 라운드에 넣을 캡슐 수를 정하세요'+
-      '<span class="sub">최소 '+minFloor+'개 · 최대 '+maxBet+'개 · 1개당 '+goldPerCapsuleFor(human)+'원</span>'+luckyNotice);
+      '<span class="sub">최소 '+minFloor+'개 · 최대 '+maxBet+'개 · 🥇1등 5원, 🥈2등 3원, 🥉3등 1원</span>'+luckyNotice);
     panel.appendChild(title);
 
     const stepperWrap = el('div','bet-controls');
@@ -1465,11 +1544,10 @@ async function runBettingPhase(){
       const ownAfter = (pool[human.id]||0) + val;
       const prob = (ownAfter/total*100).toFixed(1);
       const isLucky = (human.relics||[]).includes('lucky_bet') && val === G.luckyTarget;
-      const baseGain = val * goldPerCapsuleFor(human);
-      const totalGain = baseGain + (isLucky ? 5 : 0);
       
-      preview.innerHTML = '예상 획득: <b>'+totalGain+'원</b>' + (isLucky ? ' <span style="color:var(--accent);font-weight:bold;">(+5 행운 보너스!)</span>' : '') +
-        ' · 내 캡슐 예상 확률 약 <b>'+prob+'%</b>';
+      preview.innerHTML = '순위 경쟁: <b>1등 5원 / 2등 3원 / 3등 1원</b>' + 
+        (isLucky ? ' <span style="color:var(--accent);font-weight:bold;">(+5 행운 적중 보너스!)</span>' : '') +
+        '<br>내 캡슐 예상 위험도: 약 <b>'+prob+'%</b>';
     }
     updatePreview();
     minusBtn.addEventListener('click', ()=>{ val = clamp(val-1,minFloor,maxBet); updatePreview(); });
@@ -1496,12 +1574,6 @@ async function runBettingPhase(){
   await revealBets(bets);
 }
 
-function goldPerCapsuleFor(player){
-  let g = G.config.goldPerCapsule;
-  if((player.relics||[]).includes('golden_die')) g += 1;
-  return g;
-}
-
 function aiDecideBet(ai, floor, total, pool){
   const cfg = G.config;
   let base = randi(floor, Math.min(cfg.maxBet, floor+3));
@@ -1509,11 +1581,11 @@ function aiDecideBet(ai, floor, total, pool){
     if(Math.random()<0.65) base = G.luckyTarget;
   }
   const goldRatio = ai.gold / cfg.target;
-  if(goldRatio < 0.5 && Math.random()<0.55) base += randi(1,2);
-  if(goldRatio > 0.65 && Math.random()<0.75) base += randi(2,4);
+  if(goldRatio < 0.6 && Math.random()<0.5) base += randi(1,3);
+  if(goldRatio > 0.7 && Math.random()<0.65) base += randi(2,4);
   const ownFrac = total>0 ? (pool[ai.id]||0)/total : 0;
   if(ownFrac > 0.3 && goldRatio < 0.8 && Math.random()<0.55) base -= randi(1,2);
-  if(Math.random()<0.12) base = randi(floor, cfg.maxBet);
+  if(Math.random()<0.1) base = randi(floor, cfg.maxBet);
   return clamp(base, floor, cfg.maxBet);
 }
 
@@ -1546,32 +1618,58 @@ async function revealBets(bets){
 
 /* ---- Apply bets, penalty, gold ---- */
 async function applyBetsToMachine(bets, minPlayers){
-  let penaltyAmount = 2;
+  let penaltyAmount = 1;
   if(G.players.some(p=>p.alive && (p.relics||[]).includes('punish_heavy'))){
-    penaltyAmount += 3;
+    penaltyAmount += 2;
   }
 
   renderMachineVisual();
 
   G.roundCapsuleAdds = {};
   const dropEntries = [];
-  G.players.forEach(p=>{
-    if(!p.alive) return;
-    const n = bets[p.id];
-    G.machine.capsules[p.id] = (G.machine.capsules[p.id]||0) + n;
-    G.roundCapsuleAdds[p.id] = (G.roundCapsuleAdds[p.id]||0) + n;
-    let gain = n * goldPerCapsuleFor(p);
-    
-    let luckyBonusText = '';
-    if((p.relics||[]).includes('lucky_bet') && n === G.luckyTarget){
+
+  const sortedAlive = G.players
+    .filter(p => p.alive)
+    .map(p => ({ player: p, bet: bets[p.id] }))
+    .sort((a, b) => b.bet - a.bet);
+
+  let currentRank = 0;
+  for(let i = 0; i < sortedAlive.length; i++){
+    if(i > 0 && sortedAlive[i].bet < sortedAlive[i - 1].bet){
+      currentRank = i;
+    }
+    const rankIndex = currentRank;
+    const p = sortedAlive[i].player;
+    const n = sortedAlive[i].bet;
+
+    G.machine.capsules[p.id] = (G.machine.capsules[p.id] || 0) + n;
+    G.roundCapsuleAdds[p.id] = (G.roundCapsuleAdds[p.id] || 0) + n;
+
+    let gain = rankIndex < RANK_REWARDS.length ? RANK_REWARDS[rankIndex] : 0;
+    let extraNotes = [];
+
+    if(gain > 0 && (p.relics || []).includes('golden_die')){
+      gain += 2;
+      extraNotes.push('🎲황금 주사위 +2원');
+    }
+
+    if((p.relics || []).includes('lucky_bet') && n === G.luckyTarget){
       gain += 5;
-      luckyBonusText = ' (🎯행운의 숫자 적중 +5원!)';
+      extraNotes.push('🎯행운의 숫자 적중 +5원');
     }
 
     p.gold += gain;
-    addLog((p.id==='player'?'🔵 플레이어':p.emoji+' '+p.name)+'가 캡슐 '+n+'개 투입 → +'+gain+'원'+luckyBonusText+' (총 '+p.gold+'원)', p.id==='player'?'good':'');
-    dropEntries.push({id:p.id, count:n, penalty:false});
-  });
+
+    const rankLabel = (rankIndex + 1) + '등';
+    const noteStr = extraNotes.length ? ' (' + extraNotes.join(', ') + ')' : '';
+    addLog(
+      (p.id === 'player' ? '🔵 플레이어' : p.emoji + ' ' + p.name) +
+      '가 캡슐 ' + n + '개 투입 [' + rankLabel + '] → +' + gain + '원' + noteStr + ' (총 ' + p.gold + '원)',
+      p.id === 'player' ? 'good' : ''
+    );
+
+    dropEntries.push({ id: p.id, count: n, penalty: false });
+  }
 
   minPlayers.forEach(pid=>{
     const p = G.players.find(x=>x.id===pid);
@@ -1591,6 +1689,10 @@ async function applyBetsToMachine(bets, minPlayers){
     return;
   }
 
+  // 골드 정산 후 인게임 아이템 상점 팝업 오픈
+  await openIngameShopPopup();
+
+  // 상점 종료 후 아이템 사용 단계로 진행
   await runItemWindow();
 }
 
@@ -1634,6 +1736,163 @@ async function animateCapsuleAdd(entries){
   if(label) label.classList.remove('show');
 }
 
+/* ============================== 하단 인게임 상점 팝업 (아이템 전용) ============================== */
+function rollShopOffer(){
+  G.shopOffer = {
+    items: shuffled(ITEMS).slice(0, SHOP_OFFER_SIZE).map(it=>it.id),
+  };
+}
+
+let shopCloseResolve = null;
+
+function renderPopupShopUI(){
+  const human = G.players.find(p=>p.id==='player');
+  $('#popupShopGold').textContent = human.gold+'원';
+  const itemsGrid = $('#popupShopItems');
+  itemsGrid.innerHTML = '';
+
+  const offeredItems = (G.shopOffer.items||[]).map(id=>ITEMS.find(it=>it.id===id)).filter(Boolean);
+  const maxStock = getMaxItemStock(human);
+
+  offeredItems.forEach(it=>{
+    const count = (human.items||{})[it.id] || 0;
+    const boughtThisRound = ((G.shopBought.player)||[]).includes(it.id);
+    const atCap = count >= maxStock;
+    const card = el('div','shop-card');
+    card.innerHTML = 
+      '<div class="card-top"><span class="icon">'+it.icon+'</span><span class="name">'+it.name+' ('+count+'/'+maxStock+')</span><span class="cost">'+it.cost+'원</span></div>'+
+      '<div class="desc">'+it.desc+'</div>';
+    let label = '구매';
+    if(boughtThisRound) label = '구매 완료';
+    else if(atCap) label = '최대 보유';
+    const btn = el('button','btn btn-small btn-primary', label);
+    btn.disabled = boughtThisRound || atCap || human.gold < it.cost;
+    btn.addEventListener('click', ()=>{
+      human.gold -= it.cost;
+      human.items[it.id] = (human.items[it.id]||0) + 1;
+      G.shopBought.player = G.shopBought.player || [];
+      G.shopBought.player.push(it.id);
+      SFX.buy();
+      addLog('🛒 플레이어가 아이템 ['+it.name+']을 구매했습니다.', 'good');
+      renderPlayersRow();
+      renderItemSidebar();
+      renderPopupShopUI();
+    });
+    card.appendChild(btn);
+    itemsGrid.appendChild(card);
+  });
+
+  $('#btn-popup-shop-reroll').disabled = human.gold < SHOP_REROLL_COST;
+  $('#popupShopLog').innerHTML = (G._shopMsgs||[]).map(m=>'<div>'+m+'</div>').join('');
+}
+
+function openIngameShopPopup(){
+  return new Promise(res=>{
+    G.shopBought = {};
+    G._shopMsgs = [];
+    rollShopOffer();
+
+    G.players.filter(p=>p.isAI && p.alive).forEach(ai=> aiShop(ai));
+
+    renderPopupShopUI();
+    const overlay = $('#ingameShopOverlay');
+    overlay.classList.add('active');
+
+    shopCloseResolve = ()=>{
+      overlay.classList.remove('active');
+      shopCloseResolve = null;
+      res();
+    };
+  });
+}
+
+$('#btn-popup-shop-reroll').addEventListener('click', ()=>{
+  const human = G.players.find(p=>p.id==='player');
+  if(human.gold < SHOP_REROLL_COST) return;
+  human.gold -= SHOP_REROLL_COST;
+  rollShopOffer();
+  SFX.buy();
+  addLog('🎲 플레이어가 '+SHOP_REROLL_COST+'원을 내고 아이템 목록을 리롤했습니다.', 'good');
+  renderPlayersRow();
+  renderPopupShopUI();
+});
+
+$('#btn-popup-shop-close').addEventListener('click', ()=>{
+  if(shopCloseResolve) shopCloseResolve();
+});
+
+function aiShop(ai){
+  G._shopMsgs = G._shopMsgs || [];
+  G.shopBought[ai.id] = G.shopBought[ai.id] || [];
+  let guard = 0;
+  const maxStock = getMaxItemStock(ai);
+  while(guard++ < 4){
+    const offeredItems = (G.shopOffer.items||[]).map(id=>ITEMS.find(it=>it.id===id)).filter(Boolean);
+    const affordableItems = offeredItems.filter(it=>
+      ai.gold >= it.cost && (ai.items[it.id]||0) < maxStock && !G.shopBought[ai.id].includes(it.id)
+    );
+    if(affordableItems.length===0 || Math.random() < 0.35) break;
+    const pick = affordableItems[randi(0,affordableItems.length-1)];
+    ai.gold -= pick.cost;
+    ai.items[pick.id] = (ai.items[pick.id]||0)+1;
+    G.shopBought[ai.id].push(pick.id);
+    G._shopMsgs.unshift(ai.emoji+' '+ai.name+'가 아이템 ['+pick.name+']을 구매했습니다.');
+    addLog('🛒 '+ai.emoji+' '+ai.name+'가 아이템 ['+pick.name+']을 구매했습니다.');
+  }
+}
+
+/* ============================== 매치 종료 후 유물 상점 화면 ============================== */
+let nextMatchCarryState = null;
+
+function showRelicShopScreen(carry){
+  nextMatchCarryState = carry;
+  renderRelicShopUI();
+  showScreen('screen-relic-shop');
+}
+
+function renderRelicShopUI(){
+  const currencyVal = $('#relicCurrencyVal');
+  currencyVal.textContent = nextMatchCarryState.relicCurrency + '개';
+
+  const grid = $('#relicShopGrid');
+  grid.innerHTML = '';
+
+  const availRelics = RELICS.filter(r => !nextMatchCarryState.playerRelics.includes(r.id));
+  if(availRelics.length === 0){
+    grid.appendChild(el('div','shop-empty-note','모든 유물을 이미 보유하고 있습니다!'));
+    return;
+  }
+
+  availRelics.forEach(r=>{
+    const card = el('div','shop-card');
+    card.innerHTML = 
+      '<div class="card-top"><span class="icon">'+r.icon+'</span><span class="name">'+r.name+'</span><span class="cost" style="color:var(--accent);">파편 '+r.cost+'개</span></div>'+
+      '<div class="desc">'+r.desc+'</div>';
+    
+    const btn = el('button','btn btn-small btn-primary', '유물 획득');
+    btn.disabled = nextMatchCarryState.relicCurrency < r.cost;
+    btn.addEventListener('click', ()=>{
+      nextMatchCarryState.relicCurrency -= r.cost;
+      nextMatchCarryState.playerRelics.push(r.id);
+      SFX.buy();
+      renderRelicShopUI();
+    });
+    card.appendChild(btn);
+    grid.appendChild(card);
+  });
+}
+
+$('#btn-relic-shop-next').addEventListener('click', ()=>{
+  const nextIdx = nextMatchCarryState.nextIdx;
+  const carry = {
+    wins: nextMatchCarryState.wins,
+    playerRelics: nextMatchCarryState.playerRelics,
+    relicCurrency: nextMatchCarryState.relicCurrency
+  };
+  newMatch(nextIdx, carry);
+  startBriefVN();
+});
+
 /* ---- Central item effect dispatcher ---- */
 function applyItemEffect(itemId, user, ctx, targetId){
   const info = ITEMS.find(x=>x.id===itemId);
@@ -1642,6 +1901,28 @@ function applyItemEffect(itemId, user, ctx, targetId){
   let logMsg = '', popupTargetName = null, popupTargetEmoji = null, danger = false;
 
   switch(info.kind){
+    case 'peek': {
+      const currentPool = getEffectivePool(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
+      if(!ctx.peekedOutcome){
+        ctx.peekedOutcome = weightedPick(currentPool);
+      }
+      let peekText = '';
+      if(ctx.peekedOutcome === 'empty'){
+        peekText = '⚪ [빈 캡슐(안전)]';
+      } else {
+        let pId = ctx.peekedOutcome;
+        let pKind = '일반';
+        if(pId.startsWith('metal:')){ pKind = '🔩메탈'; pId = pId.slice(6); }
+        else if(pId.startsWith('holo:')){ pKind = '🌈홀로그램'; pId = pId.slice(5); }
+        const pObj = G.players.find(x=>x.id===pId);
+        peekText = (pObj ? (pObj.emoji + ' ' + pObj.name) : pId) + '의 ' + pKind + ' 캡슐';
+      }
+      logMsg = user.emoji+' '+user.name+'가 [투시 안경]으로 다음 캡슐을 내다보았습니다! 결과: ' + peekText;
+      if(user.id === 'player'){
+        toast('🔮 예지된 결과: ' + peekText, 4500);
+      }
+      break;
+    }
     case 'targetDouble': {
       const added = (G.roundCapsuleAdds && G.roundCapsuleAdds[target.id]) || 0;
       ctx.tempCaps[target.id] = (ctx.tempCaps[target.id]||0) + added;
@@ -1680,9 +1961,10 @@ function applyItemEffect(itemId, user, ctx, targetId){
       break;
     }
     case 'addEmpty': {
+      // [수정 1] 영구 추가가 아니라 이번 라운드에만 추가
       const n = info.count||10;
-      G.machine.empty += n;
-      logMsg = '가챠 머신에 빈 캡슐 '+n+'개가 영구히 추가되었습니다!';
+      ctx.tempEmpty = (ctx.tempEmpty || 0) + n;
+      logMsg = '가챠 머신에 이번 라운드 한정으로 빈 캡슐 '+n+'개가 투하되었습니다!';
       break;
     }
     case 'purge': {
@@ -1691,7 +1973,7 @@ function applyItemEffect(itemId, user, ctx, targetId){
       break;
     }
     case 'instantGold': {
-      const n = info.count||10;
+      const n = info.count||8;
       user.gold += n;
       logMsg = user.emoji+' '+user.name+'가 즉시 '+n+'원을 획득했습니다!';
       break;
@@ -1764,6 +2046,7 @@ function aiTryUseItems(ai, ctx){
     else if(info.kind==='doubleDraw') chance = 0.5;
     else if(info.kind==='purge' || info.kind==='addEmpty') chance = 0.55;
     else if(info.kind==='metal' || info.kind==='holo') chance = 0.65;
+    else if(info.kind==='peek') chance = 0.75;
     if(Math.random() >= chance) return;
 
     let targetId = null;
@@ -1784,13 +2067,13 @@ function aiTryUseItems(ai, ctx){
 /* ---- Item usage window ---- */
 async function runItemWindow(){
   const human = G.players.find(p=>p.id==='player');
-  const ctx = { tempCaps:{}, wardCounts:{}, shieldSet:new Set(), swapPair:null, doubleDraw:false };
+  const ctx = { tempCaps:{}, wardCounts:{}, shieldSet:new Set(), swapPair:null, doubleDraw:false, peekedOutcome:null, tempEmpty:0 };
 
   for(const ai of G.players.filter(p=>p.isAI && p.alive)){
     aiTryUseItems(ai, ctx);
   }
   renderPlayersRow();
-  renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair);
+  renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
 
   const humanUsable = ITEMS.filter(it=> it.kind!=='aging' && (human.items[it.id]||0) > 0).map(it=>it.id);
   if(humanUsable.length===0){
@@ -1802,7 +2085,7 @@ async function runItemWindow(){
   const panel = $('#controlPanel');
   panel.innerHTML = '';
   panel.appendChild(el('div','bet-title','🎒 아이템을 사용할 시간!<span class="sub">왼쪽 목록에서 아이템을 클릭해 사용하세요</span>'));
-  const skipBtn = el('button','btn btn-secondary','아이템 사용 안 함 / 계속하기');
+  const skipBtn = el('button','btn btn-secondary','아이템 사용 안 함 / 뽑기 진행');
   skipBtn.style.width='100%'; skipBtn.style.marginTop='10px';
   panel.appendChild(skipBtn);
 
@@ -1907,7 +2190,7 @@ function useItemFromSidebar(itemId){
   G.sidebarExpanded = null;
   G.sidebarTarget = null;
   renderPlayersRow();
-  renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair);
+  renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
   renderItemSidebar();
 }
 
@@ -1927,13 +2210,31 @@ function sellItemFromSidebar(itemId){
   renderItemSidebar();
 }
 
+/* [추가 3] 자기 캡슐이 뽑힌 플레이어에게 아이템을 지급하는 함수 */
+function grantCompensationItem(player){
+  if(!player || !player.alive) return;
+  const maxStock = getMaxItemStock(player);
+  player.items = player.items || {};
+  const availItems = ITEMS.filter(it => (player.items[it.id] || 0) < maxStock);
+  if(availItems.length > 0){
+    const picked = availItems[randi(0, availItems.length - 1)];
+    player.items[picked.id] = (player.items[picked.id] || 0) + 1;
+    if(player.id === 'player'){
+      addLog('🎁 [피격 보상] 플레이어가 보상 아이템 [' + picked.name + '] 1개를 획득했습니다!', 'good');
+      toast('🎁 피격 위로 보상: ' + picked.name, 3500);
+    } else {
+      addLog('🎁 [피격 보상] ' + player.emoji + ' ' + player.name + '가 [' + picked.name + '] 1개를 받았습니다.');
+    }
+  }
+}
+
 /* ---- Finalize pool, danger check, draw sequence ---- */
 async function finalizeAndDraw(ctx){
   const panel = $('#controlPanel');
   panel.innerHTML = '';
   panel.appendChild(el('div','bet-title','🎬 운명의 순간<span class="sub">머신 옆의 손잡이를 클릭해서 직접 돌려보세요!</span>'));
 
-  const pool = renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair);
+  const pool = renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
   const total = poolTotal(pool);
   const humanProb = total>0 ? (pool['player']||0)/total : 0;
   const danger = humanProb > 0.35;
@@ -1943,12 +2244,12 @@ async function finalizeAndDraw(ctx){
   await runCrankInteraction();
   await runDrawAnimation(danger);
 
-  let outcomeId = weightedPick(pool);
+  let outcomeId = ctx.peekedOutcome || weightedPick(pool);
   let result = await resolveOneDraw(outcomeId, ctx);
   while(result && result.reroll){
     toast('🔄 탈락자 캡슐 노 카운트! 즉시 재추첨합니다...', 2000);
     await sleep(800);
-    const poolReroll = renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair);
+    const poolReroll = renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
     await runQuickDraw();
     outcomeId = weightedPick(poolReroll);
     result = await resolveOneDraw(outcomeId, ctx);
@@ -1959,7 +2260,7 @@ async function finalizeAndDraw(ctx){
     await sleep(500);
     toast('🎰 더블 뽑기! 한 번 더 뽑습니다...', 2200);
     await sleep(900);
-    const pool2 = renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair);
+    const pool2 = renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
     await runQuickDraw();
     
     let outcomeId2 = weightedPick(pool2);
@@ -1967,7 +2268,7 @@ async function finalizeAndDraw(ctx){
     while(result2 && result2.reroll){
       toast('🔄 탈락자 캡슐 노 카운트! 즉시 재추첨합니다...', 2000);
       await sleep(800);
-      const poolReroll2 = renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair);
+      const poolReroll2 = renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
       await runQuickDraw();
       outcomeId2 = weightedPick(poolReroll2);
       result2 = await resolveOneDraw(outcomeId2, ctx);
@@ -1978,7 +2279,8 @@ async function finalizeAndDraw(ctx){
   if(!ended){
     awardRoundEndFreeItems();
     G.round += 1;
-    goToShop();
+    await sleep(1000);
+    beginRound(false);
   }
 }
 
@@ -2174,16 +2476,19 @@ async function resolveOneDraw(outcomeId, ctx){
     }
   }
 
+  consumeCapsuleFromMachine(outcomeId);
+  renderMachineVisual(ctx ? ctx.tempCaps : null, ctx ? ctx.wardCounts : null, ctx ? ctx.swapPair : null, ctx ? ctx.tempEmpty : 0);
+
   if(kind==='metal'){
     const owner = G.players.find(p=>p.id===ownerId);
     if(owner && owner.alive){
       owner.gold += 5;
-      banner.textContent = '🔩 메탈 캡슐! '+owner.emoji+' '+owner.name+'가 5원 획득';
+      banner.textContent = '🔩 메탈 캡슐! '+owner.emoji+' '+owner.name+'가 5원 획득 (캡슐 소멸)';
       banner.classList.add('show','safe');
       SFX.coin();
-      addLog('🔩 메탈 캡슐이 나왔습니다! '+owner.emoji+' '+owner.name+'가 목숨을 잃지 않고 +5원을 획득했습니다.', 'good');
+      addLog('🔩 메탈 캡슐이 뽑혀 머신에서 제거되었습니다! '+owner.emoji+' '+owner.name+'가 목숨을 잃지 않고 +5원을 획득했습니다.', 'good');
     } else {
-      banner.textContent = '✅ 메탈 캡슐 - 다음 라운드로';
+      banner.textContent = '✅ 메탈 캡슐 (캡슐 소멸) - 다음 라운드로';
       banner.classList.add('show','safe');
       SFX.safe();
     }
@@ -2200,7 +2505,7 @@ async function resolveOneDraw(outcomeId, ctx){
     if(others.length){
       const redirected = others[randi(0,others.length-1)];
       effectiveOutcome = redirected.id;
-      holoNote = '🌈 홀로그램 캡슐! 원래 '+(owner?owner.emoji+' '+owner.name:ownerId)+'의 캡슐이었지만 '+redirected.emoji+' '+redirected.name+'의 캡슐로 취급됩니다!';
+      holoNote = '🌈 홀로그램 캡슐! 원래 '+(owner?owner.emoji+' '+owner.name:ownerId)+'의 캡슐이었지만 '+redirected.emoji+' '+redirected.name+'의 캡슐로 취급됩니다! (머신에서 캡슐 제거됨)';
     }
   }
 
@@ -2239,38 +2544,41 @@ async function resolveOneDraw(outcomeId, ctx){
     addLog('🪶 [불사조의 깃털] '+phoenixRevived.emoji+' '+phoenixRevived.name+'가 탈락 위기에서 부활하고 머신에 캡슐 7개를 추가했습니다! (유물 파괴)', 'hot');
     await animateCapsuleAdd([{id:phoenixRevived.id, count:7, penalty:true}]);
   } else if(shielded){
-    banner.textContent = '💗 실드 발동! '+shielded.emoji+' '+shielded.name+'가 목숨 손실을 막았습니다!';
+    banner.textContent = '💗 실드 발동! '+shielded.emoji+' '+shielded.name+'가 목숨 손실을 막았습니다! (캡슐 제거됨)';
     banner.classList.add('show','safe');
     SFX.safe();
-    addLog('💗 '+shielded.emoji+' '+shielded.name+'의 하트 실드가 발동해 목숨 손실을 막았습니다!', 'good');
+    addLog('💗 '+shielded.emoji+' '+shielded.name+'의 하트 실드가 발동해 목숨 손실을 막았습니다! (해당 캡슐은 머신에서 제거됨)', 'good');
   } else if(!hitPlayer && !eliminatedPlayer){
-    banner.textContent = outcomeId==='empty' ? '✅ 빈 캡슐! 다음 라운드로' : '✅ 다음 라운드로 진행';
+    banner.textContent = outcomeId==='empty' ? '✅ 빈 캡슐! (머신에서 제거됨)' : '✅ 다음 라운드로 진행';
     banner.classList.add('show','safe');
     SFX.safe();
-    addLog('⚪ 빈 캡슐이 나왔습니다. 다음 라운드로 진행합니다.', 'good');
+    addLog('⚪ 빈 캡슐이 나와 머신에서 제거되었습니다. 다음 라운드로 진행합니다.', 'good');
   } else if(eliminatedPlayer && eliminatedPlayer.id==='player'){
     banner.textContent = '💥 마지막 목숨까지 잃었습니다... 탈락';
     banner.classList.add('show','lose');
     SFX.defeat();
     addLog('💥 플레이어의 마지막 목숨이 사라졌습니다! 탈락...', 'bad');
   } else if(eliminatedPlayer){
-    banner.textContent = '🎉 '+eliminatedPlayer.name+' 탈락!';
+    banner.textContent = '🎉 '+eliminatedPlayer.name+' 탈락! (캡슐 제거됨)';
     banner.classList.add('show','win');
     SFX.victory();
-    addLog('🎉 '+eliminatedPlayer.emoji+' '+eliminatedPlayer.name+'의 마지막 목숨이 사라졌습니다! 탈락!', 'hot');
+    addLog('🎉 '+eliminatedPlayer.emoji+' '+eliminatedPlayer.name+'의 마지막 목숨이 사라졌습니다! 탈락! (머신에서 캡슐 제거됨)', 'hot');
   } else if(hitPlayer.id==='player'){
-    banner.textContent = '💥 목숨을 하나 잃었습니다! (남은 목숨 '+hitPlayer.lives+')';
+    banner.textContent = '💥 목숨 -1 + 보상 아이템 지급! (남은 목숨 '+hitPlayer.lives+')';
     banner.classList.add('show','lose');
     SFX.hit();
-    addLog('💥 플레이어의 캡슐이 뽑혔습니다! 목숨 하나를 잃었습니다. (남은 목숨 '+hitPlayer.lives+')', 'bad');
+    addLog('💥 플레이어의 캡슐이 뽑혀 머신에서 제거되었습니다! 목숨 하나를 잃었습니다. (남은 목숨 '+hitPlayer.lives+')', 'bad');
+    grantCompensationItem(hitPlayer);
   } else {
-    banner.textContent = '💥 '+hitPlayer.name+'가 목숨을 하나 잃었다! (남은 목숨 '+hitPlayer.lives+')';
+    banner.textContent = '💥 '+hitPlayer.name+' 목숨 -1 + 보상 지급! (남은 목숨 '+hitPlayer.lives+')';
     banner.classList.add('show','win');
     SFX.hit();
-    addLog('💥 '+hitPlayer.emoji+' '+hitPlayer.name+'의 캡슐이 뽑혔습니다! 목숨 하나를 잃었습니다. (남은 목숨 '+hitPlayer.lives+')', 'hot');
+    addLog('💥 '+hitPlayer.emoji+' '+hitPlayer.name+'의 캡슐이 뽑혀 머신에서 제거되었습니다! 목숨 하나를 잃었습니다. (남은 목숨 '+hitPlayer.lives+')', 'hot');
+    grantCompensationItem(hitPlayer);
   }
 
   renderPlayersRow();
+  renderItemSidebar();
   await sleep(1600);
 
   if(eliminatedPlayer && eliminatedPlayer.id==='player'){
@@ -2286,142 +2594,6 @@ async function resolveOneDraw(outcomeId, ctx){
 
   return { ended: false, reroll: false };
 }
-
-/* ============================== SHOP ============================== */
-function rollShopOffer(){
-  const human = G.players.find(p=>p.id==='player');
-  const availRelics = RELICS.filter(r=> !(human.relics||[]).includes(r.id));
-  G.shopOffer = {
-    relics: shuffled(availRelics).slice(0, SHOP_OFFER_SIZE).map(r=>r.id),
-    items: shuffled(ITEMS).slice(0, SHOP_OFFER_SIZE).map(it=>it.id),
-  };
-}
-
-function goToShop(){
-  G.shopBought = {};
-  rollShopOffer();
-  saveGame();
-  renderShopScreen();
-  showScreen('screen-shop');
-}
-
-function renderShopScreen(){
-  const human = G.players.find(p=>p.id==='player');
-  $('#shopGold').textContent = human.gold+'원';
-  const relicsGrid = $('#shopRelics');
-  const itemsGrid = $('#shopItems');
-  relicsGrid.innerHTML = ''; itemsGrid.innerHTML = '';
-  const shopLog = $('#shopLog');
-  shopLog.innerHTML = '';
-
-  const offeredRelics = (G.shopOffer.relics||[]).map(id=>RELICS.find(r=>r.id===id)).filter(Boolean);
-  const offeredItems = (G.shopOffer.items||[]).map(id=>ITEMS.find(it=>it.id===id)).filter(Boolean);
-
-  if(offeredRelics.length===0){
-    relicsGrid.appendChild(el('div','shop-empty-note','이미 모든 유물을 보유하고 있습니다!'));
-  }
-  offeredRelics.forEach(r=>{
-    const owned = (human.relics||[]).includes(r.id);
-    const card = el('div','shop-card');
-    card.innerHTML = '<div class="icon">'+r.icon+'</div><div class="name">'+r.name+'</div>'+
-      '<div class="desc">'+r.desc+'</div><div class="cost">'+r.cost+'원</div>';
-    const btn = el('button','btn btn-small '+(owned?'btn-secondary':'btn-primary'), owned?'보유중':'구매');
-    btn.disabled = owned || human.gold < r.cost;
-    btn.addEventListener('click', ()=>{
-      human.gold -= r.cost;
-      human.relics.push(r.id);
-      SFX.buy();
-      addLog('🛒 플레이어가 유물 ['+r.name+']을 구매했습니다.', 'good');
-      renderShopScreen();
-    });
-    card.appendChild(btn);
-    relicsGrid.appendChild(card);
-  });
-
-  const maxStock = getMaxItemStock(human);
-  offeredItems.forEach(it=>{
-    const count = (human.items||{})[it.id] || 0;
-    const boughtThisRound = ((G.shopBought.player)||[]).includes(it.id);
-    const atCap = count >= maxStock;
-    const card = el('div','shop-card');
-    card.innerHTML = '<div class="icon">'+it.icon+'</div><div class="name">'+it.name+' ('+count+'/'+maxStock+')</div>'+
-      '<div class="desc">'+it.desc+'</div><div class="cost">'+it.cost+'원</div>';
-    let label = '구매';
-    if(boughtThisRound) label = '구매 완료';
-    else if(atCap) label = '최대 보유';
-    const btn = el('button','btn btn-small btn-primary', label);
-    btn.disabled = boughtThisRound || atCap || human.gold < it.cost;
-    btn.addEventListener('click', ()=>{
-      human.gold -= it.cost;
-      human.items[it.id] = (human.items[it.id]||0) + 1;
-      G.shopBought.player = G.shopBought.player || [];
-      G.shopBought.player.push(it.id);
-      SFX.buy();
-      addLog('🛒 플레이어가 아이템 ['+it.name+']을 구매했습니다.', 'good');
-      renderShopScreen();
-    });
-    card.appendChild(btn);
-    itemsGrid.appendChild(card);
-  });
-
-  const rerollBtn = $('#btn-shop-reroll');
-  rerollBtn.disabled = human.gold < SHOP_REROLL_COST;
-
-  if(!G._shoppedThisVisit){
-    G._shoppedThisVisit = true;
-    G.players.filter(p=>p.isAI && p.alive).forEach(ai=> aiShop(ai));
-  }
-  shopLog.innerHTML = (G._shopMsgs||[]).map(m=>'<div>'+m+'</div>').join('');
-}
-
-function aiShop(ai){
-  G._shopMsgs = G._shopMsgs || [];
-  G.shopBought[ai.id] = G.shopBought[ai.id] || [];
-  let guard = 0;
-  const maxStock = getMaxItemStock(ai);
-  while(guard++ < 4){
-    const offeredRelics = (G.shopOffer.relics||[]).map(id=>RELICS.find(r=>r.id===id)).filter(Boolean);
-    const offeredItems = (G.shopOffer.items||[]).map(id=>ITEMS.find(it=>it.id===id)).filter(Boolean);
-    const affordableRelics = offeredRelics.filter(r=> !(ai.relics||[]).includes(r.id) && ai.gold >= r.cost);
-    const affordableItems = offeredItems.filter(it=>
-      ai.gold >= it.cost && (ai.items[it.id]||0) < maxStock && !G.shopBought[ai.id].includes(it.id)
-    );
-    const pool = [];
-    affordableRelics.forEach(r=> pool.push({type:'relic', data:r}));
-    affordableItems.forEach(it=> pool.push({type:'item', data:it}));
-    if(pool.length===0 || Math.random() < 0.35) break;
-    const pick = pool[randi(0,pool.length-1)];
-    ai.gold -= pick.data.cost;
-    if(pick.type==='relic'){
-      ai.relics.push(pick.data.id);
-      G._shopMsgs.unshift(ai.emoji+' '+ai.name+'가 유물 ['+pick.data.name+']을 구매했습니다.');
-      addLog('🛒 '+ai.emoji+' '+ai.name+'가 유물 ['+pick.data.name+']을 구매했습니다.');
-    } else {
-      ai.items[pick.data.id] = (ai.items[pick.data.id]||0)+1;
-      G.shopBought[ai.id].push(pick.data.id);
-      G._shopMsgs.unshift(ai.emoji+' '+ai.name+'가 아이템 ['+pick.data.name+']을 구매했습니다.');
-      addLog('🛒 '+ai.emoji+' '+ai.name+'가 아이템 ['+pick.data.name+']을 구매했습니다.');
-    }
-  }
-}
-
-$('#btn-shop-reroll').addEventListener('click', ()=>{
-  const human = G.players.find(p=>p.id==='player');
-  if(human.gold < SHOP_REROLL_COST) return;
-  human.gold -= SHOP_REROLL_COST;
-  rollShopOffer();
-  SFX.buy();
-  addLog('🎲 플레이어가 '+SHOP_REROLL_COST+'원을 내고 상점 목록을 리롤했습니다.', 'good');
-  renderShopScreen();
-});
-
-$('#btn-shop-next').addEventListener('click', ()=>{
-  G._shoppedThisVisit = false;
-  G._shopMsgs = [];
-  renderGameScreen();
-  showScreen('screen-game');
-  beginRound(false);
-});
 
 /* ============================== MATCH END ============================== */
 async function matchWinByGold(winner){
@@ -2455,17 +2627,23 @@ function finishMatch(won, desc){
   $('#matchendDesc').textContent = desc;
   const nextIdx = G.matchIndex + 1;
   const contBtn = $('#btn-matchend-continue');
+
   if(won && nextIdx < MATCH_CONFIGS.length){
+    // [변경 2] 전체 캡슐이 아닌 본인의 캡슐 개수만 파편으로 정산
+    const human = G.players.find(p=>p.id==='player');
+    const ownCapsulesLeft = human ? countPlayerOwnCapsules(human.id) : 0;
+    const totalFragments = (G.relicCurrency || 0) + ownCapsulesLeft;
+
+    $('#matchendDesc').textContent = desc + ' (머신 속 남은 내 캡슐 ' + ownCapsulesLeft + '개가 캡슐 파편으로 변환되었습니다!)';
     contBtn.classList.remove('hidden');
-    contBtn.textContent = '다음 매치 (다른 수치) ▶';
+    contBtn.textContent = '유물 상점으로 가기 ▶';
     contBtn.onclick = ()=>{
-      const human = G.players.find(p=>p.id==='player');
-      const carry = { 
-        wins: G.wins+1,
-        playerRelics: human ? (human.relics || []).slice() : []
-      };
-      newMatch(nextIdx, carry);
-      startBriefVN();
+      showRelicShopScreen({
+        nextIdx,
+        wins: G.wins + 1,
+        playerRelics: human ? (human.relics || []).slice() : [],
+        relicCurrency: totalFragments
+      });
     };
   } else if(won){
     contBtn.classList.remove('hidden');
