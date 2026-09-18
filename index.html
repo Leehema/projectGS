@@ -441,7 +441,7 @@ input[type=range]{width:100%;accent-color:var(--accent);}
 .relic-currency-label{font-size:10.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;}
 .relic-currency-val{font-size:22px;font-weight:800;color:var(--accent);}
 .relic-shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;overflow-y:auto;max-height:56vh;padding:4px;}
-.relic-shop-footer{display:flex;justify-content:flex-end;align-items:center;border-top:1px solid var(--border);padding-top:16px;gap:12px;}
+.relic-shop-footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:16px;}
 
 /* Match end / game over */
 #screen-matchend{align-items:center;justify-content:center;}
@@ -598,6 +598,7 @@ input[type=range]{width:100%;accent-color:var(--accent);}
       </div>
       <div class="relic-shop-grid" id="relicShopGrid"></div>
       <div class="relic-shop-footer">
+        <button class="btn btn-secondary btn-small" id="btn-relic-shop-reroll">🎲 리롤 (1개)</button>
         <button class="btn btn-primary" id="btn-relic-shop-next">다음 매치 시작하기 ▶</button>
       </div>
     </div>
@@ -656,7 +657,6 @@ const RELICS = [
     desc:'매 라운드 무작위 지정된 캡슐 수와 정확히 같은 수의 캡슐을 넣으면 5골드를 획득합니다.' },
 ];
 
-/* [변경 1] 빈 캡슐 투하: '이번 라운드에만' 10개 추가 */
 const ITEMS = [
   { id:'peek', name:'투시 안경', icon:'🔮', cost:4, targeted:false, kind:'peek',
     desc:'이번 라운드에 바로 뽑히게 될 캡슐의 정체를 미리 내다봅니다.' },
@@ -1291,7 +1291,6 @@ function getEffectivePool(tempCaps, wardCounts, swapPair, tempEmpty){
 }
 function poolTotal(pool){ return Object.values(pool).reduce((a,b)=>a+b,0); }
 
-/* [변경 2] 본인 캡슐 개수만 카운트하는 함수 */
 function countPlayerOwnCapsules(playerId){
   let count = 0;
   count += (G.machine.capsules[playerId] || 0);
@@ -1842,10 +1841,20 @@ function aiShop(ai){
 }
 
 /* ============================== 매치 종료 후 유물 상점 화면 ============================== */
+const RELIC_SHOP_OFFER_SIZE = 3;
+const RELIC_SHOP_REROLL_COST = 1;
 let nextMatchCarryState = null;
+
+/* [변경 1] 유물 상점 3개 한정 슬롯 및 리롤 기능 */
+function rollRelicShopOffer(){
+  if(!nextMatchCarryState) return;
+  const availRelics = RELICS.filter(r => !nextMatchCarryState.playerRelics.includes(r.id));
+  nextMatchCarryState.relicOffer = shuffled(availRelics).slice(0, RELIC_SHOP_OFFER_SIZE).map(r => r.id);
+}
 
 function showRelicShopScreen(carry){
   nextMatchCarryState = carry;
+  rollRelicShopOffer();
   renderRelicShopUI();
   showScreen('screen-relic-shop');
 }
@@ -1857,30 +1866,43 @@ function renderRelicShopUI(){
   const grid = $('#relicShopGrid');
   grid.innerHTML = '';
 
-  const availRelics = RELICS.filter(r => !nextMatchCarryState.playerRelics.includes(r.id));
-  if(availRelics.length === 0){
+  const offeredRelics = (nextMatchCarryState.relicOffer || []).map(id => RELICS.find(r => r.id === id)).filter(Boolean);
+  const unownedTotal = RELICS.filter(r => !nextMatchCarryState.playerRelics.includes(r.id)).length;
+
+  if(offeredRelics.length === 0){
     grid.appendChild(el('div','shop-empty-note','모든 유물을 이미 보유하고 있습니다!'));
-    return;
+  } else {
+    offeredRelics.forEach(r=>{
+      const card = el('div','shop-card');
+      card.innerHTML = 
+        '<div class="card-top"><span class="icon">'+r.icon+'</span><span class="name">'+r.name+'</span><span class="cost" style="color:var(--accent);">파편 '+r.cost+'개</span></div>'+
+        '<div class="desc">'+r.desc+'</div>';
+      
+      const btn = el('button','btn btn-small btn-primary', '유물 획득');
+      btn.disabled = nextMatchCarryState.relicCurrency < r.cost;
+      btn.addEventListener('click', ()=>{
+        nextMatchCarryState.relicCurrency -= r.cost;
+        nextMatchCarryState.playerRelics.push(r.id);
+        nextMatchCarryState.relicOffer = nextMatchCarryState.relicOffer.filter(id => id !== r.id);
+        SFX.buy();
+        renderRelicShopUI();
+      });
+      card.appendChild(btn);
+      grid.appendChild(card);
+    });
   }
 
-  availRelics.forEach(r=>{
-    const card = el('div','shop-card');
-    card.innerHTML = 
-      '<div class="card-top"><span class="icon">'+r.icon+'</span><span class="name">'+r.name+'</span><span class="cost" style="color:var(--accent);">파편 '+r.cost+'개</span></div>'+
-      '<div class="desc">'+r.desc+'</div>';
-    
-    const btn = el('button','btn btn-small btn-primary', '유물 획득');
-    btn.disabled = nextMatchCarryState.relicCurrency < r.cost;
-    btn.addEventListener('click', ()=>{
-      nextMatchCarryState.relicCurrency -= r.cost;
-      nextMatchCarryState.playerRelics.push(r.id);
-      SFX.buy();
-      renderRelicShopUI();
-    });
-    card.appendChild(btn);
-    grid.appendChild(card);
-  });
+  const rerollBtn = $('#btn-relic-shop-reroll');
+  rerollBtn.disabled = nextMatchCarryState.relicCurrency < RELIC_SHOP_REROLL_COST || unownedTotal <= RELIC_SHOP_OFFER_SIZE;
 }
+
+$('#btn-relic-shop-reroll').addEventListener('click', ()=>{
+  if(!nextMatchCarryState || nextMatchCarryState.relicCurrency < RELIC_SHOP_REROLL_COST) return;
+  nextMatchCarryState.relicCurrency -= RELIC_SHOP_REROLL_COST;
+  rollRelicShopOffer();
+  SFX.buy();
+  renderRelicShopUI();
+});
 
 $('#btn-relic-shop-next').addEventListener('click', ()=>{
   const nextIdx = nextMatchCarryState.nextIdx;
@@ -1961,7 +1983,6 @@ function applyItemEffect(itemId, user, ctx, targetId){
       break;
     }
     case 'addEmpty': {
-      // [수정 1] 영구 추가가 아니라 이번 라운드에만 추가
       const n = info.count||10;
       ctx.tempEmpty = (ctx.tempEmpty || 0) + n;
       logMsg = '가챠 머신에 이번 라운드 한정으로 빈 캡슐 '+n+'개가 투하되었습니다!';
@@ -2210,7 +2231,6 @@ function sellItemFromSidebar(itemId){
   renderItemSidebar();
 }
 
-/* [추가 3] 자기 캡슐이 뽑힌 플레이어에게 아이템을 지급하는 함수 */
 function grantCompensationItem(player){
   if(!player || !player.alive) return;
   const maxStock = getMaxItemStock(player);
@@ -2629,7 +2649,6 @@ function finishMatch(won, desc){
   const contBtn = $('#btn-matchend-continue');
 
   if(won && nextIdx < MATCH_CONFIGS.length){
-    // [변경 2] 전체 캡슐이 아닌 본인의 캡슐 개수만 파편으로 정산
     const human = G.players.find(p=>p.id==='player');
     const ownCapsulesLeft = human ? countPlayerOwnCapsules(human.id) : 0;
     const totalFragments = (G.relicCurrency || 0) + ownCapsulesLeft;
