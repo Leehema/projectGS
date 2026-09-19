@@ -1033,7 +1033,8 @@ function freshPlayers(cfg, carry){
     return {
       id, name:NAME[id], color:COLOR[id], emoji:EMOJI[id], isAI: id!=='player',
       alive:true, lives:STARTING_LIVES, gold:0,
-      riskStyle: id==='ai1' ? 0.88 : id==='ai2' ? 1.07 : id==='ai3' ? 1.18 : 1,
+      riskStyle: id==='ai1' ? 0.88 : id==='ai2' ? 1.07 : id==='ai3' ? 1.3 : 1,
+      betPersonality: id==='ai1' ? 'conservative' : id==='ai2' ? 'balanced' : id==='ai3' ? 'aggressive' : 'balanced',
       relics:(id==='player' && carry && carry.playerRelics) ? carry.playerRelics.slice() : [],
       capsuleUpgrades,
       capsuleStock:createCapsuleStock(capsuleUpgrades),
@@ -1807,7 +1808,10 @@ async function beginRound(isResume){
   // 유물: 행운의 숫자
   if(!isResume){
     G.luckyTarget = randi(G.config.minBet, G.config.maxBet);
-    G.players.filter(p=>p.isAI && p.alive).forEach(p=>{ p.betMood = rand(-0.22, 0.22); });
+    G.players.filter(p=>p.isAI && p.alive).forEach(p=>{
+      p.betMood = p.betPersonality==='conservative' ? rand(-0.26,0.02)
+        : p.betPersonality==='aggressive' ? rand(0.04,0.32) : rand(-0.14,0.16);
+    });
   }
   renderGameScreen();
   $('#resultBanner').className = 'result-banner';
@@ -2003,6 +2007,7 @@ function aiDecideBet(ai, floor, maxBet, total, pool){
   const lives = ai.lives || 1;
   const stock = Math.max(1, countPlayerStock(ai));
   const riskStyle = ai.riskStyle || 1;
+  const personality = ai.betPersonality || (ai.id==='ai1' ? 'conservative' : ai.id==='ai3' ? 'aggressive' : 'balanced');
   let targetRisk = lives<=1 ? 0.20 : 0.28;
   if(goldRatio<0.45) targetRisk += 0.06;
   if(goldRatio>0.8) targetRisk -= 0.05;
@@ -2016,6 +2021,13 @@ function aiDecideBet(ai, floor, maxBet, total, pool){
     let score = rankPotential;
     score -= excessRisk * (lives<=1 ? 23 : 13);
     score -= (candidate/stock) * 3;
+    if(candidate===maxBet){
+      score -= goldRatio<0.35 ? 0.45 : 1.15;
+      if(personality==='aggressive') score += 1.85;
+      if(personality==='conservative') score -= 0.45;
+    }
+    else if(candidate===maxBet-1) score -= 0.18;
+    if(candidate>=2 && candidate<=maxBet-2) score += 0.28;
     if(goldRatio<0.45) score += candidate*0.3;
     if((ai.relics||[]).includes('lucky_bet') && candidate===G.luckyTarget) score += 5;
     if(goldRatio>=0.85) score -= candidate*0.35;
@@ -2067,7 +2079,13 @@ async function applyBetsToMachine(bets, minPlayers){
   const sortedAlive = G.players
     .filter(p => p.alive)
     .map(p => ({ player: p, bet: bets[p.id] }))
-    .sort((a, b) => b.bet - a.bet);
+    .sort((a, b) => {
+      const betDiff = b.bet-a.bet;
+      if(betDiff!==0) return betDiff;
+      if(a.player.id==='player') return 1;
+      if(b.player.id==='player') return -1;
+      return G.players.indexOf(a.player)-G.players.indexOf(b.player);
+    });
   G.roundRankOrder = sortedAlive.map(entry => entry.player.id);
 
   let currentRank = 0;
