@@ -686,12 +686,28 @@ button,.btn{font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;letter-s
   filter:drop-shadow(0 0 7px currentColor)!important;animation:none!important;}
 /* The metal sprite has more transparent padding than the other capsules. */
 .capsule.capsule-metal,.reveal-capsule.capsule-metal,.capsule-owned-icon .mini-cap.metal{background-size:118%!important;}
+/* Character chatter mirrors the cat tips from the opposite lower corner. */
+.cat-tip{left:auto;right:18px;transform:translateX(18px) translateY(8px);}
+.character-tip{position:absolute;left:18px;bottom:22px;z-index:42;display:flex;align-items:flex-end;gap:8px;
+  max-width:330px;opacity:0;transform:translateX(-18px) translateY(8px);pointer-events:none;
+  transition:opacity .22s ease,transform .22s ease;}
+.character-tip.show{opacity:1;transform:translateX(0) translateY(0);}
+.character-tip-capsule{width:52px;height:52px;flex:0 0 52px;background-size:contain!important;
+  filter:drop-shadow(0 5px 7px rgba(0,0,0,.45));animation:bob 2.4s ease-in-out infinite;}
+.character-tip-bubble{position:relative;padding:11px 14px;background:#f8f6ef;color:#111118;border:4px solid #08090c;
+  box-shadow:7px 7px 0 #35e8af;clip-path:polygon(1% 5%,97% 0,100% 94%,4% 100%,0 52%);font-size:12px;font-weight:700;line-height:1.4;}
+.character-tip-name{display:block;color:#e21659;font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;font-size:14px;letter-spacing:.5px;margin-bottom:2px;}
+/* Diagonal black wipe for screen changes. */
+#screenWipe{position:absolute;inset:0;z-index:180;pointer-events:none;background:#050509;transform:translate(-110%,-110%);}
+#screenWipe.play{animation:screenWipeDiagonal .62s cubic-bezier(.72,0,.28,1) both;}
+@keyframes screenWipeDiagonal{0%{transform:translate(-110%,-110%);}48%{transform:translate(0,0);}52%{transform:translate(0,0);}100%{transform:translate(110%,110%);}}
 </style>
 </head>
 <body>
 <div id="stage-outer">
 <div id="app">
 <div id="design">
+<div id="screenWipe" aria-hidden="true"></div>
 
   <!-- TITLE SCREEN -->
   <section id="screen-title" class="screen active">
@@ -848,6 +864,10 @@ button,.btn{font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;letter-s
     <div class="cat-tip" id="catTip" aria-live="polite">
       <div class="cat-tip-cat">🐱</div>
       <div class="cat-tip-bubble" id="catTipText"></div>
+    </div>
+    <div class="character-tip" id="characterTip" aria-live="polite">
+      <span class="character-tip-capsule capsule-icon" id="characterTipIcon"></span>
+      <div class="character-tip-bubble"><span class="character-tip-name" id="characterTipName"></span><span id="characterTipText"></span></div>
     </div>
   </section>
 
@@ -1136,6 +1156,7 @@ function $(sel){ return document.querySelector(sel); }
 function el(tag,cls,html){ const e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 let catTipTimer = null;
+let characterTipTimer = null;
 let machineRemixTimer = null;
 function showCatTip(text, tone){
   const tip = $('#catTip');
@@ -1147,6 +1168,44 @@ function showCatTip(text, tone){
   void tip.offsetWidth;
   tip.classList.add('show');
   catTipTimer = setTimeout(()=> tip.classList.remove('show'), 3600);
+}
+const CHARACTER_QUOTES = {
+  ai1:{
+    start:['이번엔 무리 안 해. 확률이 내 편이 될 때까지 기다리지.','적게 넣어도 충분해. 중요한 건 살아남는 거야.'],
+    item:['하나면 충분해. 낭비는 약점이야.','계산대로만 간다면, 이걸로 충분하지.'],
+    hit:['계산이 조금 어긋났군... 아직 수정할 수 있어.'],
+    out:['...여기까지인가. 다음엔 더 정확하게 보겠어.'],
+    rivalOut:['흥분하지 마. 다음 수가 더 중요해.']
+  },
+  ai2:{
+    start:['오호, 재미있어졌는데? 이번 판은 조금 흔들어 볼까!','다들 너무 심각해. 게임은 즐겨야지!'],
+    item:['이건 어때? 흐름을 살짝 흔들어 볼게!','자, 깜짝 선물이다!'],
+    hit:['앗, 그래도 아직 웃을 수 있지!'],
+    out:['아쉽다! 다음엔 더 멋지게 돌아올게!'],
+    rivalOut:['어라, 벌써 끝이야? 조금 더 놀고 싶었는데!']
+  },
+  ai3:{
+    start:['전부 걸어. 승자는 크게 가져가는 법이지!','작은 확률은 관심 없어. 판을 키워.'],
+    item:['판을 키운다. 겁나면 비켜.','이게 승부수다. 피해 봐.'],
+    hit:['좋아, 이 정도 위험은 감수할 만해.'],
+    out:['흐음... 이번 판은 넘기지.'],
+    rivalOut:['한 명 줄었군. 이제 더 빠르게 끝내지.']
+  }
+};
+function showCharacterTip(playerId, situation){
+  const player = G && G.players && G.players.find(p=>p.id===playerId);
+  const quotes = CHARACTER_QUOTES[playerId];
+  const tip = $('#characterTip'), icon = $('#characterTipIcon'), name = $('#characterTipName'), textEl = $('#characterTipText');
+  if(!player || !player.isAI || !quotes || !tip || !icon || !name || !textEl) return;
+  const lines = quotes[situation] || quotes.start;
+  clearTimeout(characterTipTimer);
+  icon.className = 'character-tip-capsule capsule-icon '+CCLASS[playerId];
+  name.textContent = player.name;
+  textEl.textContent = lines[randi(0,lines.length-1)];
+  tip.classList.remove('show');
+  void tip.offsetWidth;
+  tip.classList.add('show');
+  characterTipTimer = setTimeout(()=>tip.classList.remove('show'), 3900);
 }
 function showMachineRemix(){
   const field = $('#capsuleField');
@@ -1170,8 +1229,17 @@ function shuffled(arr){
   return a;
 }
 function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  $('#'+id).classList.add('active');
+  const swap = ()=>{
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    $('#'+id).classList.add('active');
+  };
+  const wipe = $('#screenWipe');
+  if(!wipe){ swap(); return; }
+  clearTimeout(window.__screenWipeSwap);
+  wipe.classList.remove('play');
+  void wipe.offsetWidth;
+  wipe.classList.add('play');
+  window.__screenWipeSwap = setTimeout(swap, 300);
 }
 function weightedPick(weights){
   const total = Object.values(weights).reduce((a,b)=>a+b,0);
@@ -1245,6 +1313,8 @@ function newMatch(matchIndex, carry){
   });
   const previousTimeline = document.getElementById('itemUseTimeline');
   if(previousTimeline) previousTimeline.innerHTML = '';
+  const previousCharacterTip = document.getElementById('characterTip');
+  if(previousCharacterTip) previousCharacterTip.classList.remove('show');
   addLog('🔮 매치 시작 보급: 모든 참가자에게 [투시 안경] 1개가 지급되었습니다.', 'good');
 }
 
@@ -1899,11 +1969,11 @@ function renderMachineVisual(tempCaps, wardCounts, swapPair, tempEmpty){
   const shown = items.slice(0, cap);
   shown.forEach(it=>{
     const c = el('div','capsule '+it.cls);
-    c.style.left = rand(22,65)+'%';
-    c.style.top = rand(28,60)+'%';
-    c.style.setProperty('--hop-x', rand(-6,6).toFixed(1)+'px');
-    c.style.setProperty('--hop-y', rand(-10,-5).toFixed(1)+'px');
-    c.style.setProperty('--settle-x', rand(-3,3).toFixed(1)+'px');
+    c.style.left = rand(15,72)+'%';
+    c.style.top = rand(20,65)+'%';
+    c.style.setProperty('--hop-x', rand(-8,8).toFixed(1)+'px');
+    c.style.setProperty('--hop-y', rand(-14,-6).toFixed(1)+'px');
+    c.style.setProperty('--settle-x', rand(-4,4).toFixed(1)+'px');
     c.style.setProperty('--settle-y', rand(-4,1).toFixed(1)+'px');
     c.style.setProperty('--bounce-delay', (-Math.random()*0.8).toFixed(2)+'s');
     field.appendChild(c);
@@ -2019,6 +2089,10 @@ async function beginRound(isResume){
   if(!isResume && G.firstRoundEver && G.round===1){
     await showPenaltyExplainer();
     G.firstRoundEver = false;
+  }
+  if(!isResume && G.round===1){
+    const speaker = G.players.find(p=>p.isAI && p.alive);
+    if(speaker) setTimeout(()=>showCharacterTip(speaker.id,'start'), 500);
   }
 
   if(!isResume){
@@ -2737,6 +2811,7 @@ function applyItemEffect(itemId, user, ctx, targetId){
   if(remixMachine) showMachineRemix();
   addLog('✨ '+logMsg, danger?'bad':'good');
   recordItemUse(info, user, target);
+  if(user.isAI) showCharacterTip(user.id,'item');
   showItemUsePopup({icon:info.icon, itemName:info.name, desc:info.desc,
     userEmoji:user.emoji, userName:user.name, targetEmoji:popupTargetEmoji, targetName:popupTargetName, danger});
 }
@@ -3365,6 +3440,9 @@ async function resolveOneDraw(outcomeId, ctx){
     SFX.victory();
     addLog('🎉 '+eliminatedPlayer.emoji+' '+eliminatedPlayer.name+'의 마지막 목숨이 사라졌습니다! 탈락! (머신에서 캡슐 제거됨)', 'hot');
     showCatTip(eliminatedPlayer.name+'이(가) 탈락했다냥! 흐름을 잡아라냥!', 'good');
+    showCharacterTip(eliminatedPlayer.id,'out');
+    const responder = G.players.find(p=>p.isAI && p.alive && p.id!==eliminatedPlayer.id);
+    if(responder) setTimeout(()=>showCharacterTip(responder.id,'rivalOut'), 1800);
   } else if(hitPlayer.id==='player'){
     banner.textContent = '💥 목숨 -1 + 보상 아이템 지급! (남은 목숨 '+hitPlayer.lives+')';
     banner.classList.add('show','lose');
@@ -3379,6 +3457,7 @@ async function resolveOneDraw(outcomeId, ctx){
     SFX.hit();
     addLog('💥 '+hitPlayer.emoji+' '+hitPlayer.name+'의 캡슐이 뽑혀 머신에서 제거되었습니다! 목숨 하나를 잃었습니다. (남은 목숨 '+hitPlayer.lives+')', 'hot');
     grantCompensationItem(hitPlayer);
+    showCharacterTip(hitPlayer.id,'hit');
   }
 
   renderPlayersRow();
