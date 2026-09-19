@@ -184,9 +184,9 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;}
 .capsule-stat-chip .dot{width:8px;height:8px;border-radius:50%;box-shadow:0 0 5px currentColor;flex-shrink:0;}
 .capsule-stat-chip b{color:var(--text);font-weight:700;}
 
-.players-row{display:flex;gap:10px;flex-wrap:wrap;}
+.players-row{display:flex;gap:6px;flex-wrap:wrap;}
 .player-chip{display:flex;align-items:center;gap:6px;background:var(--panel-2);
-  border:1px solid var(--border);border-radius:20px;padding:5px 12px 5px 6px;font-size:13px;}
+  border:1px solid var(--border);border-radius:20px;padding:4px 9px 4px 6px;font-size:12px;}
 .player-chip .dot{width:14px;height:14px;border-radius:50%;box-shadow:0 0 8px currentColor;}
 .player-chip.dead{opacity:.35;text-decoration:line-through;}
 .player-chip .gold{font-weight:700;color:var(--accent);}
@@ -217,7 +217,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;}
 .side-panel{flex:1;display:flex;flex-direction:column;min-width:280px;max-width:400px;
   border-left:1px solid var(--border);background:var(--panel);}
 .control-panel{padding:16px;border-bottom:1px solid var(--border);}
-.log-panel{flex:1;min-height:0;max-height:260px;overflow-y:auto;padding:12px 16px;font-size:12.5px;color:var(--text-dim);
+.log-panel{flex:1;min-height:0;max-height:220px;overflow-y:auto;padding:10px 14px;font-size:12px;color:var(--text-dim);
   display:flex;flex-direction:column-reverse;}
 .log-entry{padding:5px 0;border-bottom:1px dashed rgba(255,255,256,.06);}
 .log-entry.hot{color:var(--accent);}
@@ -544,7 +544,7 @@ input[type=range]{width:100%;accent-color:var(--accent);}
       <h1 class="title-logo">🎰 가챠머신 서바이벌</h1>
       <p class="title-sub">마지막까지 살아남거나, 먼저 목표 금액을 달성하라!</p>
       <div class="title-buttons">
-        <button id="btn-newgame" class="btn btn-primary">게임 시작</button>
+        <button id="btn-newgame" class="btn btn-primary">새 게임</button>
         <button id="btn-continue" class="btn btn-secondary">이어하기</button>
       </div>
     </div>
@@ -634,7 +634,7 @@ input[type=range]{width:100%;accent-color:var(--accent);}
           <div class="capsule-drawer-head">
             <div>
               <div class="capsule-drawer-title">🔵 내 캡슐 30개</div>
-              <div class="capsule-drawer-sub">활성 캡슐은 아직 보유 중입니다. 흐리게 표시된 캡슐은 머신에 들어갔거나 이번 매치에서 이미 소모되었습니다.</div>
+              <div class="capsule-drawer-sub">흐린 캡슐은 머신에 있거나 소모된 캡슐입니다.</div>
             </div>
             <button class="btn btn-secondary btn-small" id="btnCloseCapsuleDrawer">닫기</button>
           </div>
@@ -1150,7 +1150,9 @@ function initFloatingCapsules(){
 
 $('#btn-newgame').addEventListener('click', ()=>{
   SFX.unlock();
+  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
   newMatch(0);
+  refreshContinueButton();
   startIntroVN();
 });
 $('#btn-continue').addEventListener('click', ()=>{
@@ -1369,7 +1371,7 @@ async function startIntroVN(){
   ]);
   renderGameScreen();
   showScreen('screen-game');
-  beginRound(true);
+  beginRound(false);
 }
 
 async function startBriefVN(){
@@ -1384,7 +1386,7 @@ async function startBriefVN(){
   ]);
   renderGameScreen();
   showScreen('screen-game');
-  beginRound(true);
+  beginRound(false);
 }
 
 /* ============================== RENDER: GAME SCREEN HEADER ============================== */
@@ -1426,10 +1428,10 @@ function renderPlayersRow(){
       Object.keys(p.items||{}).filter(k=>p.items[k]>0).map(k=> ITEMS.find(x=>x.id===k).icon + (p.items[k]>1?p.items[k]:'') ).join(' ');
     const livesStr = '❤️'.repeat(Math.max(0,p.lives)) + '🖤'.repeat(Math.max(0,STARTING_LIVES-p.lives));
     const stockStr = countPlayerStock(p)+'/'+PLAYER_CAPSULE_POOL;
+    chip.title = p.name+' · 골드 '+p.gold+'원 · 보유 캡슐 '+stockStr;
     chip.innerHTML = '<span class="dot" style="background:'+p.color+';color:'+p.color+'"></span>'+
-      '<span>'+p.emoji+' '+p.name+'</span><span class="lives">'+livesStr+'</span><span class="gold">'+p.gold+'원</span>'+
-      '<span class="badges" style="margin-left:4px;">캡슐 '+stockStr+'</span>'+
-      (badgeStr? '<span class="badges" style="margin-left:4px;">'+badgeStr+'</span>':'');
+      '<span>'+p.emoji+' '+p.name+'</span><span class="lives">'+livesStr+'</span><span class="gold">'+p.gold+'</span>'+
+      '<span class="badges">📦'+stockStr+'</span>'+(badgeStr? '<span class="badges">'+badgeStr+'</span>':'');
     row.appendChild(chip);
   });
   renderGoalBadge();
@@ -1438,7 +1440,7 @@ function renderPlayersRow(){
 function renderLog(){
   const panel = $('#logPanel');
   panel.innerHTML = '';
-  const recent = G.log.slice(-40).slice().reverse();
+  const recent = G.log.slice(-12).slice().reverse();
   recent.forEach(l=>{
     const d = el('div','log-entry'+(l.cls?(' '+l.cls):''), l.msg);
     panel.appendChild(d);
@@ -1510,14 +1512,13 @@ function showItemUsePopup(popupData){
 function processItemPopupQueue(){
   if(isItemPopupShowing || itemPopupQueue.length === 0) return;
   isItemPopupShowing = true;
-  const {icon, itemName, desc, userEmoji, userName, targetEmoji, targetName, danger} = itemPopupQueue.shift();
+  const {icon, itemName, userEmoji, userName, targetEmoji, targetName, danger} = itemPopupQueue.shift();
 
   const wrap = $('#itemUsePopupWrap');
   const card = el('div','item-use-popup'+(danger?' danger':''));
   card.innerHTML =
     '<div class="headline"><span class="icon">'+icon+'</span>'+userEmoji+' '+userName+'가 ['+itemName+'] 사용!</div>'+
-    (targetName ? '<div class="sub">🎯 대상: '+targetEmoji+' '+targetName+'</div>' : '')+
-    '<div class="desc">'+desc+'</div>';
+    (targetName ? '<div class="sub">🎯 '+targetEmoji+' '+targetName+'</div>' : '');
   wrap.appendChild(card);
   const area = $('#machineArea');
   area.classList.remove('item-impact'); void area.offsetWidth; area.classList.add('item-impact');
@@ -1933,7 +1934,7 @@ async function runBettingPhase(){
 
     const passNotice = humanStock < rawMinFloor ? '<span class="sub" style="color:var(--accent);">보유 캡슐이 부족해 이번 라운드는 0개 패스가 가능합니다.</span>' : '';
     const title = el('div','bet-title','🎰 이번 라운드에 넣을 캡슐 수를 정하세요'+
-      '<span class="sub">보유 '+humanStock+'/'+PLAYER_CAPSULE_POOL+'개 · 최소 '+rawMinFloor+'개 · 최대 '+maxBet+'개 · 🥇1등 '+RANK_REWARDS[0]+'원, 🥈2등 '+RANK_REWARDS[1]+'원, 🥉3등 '+RANK_REWARDS[2]+'원</span>'+passNotice+luckyNotice);
+      '<span class="sub">보유 '+humanStock+'/'+PLAYER_CAPSULE_POOL+' · '+minFloor+'~'+maxBet+'개 투입 · 🏆 '+RANK_REWARDS.join('/')+'원</span>'+passNotice+luckyNotice);
     panel.appendChild(title);
 
     const pickerWrap = el('div','capsule-pick-wrap');
@@ -1972,9 +1973,8 @@ async function runBettingPhase(){
       const prob = total>0 ? (ownAfter/total*100).toFixed(1) : '0.0';
       const isLucky = (human.relics||[]).includes('lucky_bet') && val === G.luckyTarget;
       
-      preview.innerHTML = '순위 경쟁: <b>1등 '+RANK_REWARDS[0]+'원 / 2등 '+RANK_REWARDS[1]+'원 / 3등 '+RANK_REWARDS[2]+'원</b>' +
-        (isLucky ? ' <span style="color:var(--accent);font-weight:bold;">(+5 행운 적중 보너스!)</span>' : '') +
-        '<br>내 캡슐 예상 위험도: 약 <b>'+prob+'%</b>';
+      preview.innerHTML = '내 캡슐 위험도 <b>'+prob+'%</b>' +
+        (isLucky ? ' · <span style="color:var(--accent);font-weight:bold;">행운 +5</span>' : '');
     }
     renderPicker();
     updatePreview();
@@ -2052,12 +2052,24 @@ async function revealBets(bets){
   for(const p of G.players.filter(p=>p.alive)){
     await sleep(260);
     SFX.click();
-    const isPenalty = minPlayers.includes(p.id);
-    const item = el('div','reveal-item'+(isPenalty?' penalty':''));
-    item.innerHTML = '<span>'+p.emoji+' '+p.name+'</span><span class="n">'+bets[p.id]+'개'+
-      (isPenalty?'<span class="tag">최소! 페널티</span>':'')+'</span>';
+    const item = el('div','reveal-item');
+    item.innerHTML = '<span>'+p.emoji+' '+p.name+'</span><span class="n">'+bets[p.id]+'개</span>';
     row.appendChild(item);
     requestAnimationFrame(()=> item.classList.add('show'));
+  }
+  await sleep(450);
+
+  const penaltyTitle = el('div','bet-title','⚠️ 패널티 대상 공개!');
+  penaltyTitle.style.marginTop = '14px';
+  panel.appendChild(penaltyTitle);
+  for(const playerId of minPlayers){
+    const p = G.players.find(x=>x.id===playerId);
+    await sleep(280);
+    SFX.click();
+    const penaltyItem = el('div','reveal-item penalty');
+    penaltyItem.innerHTML = '<span>⚠️ '+p.emoji+' '+p.name+'</span><span class="n">최소 투입</span>';
+    row.appendChild(penaltyItem);
+    requestAnimationFrame(()=> penaltyItem.classList.add('show'));
   }
   await sleep(500);
 
@@ -2673,7 +2685,7 @@ async function runItemWindow(){
     const panel = $('#controlPanel');
     panel.innerHTML = '';
     const rankPosition = order.indexOf(current.id)+1;
-    panel.appendChild(el('div','bet-title','🎒 '+current.emoji+' '+current.name+'의 아이템 턴<span class="sub">투입 순위 '+rankPosition+'번째 · 많이 넣은 사람부터 사용합니다</span>'));
+    panel.appendChild(el('div','bet-title','🎒 '+current.emoji+' '+current.name+'의 아이템 턴<span class="sub">투입 순위 '+rankPosition+'번째</span>'));
     const skipBtn = el('button','btn btn-secondary','아이템 사용 종료 / 턴 넘기기');
     skipBtn.style.width='100%'; skipBtn.style.marginTop='10px';
     panel.appendChild(skipBtn);
