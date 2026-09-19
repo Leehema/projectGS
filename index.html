@@ -620,6 +620,7 @@ input[type=range]{width:100%;accent-color:var(--accent);}
 
     </div>
     <div class="ingame-vn-overlay" id="ingameVnOverlay">
+      <button class="btn btn-secondary btn-small vn-skip" id="ingameVnSkip">안내 건너뛰기 ▶▶</button>
       <div class="ingame-vn-character">🐱</div>
       <div class="ingame-vn-box" id="ingameVnBox">
         <div class="vn-name">MC 가챠냥</div>
@@ -1674,6 +1675,7 @@ async function beginRound(isResume){
 }
 
 let ingameVnResolve = null;
+let ingameVnSkipAll = false;
 function ingameVnLine(text){
   return new Promise(res=>{
     const textEl = $('#ingameVnText');
@@ -1699,17 +1701,26 @@ function ingameVnLine(text){
 }
 async function playIngameCatLines(lines){
   const overlay = $('#ingameVnOverlay');
+  ingameVnSkipAll = false;
   overlay.classList.add('show');
   for(const text of lines){
+    if(ingameVnSkipAll) break;
     await ingameVnLine(text);
+    if(ingameVnSkipAll) break;
     await new Promise(res=>{
       ingameVnResolve = ()=>{ clearTimeout(window.__ingameVnTyper); $('#ingameVnText').textContent=text; ingameVnResolve=null; res(); };
     });
   }
+  ingameVnResolve = null;
   overlay.classList.remove('show');
 }
 $('#ingameVnNext').addEventListener('click', ()=>{ if(ingameVnResolve) ingameVnResolve(); });
 $('#ingameVnBox').addEventListener('click', ()=>{ if(ingameVnResolve) ingameVnResolve(); });
+$('#ingameVnSkip').addEventListener('click', (ev)=>{
+  ev.stopPropagation();
+  ingameVnSkipAll = true;
+  if(ingameVnResolve) ingameVnResolve();
+});
 
 async function showPenaltyExplainer(){
   await playIngameCatLines([
