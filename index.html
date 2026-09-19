@@ -613,7 +613,7 @@ input[type=range]{width:100%;accent-color:var(--accent);}
           </div>
           <div class="ingame-shop-footer">
             <div class="ingame-shop-ai-log" id="popupShopLog"></div>
-            <button class="btn btn-primary" id="btn-popup-shop-close">쇼핑 완료 · 아이템 사용 및 뽑기로 ▶</button>
+            <button class="btn btn-primary" id="btn-popup-shop-close">쇼핑 완료 · 순위별 아이템 턴 및 뽑기로 ▶</button>
           </div>
         </div>
       </div>
@@ -677,13 +677,13 @@ const NAME  = { player:'플레이어', ai1:'루디', ai2:'미미', ai3:'제타' 
 const EMOJI = { player:'🔵', ai1:'🔴', ai2:'🟡', ai3:'🟣' };
 const CCLASS= { player:'c-player', ai1:'c-ai1', ai2:'c-ai2', ai3:'c-ai3' };
 
-/* 순위별 보상 테이블 (1등 5골드, 2등 3골드, 3등 1골드) */
-const RANK_REWARDS = [5, 3, 1];
+/* 순위별 보상 테이블 (1등 4골드, 2등 2골드, 3등 1골드) */
+const RANK_REWARDS = [4, 2, 1];
 
 const MATCH_CONFIGS = [
-  { aiCount:1, emptyCapsules:9,  target:30, minBet:1, maxBet:7, label:'MATCH 1 · 튜토리얼' },
-  { aiCount:2, emptyCapsules:13, target:48, minBet:1, maxBet:7, label:'MATCH 2 · 혼돈의 3파전' },
-  { aiCount:3, emptyCapsules:17, target:65, minBet:1, maxBet:8, label:'MATCH 3 · 최종 생존전' },
+  { aiCount:1, emptyCapsules:8,  target:28, minBet:1, maxBet:5, label:'MATCH 1 · 튜토리얼' },
+  { aiCount:2, emptyCapsules:11, target:42, minBet:1, maxBet:5, label:'MATCH 2 · 혼돈의 3파전' },
+  { aiCount:3, emptyCapsules:14, target:56, minBet:1, maxBet:5, label:'MATCH 3 · 최종 생존전' },
 ];
 
 const RELICS = [
@@ -694,9 +694,9 @@ const RELICS = [
   { id:'golden_die', name:'황금 주사위', icon:'🎲', cost:7,
     desc:'라운드 순위 골드 보상을 받을 때 추가로 +2골드를 획득합니다.' },
   { id:'phoenix', name:'불사조의 깃털', icon:'🪶', cost:9,
-    desc:'체력이 1 남았을 때 탈락 위기에서 한 번 살아남고, 머신에 내 캡슐 7개를 추가합니다. (1회 발동 후 파괴)' },
+    desc:'체력이 1 남았을 때 탈락 위기에서 한 번 살아남고, 머신에 내 캡슐 4개를 추가합니다. (1회 발동 후 파괴)' },
   { id:'punish_heavy', name:'가혹한 형벌', icon:'👁️‍🗨️', cost:7,
-    desc:'라운드 최소 투입자에게 주어지는 페널티 캡슐의 수를 2개 늘립니다. (기본 1개 → 총 3개)' },
+    desc:'라운드 최소 투입자에게 주어지는 페널티 캡슐의 수를 1개 늘립니다. (기본 1개 → 총 2개)' },
   { id:'dividend', name:'황금 배당금', icon:'🏦', cost:6,
     desc:'매 라운드 시작 시, 머신 속 본인 캡슐 5개당 3골드를 정산하여 획득합니다.' },
   { id:'lucky_bet', name:'행운의 숫자', icon:'🎯', cost:5,
@@ -709,17 +709,17 @@ const ITEMS = [
   { id:'double', name:'더블 트랩', icon:'🎯2️⃣', cost:3, targeted:true, kind:'targetDouble',
     desc:'상대 1명을 지목해 이번 라운드 넣은 캡슐 수를 2배로 만듭니다. (보너스 골드 없음, 라운드 종료 시 원상 복구)' },
   { id:'purge', name:'캡슐 청소', icon:'🧹', cost:4, targeted:false, kind:'purge',
-    desc:'가챠 기계에서 무작위로 캡슐 10개를 영구히 제거합니다. 어떤 캡슐이 제거됐는지 공개됩니다.' },
+    desc:'가챠 기계에서 무작위로 캡슐 6개를 영구히 제거합니다. 어떤 캡슐이 제거됐는지 공개됩니다.', count:6 },
   { id:'emptydrop', name:'빈 캡슐 투하', icon:'⚪', cost:3, targeted:false, kind:'addEmpty',
-    desc:'이번 라운드 한정으로 가챠 기계에 빈 캡슐 10개를 추가합니다. (라운드 종료 시 원상 복구)', count:10 },
+    desc:'이번 라운드 한정으로 가챠 기계에 빈 캡슐 6개를 추가합니다. (라운드 종료 시 원상 복구)', count:6 },
   { id:'doubledraw', name:'더블 뽑기', icon:'🎰2️⃣', cost:3, targeted:false, kind:'doubleDraw',
     desc:'이번 라운드에는 캡슐을 2번 뽑습니다.' },
   { id:'shield', name:'하트 실드', icon:'💗', cost:4, targeted:false, kind:'shield',
     desc:'이번 라운드에만, 목숨이 줄어드는 것을 1회 막아줍니다.' },
   { id:'trap3', name:'함정 캡슐', icon:'🎯', cost:3, targeted:true, kind:'targetAdd',
-    desc:'상대 1명을 지목해 이번 라운드 한정 캡슐 3개를 몰래 추가합니다. (보너스 골드 없음, 라운드 종료 시 원상 복구)', count:3 },
+    desc:'상대 1명을 지목해 이번 라운드 한정 캡슐 2개를 몰래 추가합니다. (보너스 골드 없음, 라운드 종료 시 원상 복구)', count:2 },
   { id:'ward3', name:'삼중 부적', icon:'🛡️', cost:3, targeted:false, kind:'selfWard',
-    desc:'이번 라운드, 내 캡슐 3개를 빈 캡슐로 취급합니다. (라운드 종료 시 원상 복구)', count:3 },
+    desc:'이번 라운드, 내 캡슐 2개를 빈 캡슐로 취급합니다. (라운드 종료 시 원상 복구)', count:2 },
   { id:'matchgold', name:'캡슐 수당', icon:'💹', cost:3, targeted:false, kind:'matchGold',
     desc:'이번 라운드에 내가 넣게 된 캡슐 수(페널티·아이템 효과 포함)만큼 추가 골드를 획득합니다.' },
   { id:'gold10', name:'골드 캡슐', icon:'💰', cost:3, targeted:false, kind:'instantGold',
@@ -729,12 +729,13 @@ const ITEMS = [
   { id:'aging', name:'숙성 캡슐', icon:'📈', cost:3, targeted:false, kind:'aging',
     desc:'사용 효과는 없지만, 판매하지 않고 보유할수록 라운드마다 판매 가치가 3원씩 오릅니다.' },
   { id:'metalcap', name:'메탈 캡슐화', icon:'🔩', cost:5, targeted:false, kind:'metal',
-    desc:'머신 속 내 일반 캡슐 3개를 메탈 캡슐로 바꿉니다. 뽑히면 목숨을 잃지 않고 5원을 획득하며, 효과는 이번 매치가 끝나면 초기화됩니다.', count:3 },
+    desc:'머신 속 내 일반 캡슐 최대 3개를 대상으로 각각 50% 확률로 메탈 캡슐로 바꿉니다. 뽑히면 5골드를 획득하고 결과를 무효화한 뒤 재추첨합니다.', count:3 },
   { id:'holocap', name:'홀로그램 캡슐화', icon:'🌈', cost:5, targeted:false, kind:'holo',
-    desc:'머신 속 내 일반 캡슐 3개를 홀로그램 캡슐로 바꿉니다. 뽑히면 무작위 다른 플레이어의 캡슐로 취급되며, 효과는 이번 매치가 끝나면 초기화됩니다.', count:3 },
+    desc:'머신 속 내 일반 캡슐 최대 3개를 대상으로 각각 50% 확률로 홀로그램 캡슐로 바꿉니다. 뽑히면 랜덤 아이템을 획득하고 결과를 무효화한 뒤 재추첨합니다.', count:3 },
 ];
 
 const BASE_ITEM_MAX_STOCK = 3;
+const CAPSULE_ENCHANT_SUCCESS_RATE = 0.5;
 function getMaxItemStock(player){
   let limit = BASE_ITEM_MAX_STOCK;
   if(player && (player.relics || []).includes('pocket')){
@@ -749,9 +750,9 @@ const SAVE_KEY = 'gachaSurvivalSave_v1';
 const PLAYER_CAPSULE_POOL = 30;
 const CAPSULE_UPGRADE_SHOP = [
   { id:'metal', name:'메탈 캡슐 강화', icon:'🔩', cost:2,
-    desc:'보유 일반 캡슐 1개를 메탈 캡슐로 영구 강화합니다. 메탈 캡슐은 뽑혀도 목숨을 잃지 않고 5원을 획득합니다.' },
+    desc:'보유 일반 캡슐 1개를 메탈 캡슐로 영구 강화합니다. 뽑히면 소유자가 5원을 얻고 결과를 무효화한 뒤 재추첨합니다.' },
   { id:'holo', name:'홀로그램 캡슐 강화', icon:'🌈', cost:3,
-    desc:'보유 일반 캡슐 1개를 홀로그램 캡슐로 영구 강화합니다. 홀로그램 캡슐은 뽑히면 무작위 다른 플레이어의 캡슐로 취급됩니다.' },
+    desc:'보유 일반 캡슐 1개를 홀로그램 캡슐로 영구 강화합니다. 뽑히면 소유자가 랜덤 아이템을 받고 결과를 무효화한 뒤 재추첨합니다.' },
 ];
 
 /* ============================== AUDIO ============================== */
@@ -941,6 +942,7 @@ function freshPlayers(cfg, carry){
     return {
       id, name:NAME[id], color:COLOR[id], emoji:EMOJI[id], isAI: id!=='player',
       alive:true, lives:STARTING_LIVES, gold:0,
+      riskStyle: id==='ai1' ? 0.82 : id==='ai2' ? 1.0 : id==='ai3' ? 1.18 : 1,
       relics:(id==='player' && carry && carry.playerRelics) ? carry.playerRelics.slice() : [],
       capsuleUpgrades,
       capsuleStock:createCapsuleStock(capsuleUpgrades),
@@ -966,6 +968,7 @@ function newMatch(matchIndex, carry){
     shopOffer: { items:[] },
     shopBought: {},
     roundCapsuleAdds: {},
+    roundRankOrder: [],
     luckyTarget: 1,
     relicCurrency: carry && carry.relicCurrency || 0
   };
@@ -1101,9 +1104,9 @@ function diagMachineLegend(){
 function diagBetGold(maxBet){
   return '<div class="vn-diagram-title">투입 순위 경쟁 → 골드 획득</div>'+
     '<div class="vd-row">'+
-      '<div class="vd-chip"><span class="icon">🥇 1등</span><span class="val">5원</span></div>'+
-      '<div class="vd-chip"><span class="icon">🥈 2등</span><span class="val">3원</span></div>'+
-      '<div class="vd-chip"><span class="icon">🥉 3등</span><span class="val">1원</span></div>'+
+      '<div class="vd-chip"><span class="icon">🥇 1등</span><span class="val">'+RANK_REWARDS[0]+'원</span></div>'+
+      '<div class="vd-chip"><span class="icon">🥈 2등</span><span class="val">'+RANK_REWARDS[1]+'원</span></div>'+
+      '<div class="vd-chip"><span class="icon">🥉 3등</span><span class="val">'+RANK_REWARDS[2]+'원</span></div>'+
     '</div>'+
     '<div class="vd-legend"><span>매치마다 보유 캡슐 30개 안에서 투입한다냥! (라운드 최대 '+maxBet+'개)</span></div>';
 }
@@ -1232,15 +1235,15 @@ async function startIntroVN(){
     {name:'MC 가챠냥', text:'나는 오늘 진행을 맡은 MC 가챠냥이다냥 🐱'},
     {name:'MC 가챠냥', text:'지금부터 「가챠머신 서바이벌」의 규칙을 설명해주겠다냥!'},
     {name:'MC 가챠냥', text:'가운데 놓인 이 거대한 가챠 머신 안에는 참가자들의 색깔 캡슐이랑 빈 캡슐이 마구 섞여 들어있다냥.', diag: diagMachineLegend()},
-    {name:'MC 가챠냥', text:'각 참가자는 매치마다 자기 캡슐 30개를 들고 시작하고, 그 안에서 캡슐을 머신에 넣는다냥.', diag: diagBetGold(cfg.maxBet)},
+    {name:'MC 가챠냥', text:'각 참가자는 매치마다 자기 캡슐 30개를 들고 시작하고, 라운드마다 1개부터 5개까지 머신에 넣는다냥.', diag: diagBetGold(cfg.maxBet)},
     {name:'MC 가챠냥', text:'캡슐을 다 쓰면 최소 투입량을 못 채워도 그 라운드는 0개로 패스할 수 있다냥.'},
-    {name:'MC 가챠냥', text:'이번 라운드에 가장 캡슐을 많이 넣은 순서대로 1등 5원, 2등 3원, 3등 1원을 받는다냥!'},
+    {name:'MC 가챠냥', text:'이번 라운드에 가장 캡슐을 많이 넣은 순서대로 1등 '+RANK_REWARDS[0]+'원, 2등 '+RANK_REWARDS[1]+'원, 3등 '+RANK_REWARDS[2]+'원을 받는다냥!'},
     {name:'MC 가챠냥', text:'골드를 정산받으면, 머신 바로 밑에 아이템 상점이 열린다냥!'},
     {name:'MC 가챠냥', text:'방금 번 돈으로 저렴한 아이템을 사서 곧바로 이어질 추첨에 대비할 수 있다냥!'},
     {name:'MC 가챠냥', text:'그리고 강력한 "유물"과 보유 캡슐 강화는 한 매치가 완전히 끝난 뒤 열리는 전용 상점에서만 살 수 있다냥!', diag: diagRelicShop()},
     {name:'MC 가챠냥', text:'상점에서는 골드가 아니라 "매치가 끝났을 때 머신에 남은 내 캡슐 개수"로 얻는 캡슐 파편을 쓴다냥.'},
     {name:'MC 가챠냥', text:'한 번 뽑힌 캡슐은 머신에서 즉시 제거된다는 점도 잊지 마라냥!'},
-    {name:'MC 가챠냥', text:'상점을 닫으면 아이템 사용과 함께 손잡이를 돌려 캡슐을 뽑는다냥!', diag: diagCrank()},
+    {name:'MC 가챠냥', text:'상점을 닫으면 투입 순위대로 아이템 턴을 가진다냥. 자기 턴에는 원하는 만큼 사용한 뒤 턴을 넘길 수 있다냥!', diag: diagCrank()},
     {name:'MC 가챠냥', text:'다들 목숨은 2개씩이다냥!', diag: diagOutcomes()},
     {name:'MC 가챠냥', text:'뽑힌 캡슐이 자기 색깔이면 목숨을 하나 잃지만, 위로 차원에서 아이템 1개를 무료로 선물한다냥!'},
     {name:'MC 가챠냥', text:'목숨이 다 떨어지면 그제서야 진짜 탈락이다냥.'},
@@ -1519,7 +1522,7 @@ function capsuleAddSummary(added){
   return parts.join(', ') || '0개';
 }
 
-function consumeCapsuleFromMachine(outcomeId){
+function consumeCapsuleFromMachine(outcomeId, ctx){
   if(outcomeId === 'empty'){
     if(G.machine.empty > 0) G.machine.empty -= 1;
   } else if(outcomeId.startsWith('metal:')){
@@ -1529,7 +1532,12 @@ function consumeCapsuleFromMachine(outcomeId){
     const ownerId = outcomeId.slice(5);
     if(G.machine.holo[ownerId] > 0) G.machine.holo[ownerId] -= 1;
   } else {
-    if(G.machine.capsules[outcomeId] > 0) G.machine.capsules[outcomeId] -= 1;
+    let sourceId = outcomeId;
+    if(ctx && ctx.swapPair){
+      if(outcomeId===ctx.swapPair.a) sourceId = ctx.swapPair.b;
+      else if(outcomeId===ctx.swapPair.b) sourceId = ctx.swapPair.a;
+    }
+    if(G.machine.capsules[sourceId] > 0) G.machine.capsules[sourceId] -= 1;
   }
 }
 
@@ -1741,7 +1749,7 @@ async function runBettingPhase(){
 
     const passNotice = humanStock < rawMinFloor ? '<span class="sub" style="color:var(--accent);">보유 캡슐이 부족해 이번 라운드는 0개 패스가 가능합니다.</span>' : '';
     const title = el('div','bet-title','🎰 이번 라운드에 넣을 캡슐 수를 정하세요'+
-      '<span class="sub">보유 '+humanStock+'/'+PLAYER_CAPSULE_POOL+'개 · 최소 '+rawMinFloor+'개 · 최대 '+maxBet+'개 · 🥇1등 5원, 🥈2등 3원, 🥉3등 1원</span>'+passNotice+luckyNotice);
+      '<span class="sub">보유 '+humanStock+'/'+PLAYER_CAPSULE_POOL+'개 · 최소 '+rawMinFloor+'개 · 최대 '+maxBet+'개 · 🥇1등 '+RANK_REWARDS[0]+'원, 🥈2등 '+RANK_REWARDS[1]+'원, 🥉3등 '+RANK_REWARDS[2]+'원</span>'+passNotice+luckyNotice);
     panel.appendChild(title);
 
     const stepperWrap = el('div','bet-controls');
@@ -1770,7 +1778,7 @@ async function runBettingPhase(){
       const prob = total>0 ? (ownAfter/total*100).toFixed(1) : '0.0';
       const isLucky = (human.relics||[]).includes('lucky_bet') && val === G.luckyTarget;
       
-      preview.innerHTML = '순위 경쟁: <b>1등 5원 / 2등 3원 / 3등 1원</b>' + 
+      preview.innerHTML = '순위 경쟁: <b>1등 '+RANK_REWARDS[0]+'원 / 2등 '+RANK_REWARDS[1]+'원 / 3등 '+RANK_REWARDS[2]+'원</b>' +
         (isLucky ? ' <span style="color:var(--accent);font-weight:bold;">(+5 행운 적중 보너스!)</span>' : '') +
         '<br>내 캡슐 예상 위험도: 약 <b>'+prob+'%</b>';
     }
@@ -1803,17 +1811,30 @@ async function runBettingPhase(){
 function aiDecideBet(ai, floor, maxBet, total, pool){
   if(maxBet <= 0) return 0;
   const cfg = G.config;
-  let base = randi(floor, Math.min(maxBet, floor+3));
-  if((ai.relics||[]).includes('lucky_bet') && G.luckyTarget >= floor && G.luckyTarget <= maxBet){
-    if(Math.random()<0.65) base = G.luckyTarget;
-  }
   const goldRatio = ai.gold / cfg.target;
-  if(goldRatio < 0.6 && Math.random()<0.5) base += randi(1,3);
-  if(goldRatio > 0.7 && Math.random()<0.65) base += randi(2,4);
-  const ownFrac = total>0 ? (pool[ai.id]||0)/total : 0;
-  if(ownFrac > 0.3 && goldRatio < 0.8 && Math.random()<0.55) base -= randi(1,2);
-  if(Math.random()<0.1) base = randi(floor, maxBet);
-  return clamp(base, floor, maxBet);
+  const lives = ai.lives || 1;
+  const stock = Math.max(1, countPlayerStock(ai));
+  const riskStyle = ai.riskStyle || 1;
+  let targetRisk = lives<=1 ? 0.20 : 0.28;
+  if(goldRatio<0.45) targetRisk += 0.04;
+  if(goldRatio>0.8) targetRisk -= 0.05;
+  targetRisk *= riskStyle;
+  let best = floor, bestScore = -Infinity;
+  for(let candidate=floor; candidate<=maxBet; candidate++){
+    const projectedTotal = total + candidate;
+    const projectedFrac = projectedTotal>0 ? ((pool[ai.id]||0)+candidate)/projectedTotal : 0;
+    const rankPotential = 0.8 + candidate*0.55;
+    const excessRisk = Math.max(0, projectedFrac-targetRisk);
+    let score = rankPotential;
+    score -= excessRisk * (lives<=1 ? 26 : 20);
+    score -= (candidate/stock) * 3;
+    if(goldRatio<0.45) score += candidate*0.18;
+    if((ai.relics||[]).includes('lucky_bet') && candidate===G.luckyTarget) score += 5;
+    if(goldRatio>=0.85) score -= candidate*0.35;
+    score += Math.random()*0.5;
+    if(score>bestScore){ bestScore=score; best=candidate; }
+  }
+  return clamp(best, floor, maxBet);
 }
 
 /* ---- Reveal bets ---- */
@@ -1847,7 +1868,7 @@ async function revealBets(bets){
 async function applyBetsToMachine(bets, minPlayers){
   let penaltyAmount = 1;
   if(G.players.some(p=>p.alive && (p.relics||[]).includes('punish_heavy'))){
-    penaltyAmount += 2;
+    penaltyAmount += 1;
   }
 
   renderMachineVisual();
@@ -1859,6 +1880,7 @@ async function applyBetsToMachine(bets, minPlayers){
     .filter(p => p.alive)
     .map(p => ({ player: p, bet: bets[p.id] }))
     .sort((a, b) => b.bet - a.bet);
+  G.roundRankOrder = sortedAlive.map(entry => entry.player.id);
 
   let currentRank = 0;
   for(let i = 0; i < sortedAlive.length; i++){
@@ -2184,6 +2206,7 @@ function applyItemEffect(itemId, user, ctx, targetId){
   if(!info) return;
   const target = targetId ? G.players.find(p=>p.id===targetId) : null;
   let logMsg = '', popupTargetName = null, popupTargetEmoji = null, danger = false;
+  const invalidatePeek = ()=>{ ctx.peekedOutcome = null; };
 
   switch(info.kind){
     case 'peek': {
@@ -2209,6 +2232,7 @@ function applyItemEffect(itemId, user, ctx, targetId){
       break;
     }
     case 'targetDouble': {
+      invalidatePeek();
       const added = (G.roundCapsuleAdds && G.roundCapsuleAdds[target.id]) || 0;
       ctx.tempCaps[target.id] = (ctx.tempCaps[target.id]||0) + added;
       logMsg = target.emoji+' '+target.name+'의 이번 라운드 캡슐 수가 2배가 되었습니다! (+'+added+'개, 보너스 골드 없음)';
@@ -2216,6 +2240,7 @@ function applyItemEffect(itemId, user, ctx, targetId){
       break;
     }
     case 'targetAdd': {
+      invalidatePeek();
       const n = info.count||3;
       ctx.tempCaps[target.id] = (ctx.tempCaps[target.id]||0) + n;
       logMsg = target.emoji+' '+target.name+'에게 임시 캡슐 '+n+'개 추가 (보너스 골드 없음)';
@@ -2223,6 +2248,7 @@ function applyItemEffect(itemId, user, ctx, targetId){
       break;
     }
     case 'selfWard': {
+      invalidatePeek();
       const n = info.count||3;
       ctx.wardCounts[user.id] = (ctx.wardCounts[user.id]||0) + n;
       logMsg = user.emoji+' '+user.name+'의 캡슐 '+n+'개를 이번 라운드 한정 빈 캡슐로 취급';
@@ -2235,6 +2261,10 @@ function applyItemEffect(itemId, user, ctx, targetId){
     }
     case 'swap': {
       ctx.swapPair = { a:user.id, b:target.id };
+      if(ctx.peekedOutcome && !ctx.peekedOutcome.includes(':')){
+        if(ctx.peekedOutcome===user.id) ctx.peekedOutcome = target.id;
+        else if(ctx.peekedOutcome===target.id) ctx.peekedOutcome = user.id;
+      }
       logMsg = user.emoji+' '+user.name+'와(과) '+target.emoji+' '+target.name+'의 캡슐이 이번 라운드 한정 뒤바뀝니다!';
       popupTargetName = target.name; popupTargetEmoji = target.emoji; danger = true;
       break;
@@ -2246,14 +2276,17 @@ function applyItemEffect(itemId, user, ctx, targetId){
       break;
     }
     case 'addEmpty': {
+      invalidatePeek();
       const n = info.count||10;
       ctx.tempEmpty = (ctx.tempEmpty || 0) + n;
       logMsg = '가챠 머신에 이번 라운드 한정으로 빈 캡슐 '+n+'개가 투하되었습니다!';
       break;
     }
     case 'purge': {
-      const summary = purgeRandomCapsules(10);
-      logMsg = '가챠 머신에서 캡슐 10개가 제거되었습니다! ('+(summary||'해당 없음')+')';
+      invalidatePeek();
+      const n = info.count||6;
+      const summary = purgeRandomCapsules(n);
+      logMsg = '가챠 머신에서 캡슐 '+n+'개가 제거되었습니다! ('+(summary||'해당 없음')+')';
       break;
     }
     case 'instantGold': {
@@ -2269,17 +2302,25 @@ function applyItemEffect(itemId, user, ctx, targetId){
       break;
     }
     case 'metal': {
-      const n = Math.min(info.count||3, G.machine.capsules[user.id]||0);
+      const beforeMetal = G.machine.capsules[user.id]||0;
+      const attemptsMetal = Math.min(info.count||3, beforeMetal);
+      let n = 0;
+      for(let i=0;i<attemptsMetal;i++) if(Math.random() < CAPSULE_ENCHANT_SUCCESS_RATE) n++;
       G.machine.capsules[user.id] -= n;
       G.machine.metal[user.id] = (G.machine.metal[user.id]||0) + n;
-      logMsg = user.emoji+' '+user.name+'의 캡슐 '+n+'개가 메탈 캡슐로 변했습니다! (매치 종료까지 유지)';
+      if(ctx.peekedOutcome===user.id && n>0 && Math.random() < n/beforeMetal) ctx.peekedOutcome = 'metal:'+user.id;
+      logMsg = user.emoji+' '+user.name+'의 일반 캡슐 '+n+'개가 메탈 캡슐로 변했습니다! (시도 '+attemptsMetal+'개, 매치 종료까지 유지)';
       break;
     }
     case 'holo': {
-      const n = Math.min(info.count||3, G.machine.capsules[user.id]||0);
+      const beforeHolo = G.machine.capsules[user.id]||0;
+      const attemptsHolo = Math.min(info.count||3, beforeHolo);
+      let n = 0;
+      for(let i=0;i<attemptsHolo;i++) if(Math.random() < CAPSULE_ENCHANT_SUCCESS_RATE) n++;
       G.machine.capsules[user.id] -= n;
       G.machine.holo[user.id] = (G.machine.holo[user.id]||0) + n;
-      logMsg = user.emoji+' '+user.name+'의 캡슐 '+n+'개가 홀로그램 캡슐로 변했습니다! (매치 종료까지 유지)';
+      if(ctx.peekedOutcome===user.id && n>0 && Math.random() < n/beforeHolo) ctx.peekedOutcome = 'holo:'+user.id;
+      logMsg = user.emoji+' '+user.name+'의 일반 캡슐 '+n+'개가 홀로그램 캡슐로 변했습니다! (시도 '+attemptsHolo+'개, 매치 종료까지 유지)';
       break;
     }
     default: {
@@ -2336,75 +2377,97 @@ function purgeRandomCapsules(n){
 }
 
 function aiTryUseItems(ai, ctx){
-  Object.keys(ai.items||{}).forEach(id=>{
-    if((ai.items[id]||0) <= 0) return;
-    const info = ITEMS.find(x=>x.id===id);
-    if(!info || info.kind==='aging') return;
-    let chance = 0.6;
-    if(info.kind==='instantGold') chance = 0.9;
-    else if(info.kind==='matchGold') chance = 0.85;
-    else if(info.kind==='shield') chance = 0.7;
-    else if(info.kind==='targetAdd' || info.kind==='targetDouble' || info.kind==='swap') chance = 0.8;
-    else if(info.kind==='doubleDraw') chance = 0.5;
-    else if(info.kind==='purge' || info.kind==='addEmpty') chance = 0.55;
-    else if(info.kind==='metal' || info.kind==='holo') chance = 0.65;
-    else if(info.kind==='peek') chance = 0.75;
-    if(Math.random() >= chance) return;
-
-    let targetId = null;
-    if(info.targeted){
-      const targets = G.players.filter(p=>p.alive && p.id!==ai.id);
-      if(!targets.length) return;
-      const weights = targets.map(t=> t.id==='player' ? 3 : 1);
-      const totalW = weights.reduce((a,b)=>a+b,0);
-      let r = Math.random()*totalW, target = targets[targets.length-1];
-      for(let i=0;i<targets.length;i++){ r -= weights[i]; if(r<=0){ target=targets[i]; break; } }
-      targetId = target.id;
-    }
-    ai.items[id] -= 1;
-    applyItemEffect(id, ai, ctx, targetId);
-  });
+  const pool = getEffectivePool(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
+  const total = poolTotal(pool);
+  const own = (pool[ai.id]||0) + (pool['metal:'+ai.id]||0) + (pool['holo:'+ai.id]||0);
+  const danger = total>0 ? own/total : 0;
+  const deficit = Math.max(0, G.config.target-ai.gold);
+  const targets = G.players.filter(p=>p.alive && p.id!==ai.id);
+  const targetFor = info=>{
+    if(!info.targeted || !targets.length) return null;
+    return targets.slice().sort((a,b)=>{
+      const aCaps=(pool[a.id]||0)+(pool['metal:'+a.id]||0)+(pool['holo:'+a.id]||0);
+      const bCaps=(pool[b.id]||0)+(pool['metal:'+b.id]||0)+(pool['holo:'+b.id]||0);
+      const aThreat=(a.gold/G.config.target)*4+(aCaps/Math.max(1,total))*3+(a.lives<=1?2:0);
+      const bThreat=(b.gold/G.config.target)*4+(bCaps/Math.max(1,total))*3+(b.lives<=1?2:0);
+      return bThreat-aThreat;
+    })[0].id;
+  };
+  const scored = [];
+  for(const id of Object.keys(ai.items||{})){
+    if((ai.items[id]||0)<=0) continue;
+    const info=ITEMS.find(x=>x.id===id);
+    if(!info || info.kind==='aging') continue;
+    let score=0;
+    if(info.kind==='shield') score=(ai.lives<=1?6:0)+danger*5;
+    else if(info.kind==='metal' || info.kind==='holo') score=own>0?((danger>0.18?3:0)+(ai.lives<=1?2:0)):0;
+    else if(info.kind==='peek') score=danger>0.2?3:1;
+    else if(info.kind==='purge') score=danger>0.22?3.5:1;
+    else if(info.kind==='addEmpty') score=danger>0.2?2.5:0.8;
+    else if(info.kind==='targetDouble' || info.kind==='targetAdd') score=targets.length?(deficit< G.config.target*0.4?3:1.5):0;
+    else if(info.kind==='swap') score=targets.length && danger>0.18?2.8:0;
+    else if(info.kind==='instantGold') score=deficit>8?4:1;
+    else if(info.kind==='matchGold') score=G.roundCapsuleAdds[ai.id]>0?2.5:0;
+    else if(info.kind==='doubleDraw') score=deficit>10?3:1;
+    score += Math.random()*0.5;
+    if(score>0) scored.push({id, info, score, targetId:targetFor(info)});
+  }
+  if(!scored.length) return false;
+  scored.sort((a,b)=>b.score-a.score);
+  const choice=scored[0];
+  if(choice.info.targeted && !choice.targetId) return false;
+  ai.items[choice.id] -= 1;
+  applyItemEffect(choice.id, ai, ctx, choice.targetId);
+  return true;
 }
 
 /* ---- Item usage window ---- */
 async function runItemWindow(){
   const human = G.players.find(p=>p.id==='player');
   const ctx = { tempCaps:{}, wardCounts:{}, shieldSet:new Set(), swapPair:null, doubleDraw:false, peekedOutcome:null, tempEmpty:0 };
-
-  for(const ai of G.players.filter(p=>p.isAI && p.alive)){
-    aiTryUseItems(ai, ctx);
-  }
-  renderPlayersRow();
-  renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
-
-  const humanUsable = ITEMS.filter(it=> it.kind!=='aging' && (human.items[it.id]||0) > 0).map(it=>it.id);
-  if(humanUsable.length===0){
-    await sleep(300);
-    await finalizeAndDraw(ctx);
-    return;
-  }
-
-  const panel = $('#controlPanel');
-  panel.innerHTML = '';
-  panel.appendChild(el('div','bet-title','🎒 아이템을 사용할 시간!<span class="sub">왼쪽 목록에서 아이템을 클릭해 사용하세요</span>'));
-  const skipBtn = el('button','btn btn-secondary','아이템 사용 안 함 / 뽑기 진행');
-  skipBtn.style.width='100%'; skipBtn.style.marginTop='10px';
-  panel.appendChild(skipBtn);
-
   G.itemWindowActive = true;
   G.itemWindowCtx = ctx;
-  G.sidebarExpanded = null;
-  G.sidebarTarget = null;
-  renderItemSidebar();
-
-  await new Promise(res=>{ skipBtn.addEventListener('click', ()=> res(), {once:true}); });
-
+  const order = G.roundRankOrder || G.players.filter(p=>p.alive).map(p=>p.id);
+  for(const playerId of order){
+    const current = G.players.find(p=>p.id===playerId);
+    if(!current || !current.alive) continue;
+    G.itemTurnPlayerId = current.id;
+    G.sidebarExpanded = null;
+    G.sidebarTarget = null;
+    renderPlayersRow();
+    renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
+    if(current.isAI){
+      let used = 0;
+      while(aiTryUseItems(current, ctx)){
+        used++;
+        renderPlayersRow();
+        renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
+        await sleep(350);
+      }
+      if(!used) await sleep(250);
+      continue;
+    }
+    const humanUsable = ITEMS.some(it=>it.kind!=='aging' && (human.items[it.id]||0)>0);
+    if(!humanUsable) continue;
+    const panel = $('#controlPanel');
+    panel.innerHTML = '';
+    panel.appendChild(el('div','bet-title','🎒 '+current.emoji+' '+current.name+'의 아이템 턴<span class="sub">투입 순위대로 진행 · 원하는 만큼 사용한 뒤 턴을 넘기세요</span>'));
+    const skipBtn = el('button','btn btn-secondary','아이템 사용 종료 / 턴 넘기기');
+    skipBtn.style.width='100%'; skipBtn.style.marginTop='10px';
+    panel.appendChild(skipBtn);
+    renderItemSidebar();
+    await new Promise(res=>{
+      G.itemTurnResolve = res;
+      skipBtn.addEventListener('click', ()=>{ if(G.itemTurnResolve){ G.itemTurnResolve(); G.itemTurnResolve=null; } }, {once:true});
+    });
+  }
+  G.itemTurnPlayerId = null;
+  G.itemTurnResolve = null;
   G.itemWindowActive = false;
   G.itemWindowCtx = null;
   G.sidebarExpanded = null;
   G.sidebarTarget = null;
   renderItemSidebar();
-
   await finalizeAndDraw(ctx);
 }
 
@@ -2470,7 +2533,7 @@ function renderItemSidebar(){
       const btnRow = el('div','item-slot-btns');
       if(!isAging){
         const useBtn = el('button','btn btn-small btn-danger','사용');
-        const canUse = G.itemWindowActive && (!it.targeted || G.sidebarTarget);
+        const canUse = G.itemWindowActive && G.itemTurnPlayerId==='player' && (!it.targeted || G.sidebarTarget);
         useBtn.disabled = !canUse;
         useBtn.addEventListener('click', ()=> useItemFromSidebar(it.id));
         btnRow.appendChild(useBtn);
@@ -2487,7 +2550,7 @@ function renderItemSidebar(){
 
 function useItemFromSidebar(itemId){
   const human = G.players.find(p=>p.id==='player');
-  if(!G.itemWindowActive || !G.itemWindowCtx || (human.items[itemId]||0)<=0) return;
+  if(!G.itemWindowActive || G.itemTurnPlayerId!=='player' || !G.itemWindowCtx || (human.items[itemId]||0)<=0) return;
   const info = ITEMS.find(x=>x.id===itemId);
   if(!info || info.kind==='aging') return;
   if(info.targeted && !G.sidebarTarget) return;
@@ -2558,7 +2621,7 @@ async function finalizeAndDraw(ctx){
     await sleep(800);
     const poolReroll = renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
     await runQuickDraw();
-    outcomeId = weightedPick(poolReroll);
+    outcomeId = poolTotal(poolReroll)>0 ? weightedPick(poolReroll) : 'empty';
     result = await resolveOneDraw(outcomeId, ctx);
   }
   let ended = result && result.ended;
@@ -2570,14 +2633,14 @@ async function finalizeAndDraw(ctx){
     const pool2 = renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
     await runQuickDraw();
     
-    let outcomeId2 = weightedPick(pool2);
+    let outcomeId2 = poolTotal(pool2)>0 ? weightedPick(pool2) : 'empty';
     let result2 = await resolveOneDraw(outcomeId2, ctx);
     while(result2 && result2.reroll){
       toast('🔄 탈락자 캡슐 노 카운트! 즉시 재추첨합니다...', 2000);
       await sleep(800);
       const poolReroll2 = renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
       await runQuickDraw();
-      outcomeId2 = weightedPick(poolReroll2);
+      outcomeId2 = poolTotal(poolReroll2)>0 ? weightedPick(poolReroll2) : 'empty';
       result2 = await resolveOneDraw(outcomeId2, ctx);
     }
     ended = result2 && result2.ended;
@@ -2783,39 +2846,41 @@ async function resolveOneDraw(outcomeId, ctx){
     }
   }
 
-  consumeCapsuleFromMachine(outcomeId);
+  consumeCapsuleFromMachine(outcomeId, ctx);
   renderMachineVisual(ctx ? ctx.tempCaps : null, ctx ? ctx.wardCounts : null, ctx ? ctx.swapPair : null, ctx ? ctx.tempEmpty : 0);
 
   if(kind==='metal'){
     const owner = G.players.find(p=>p.id===ownerId);
     if(owner && owner.alive){
       owner.gold += 5;
-      banner.textContent = '🔩 메탈 캡슐! '+owner.emoji+' '+owner.name+'가 5원 획득 (캡슐 소멸)';
+      banner.textContent = '🔩 메탈 캡슐! '+owner.emoji+' '+owner.name+'가 5원 획득 · 결과 무효화 후 재추첨';
       banner.classList.add('show','safe');
       SFX.coin();
-      addLog('🔩 메탈 캡슐이 뽑혀 머신에서 제거되었습니다! '+owner.emoji+' '+owner.name+'가 목숨을 잃지 않고 +5원을 획득했습니다.', 'good');
+      addLog('🔩 메탈 캡슐 결과 무효화: '+owner.emoji+' '+owner.name+'가 +5원을 획득하고 즉시 재추첨합니다.', 'good');
     } else {
-      banner.textContent = '✅ 메탈 캡슐 (캡슐 소멸) - 다음 라운드로';
+      banner.textContent = '✅ 메탈 캡슐 결과 무효화 · 재추첨';
       banner.classList.add('show','safe');
       SFX.safe();
     }
     renderPlayersRow();
-    await sleep(1600);
-    return { ended: false, reroll: false };
+    await sleep(1200);
+    return { ended: false, reroll: true };
+  }
+
+  if(kind==='holo'){
+    const owner = G.players.find(p=>p.id===ownerId);
+    banner.textContent = '🌈 홀로그램 캡슐! '+(owner?owner.emoji+' '+owner.name:ownerId)+'가 랜덤 아이템 획득 · 결과 무효화 후 재추첨';
+    banner.classList.add('show','safe');
+    SFX.coin();
+    if(owner && owner.alive) grantCompensationItem(owner);
+    addLog('🌈 홀로그램 캡슐 결과 무효화: '+(owner?owner.emoji+' '+owner.name:ownerId)+'에게 랜덤 아이템을 지급하고 즉시 재추첨합니다.', 'good');
+    renderPlayersRow();
+    await sleep(1200);
+    return { ended: false, reroll: true };
   }
 
   let effectiveOutcome = ownerId;
   let holoNote = '';
-  if(kind==='holo'){
-    const owner = G.players.find(p=>p.id===ownerId);
-    const others = G.players.filter(p=>p.alive && p.id!==ownerId);
-    if(others.length){
-      const redirected = others[randi(0,others.length-1)];
-      effectiveOutcome = redirected.id;
-      holoNote = '🌈 홀로그램 캡슐! 원래 '+(owner?owner.emoji+' '+owner.name:ownerId)+'의 캡슐이었지만 '+redirected.emoji+' '+redirected.name+'의 캡슐로 취급됩니다! (머신에서 캡슐 제거됨)';
-    }
-  }
-
   let hitPlayer = null, eliminatedPlayer = null, shielded = null, phoenixRevived = null;
   if(outcomeId!=='empty'){
     const target = G.players.find(p=>p.id===effectiveOutcome);
@@ -2827,7 +2892,7 @@ async function resolveOneDraw(outcomeId, ctx){
         if(target.lives === 1 && (target.relics||[]).includes('phoenix')){
           target.lives = 1;
           target.relics = target.relics.filter(r => r !== 'phoenix');
-          const revivedCaps = addCapsulesToMachineFromStock(target, 7);
+          const revivedCaps = addCapsulesToMachineFromStock(target, 4);
           target._phoenixAdded = capsuleAddTotal(revivedCaps);
           target._phoenixSummary = capsuleAddSummary(revivedCaps);
           phoenixRevived = target;
