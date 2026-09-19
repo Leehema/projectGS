@@ -687,9 +687,9 @@ button,.btn{font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;letter-s
 /* The metal sprite has more transparent padding than the other capsules. */
 .capsule.capsule-metal,.reveal-capsule.capsule-metal,.capsule-owned-icon .mini-cap.metal{background-size:118%!important;}
 /* Character chatter mirrors the cat tips from the opposite lower corner. */
-.cat-tip{left:auto;right:18px;transform:translateX(18px) translateY(8px);}
-.character-tip{position:absolute;left:18px;bottom:22px;z-index:42;display:flex;align-items:flex-end;gap:8px;
-  max-width:330px;opacity:0;transform:translateX(-18px) translateY(8px);pointer-events:none;
+.cat-tip{left:18px;right:auto;transform:translateX(-18px) translateY(8px);}
+.character-tip{position:absolute;left:auto;right:18px;bottom:22px;z-index:42;display:flex;align-items:flex-end;gap:8px;
+  max-width:330px;opacity:0;transform:translateX(18px) translateY(8px);pointer-events:none;
   transition:opacity .22s ease,transform .22s ease;}
 .character-tip.show{opacity:1;transform:translateX(0) translateY(0);}
 .character-tip-capsule{width:52px;height:52px;flex:0 0 52px;background-size:contain!important;
@@ -697,10 +697,10 @@ button,.btn{font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;letter-s
 .character-tip-bubble{position:relative;padding:11px 14px;background:#f8f6ef;color:#111118;border:4px solid #08090c;
   box-shadow:7px 7px 0 #35e8af;clip-path:polygon(1% 5%,97% 0,100% 94%,4% 100%,0 52%);font-size:12px;font-weight:700;line-height:1.4;}
 .character-tip-name{display:block;color:#e21659;font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;font-size:14px;letter-spacing:.5px;margin-bottom:2px;}
-/* Diagonal black wipe for screen changes. */
-#screenWipe{position:absolute;inset:0;z-index:180;pointer-events:none;background:#050509;transform:translate(-110%,-110%);}
-#screenWipe.play{animation:screenWipeDiagonal .62s cubic-bezier(.72,0,.28,1) both;}
-@keyframes screenWipeDiagonal{0%{transform:translate(-110%,-110%);}48%{transform:translate(0,0);}52%{transform:translate(0,0);}100%{transform:translate(110%,110%);}}
+/* Slow, smooth horizontal black wipe for screen changes. */
+#screenWipe{position:absolute;inset:0;z-index:180;pointer-events:none;background:#050509;transform:translateX(-110%);}
+#screenWipe.play{animation:screenWipeHorizontal 1.05s cubic-bezier(.65,0,.35,1) both;}
+@keyframes screenWipeHorizontal{0%{transform:translateX(-110%);}46%{transform:translateX(0);}54%{transform:translateX(0);}100%{transform:translateX(110%);}}
 </style>
 </head>
 <body>
@@ -1157,6 +1157,8 @@ function el(tag,cls,html){ const e=document.createElement(tag); if(cls)e.classNa
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 let catTipTimer = null;
 let characterTipTimer = null;
+const characterTipQueue = [];
+let isCharacterTipShowing = false;
 let machineRemixTimer = null;
 function showCatTip(text, tone){
   const tip = $('#catTip');
@@ -1195,17 +1197,35 @@ const CHARACTER_QUOTES = {
 function showCharacterTip(playerId, situation){
   const player = G && G.players && G.players.find(p=>p.id===playerId);
   const quotes = CHARACTER_QUOTES[playerId];
-  const tip = $('#characterTip'), icon = $('#characterTipIcon'), name = $('#characterTipName'), textEl = $('#characterTipText');
-  if(!player || !player.isAI || !quotes || !tip || !icon || !name || !textEl) return;
+  if(!player || !player.isAI || !quotes) return;
   const lines = quotes[situation] || quotes.start;
-  clearTimeout(characterTipTimer);
-  icon.className = 'character-tip-capsule capsule-icon '+CCLASS[playerId];
-  name.textContent = player.name;
-  textEl.textContent = lines[randi(0,lines.length-1)];
+  characterTipQueue.push({
+    playerId,
+    name:player.name,
+    text:lines[randi(0,lines.length-1)]
+  });
+  playNextCharacterTip();
+}
+function playNextCharacterTip(){
+  if(isCharacterTipShowing || !characterTipQueue.length) return;
+  const tip = $('#characterTip'), icon = $('#characterTipIcon'), name = $('#characterTipName'), textEl = $('#characterTipText');
+  if(!tip || !icon || !name || !textEl) return;
+  const next = characterTipQueue.shift();
+  isCharacterTipShowing = true;
+  icon.className = 'character-tip-capsule capsule-icon '+CCLASS[next.playerId];
+  name.textContent = next.name;
+  textEl.textContent = next.text;
   tip.classList.remove('show');
   void tip.offsetWidth;
   tip.classList.add('show');
-  characterTipTimer = setTimeout(()=>tip.classList.remove('show'), 3900);
+  clearTimeout(characterTipTimer);
+  characterTipTimer = setTimeout(()=>{
+    tip.classList.remove('show');
+    setTimeout(()=>{
+      isCharacterTipShowing = false;
+      playNextCharacterTip();
+    }, 260);
+  }, 3900);
 }
 function showMachineRemix(){
   const field = $('#capsuleField');
@@ -1239,7 +1259,7 @@ function showScreen(id){
   wipe.classList.remove('play');
   void wipe.offsetWidth;
   wipe.classList.add('play');
-  window.__screenWipeSwap = setTimeout(swap, 300);
+  window.__screenWipeSwap = setTimeout(swap, 525);
 }
 function weightedPick(weights){
   const total = Object.values(weights).reduce((a,b)=>a+b,0);
@@ -1313,6 +1333,9 @@ function newMatch(matchIndex, carry){
   });
   const previousTimeline = document.getElementById('itemUseTimeline');
   if(previousTimeline) previousTimeline.innerHTML = '';
+  clearTimeout(characterTipTimer);
+  characterTipQueue.length = 0;
+  isCharacterTipShowing = false;
   const previousCharacterTip = document.getElementById('characterTip');
   if(previousCharacterTip) previousCharacterTip.classList.remove('show');
   addLog('🔮 매치 시작 보급: 모든 참가자에게 [투시 안경] 1개가 지급되었습니다.', 'good');
