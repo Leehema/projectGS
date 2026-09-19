@@ -316,7 +316,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;}
   42%{transform:translate(var(--hop-x,0px),var(--hop-y,-12px)) scale(1.06);}
   68%{transform:translate(var(--settle-x,0px),var(--settle-y,-2px)) scale(.94);}
 }
-.capsule{position:absolute;width:20px;height:20px;border-radius:50%;
+.capsule{position:absolute;width:47px;height:47px;border-radius:50%;
   box-shadow:inset -3px -3px 4px rgba(0,0,0,.35), inset 2px 2px 3px rgba(255,255,255,.5), 0 2px 4px rgba(0,0,0,.4);}
 .capsule.empty{background:var(--empty-color);}
 .capsule.c-player{background:var(--player-color);}
@@ -530,6 +530,162 @@ input[type=range]{width:100%;accent-color:var(--accent);}
 .hidden{display:none !important;}
 ::-webkit-scrollbar{width:8px;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+/* ---------- Punk collage visual skin ---------- */
+#design{isolation:isolate;background:
+  linear-gradient(115deg,rgba(7,5,14,.78),rgba(16,8,29,.56)),
+  url('assets/punk-arcade-backdrop.png') center/cover no-repeat,#0c0714;}
+#design::before,#design::after{content:'';position:absolute;inset:0;pointer-events:none;}
+#design::before{z-index:0;background:url('assets/punk-ui-overlay.png') center/cover no-repeat;opacity:.88;mix-blend-mode:screen;}
+#design::after{z-index:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 5px);opacity:.25;}
+.screen{z-index:1;}
+:root{--panel:#13121b;--panel-2:#20212c;--border:#090a0e;--text:#f7f4ef;--text-dim:#c6bec9;--accent:#f6ea37;--danger:#ff276d;--good:#35e8af;}
+button,.btn{font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;letter-spacing:.4px;}
+.btn{border-radius:1px;border:3px solid #07080b;box-shadow:4px 4px 0 #07080b;padding:10px 22px;text-shadow:none;}
+.btn-primary{background:#ff1766;color:#fff;box-shadow:4px 4px 0 #07080b,0 0 0 2px #ff1766;}
+.btn-primary:hover:not(:disabled){background:#ff4388;box-shadow:6px 6px 0 #07080b,0 0 0 2px #ff4388;transform:translate(-1px,-1px) rotate(-1deg);}
+.btn-secondary{background:#f8f6ef;color:#101018;border-color:#08090c;box-shadow:3px 3px 0 #08090c;}
+.btn-secondary:hover:not(:disabled){background:#35e8af;color:#07100d;}
+.btn-danger{background:#ff276d;border-color:#08090c;box-shadow:4px 4px 0 #08090c;}
+.title-wrap{background:rgba(10,10,16,.78);padding:34px 52px 38px;clip-path:polygon(2% 5%,96% 0,100% 90%,7% 100%,0 55%);border:3px solid #f8f6ef;box-shadow:9px 9px 0 #ff1766,-9px -7px 0 #35e8af;}
+.title-logo{font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;font-size:60px;letter-spacing:2px;background:none;color:#f8f6ef;-webkit-text-fill-color:#f8f6ef;text-shadow:5px 5px 0 #ff1766,-3px -3px 0 #35e8af;transform:rotate(-2deg);}
+.title-sub{color:#f6ea37;font-weight:800;letter-spacing:1px;}
+.topbar,.player-progress-row{background:rgba(12,13,19,.9);border-color:#05060a;border-width:3px;box-shadow:0 4px 0 rgba(0,0,0,.4);}
+.round-info{font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;color:#f8f6ef;font-size:18px;letter-spacing:1px;text-shadow:2px 2px 0 #ff1766;}
+.goal-badge{border:3px solid #08090c;border-radius:0;background:#f6ea37;box-shadow:4px 4px 0 #ff1766;transform:rotate(-2deg);}
+.goal-badge-value{color:#111118;font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;}
+.goal-badge-progress{border:1px solid #111;background:#fff;border-radius:0;}.goal-badge-progress-fill{background:#35e8af;border-radius:0;}
+.player-progress-item .bar-track{border:2px solid #08090c;border-radius:0;background:#f8f6ef;}.player-progress-item .bar-fill{border-radius:0;}
+.player-chip,.capsule-stats-bar{background:#f8f6ef;border:2px solid #08090c;border-radius:0;color:#111118;box-shadow:3px 3px 0 #08090c;}
+.player-chip .gold,.capsule-stats-total b{color:#e21659;}.capsule-stats-total,.capsule-stat-chip b{color:#111118;}.capsule-stat-chip{color:#302c35;}
+.item-sidebar,.side-panel{background:rgba(15,16,24,.9);border-color:#08090c;border-width:3px;}
+.item-sidebar-title{color:#f6ea37;font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;font-size:15px;letter-spacing:1px;}
+.capsule-status-open{background:#35e8af!important;color:#07100d!important;}
+.item-slot{background:#f8f6ef;border:3px solid #08090c;border-radius:0;color:#111118;box-shadow:3px 3px 0 #08090c;}
+.item-slot.expanded{border-color:#ff1766;box-shadow:4px 4px 0 #ff1766;}.item-slot-desc{color:#45414b;}.item-slot-count{color:#e21659;}
+.control-panel{background:rgba(12,13,19,.96);border-bottom:4px solid #08090c;color:#fff;}
+.control-panel *{color:inherit;}.control-panel .bet-title .sub,.control-panel .capsule-pick-label,.control-panel .bet-preview{color:#e6e1eb;}
+.control-panel .btn-primary{color:#fff;}.control-panel .btn-secondary{color:#111118;}
+.log-panel{background:rgba(11,12,18,.88);border-top:4px solid #08090c;}
+.machine{filter:drop-shadow(8px 9px 0 rgba(0,0,0,.45));}
+.machine-dome,.machine-base{border-color:#08090c!important;}.machine-base{box-shadow:6px 6px 0 #ff1766!important;}
+.cat-tip-bubble,.vn-box,.ingame-vn-box,.vn-diagram,.game-menu-card{background:#f8f6ef;color:#111118;border:4px solid #08090c;border-radius:0;box-shadow:7px 7px 0 #ff1766;clip-path:polygon(1% 4%,97% 0,100% 94%,4% 100%,0 50%);}
+.cat-tip-bubble{padding:12px 15px;}.vn-text,.ingame-vn-text{color:#111118;}.vn-name{border-radius:0;background:#35e8af;color:#07100d;box-shadow:3px 3px 0 #08090c;}
+.game-menu-card h3{color:#e21659;font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;font-size:25px;}.game-menu-card p{color:#4a4650;}
+.capsule-drawer{background:#f8f6ef;color:#111118;border-right:4px solid #08090c;box-shadow:10px 0 0 #ff1766;}.capsule-drawer-title{color:#e21659;font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;}.capsule-drawer-sub,.capsule-owned-icon .cap-state{color:#4a4650;}.capsule-drawer-head{border-color:#111;}
+.capsule-summary-chip,.capsule-owned-icon{background:#fff;border:2px solid #08090c;border-radius:0;color:#111118;}.capsule-summary-chip b{color:#e21659;}
+.ingame-shop-wrap,.reveal-panel,.item-turn-popup,.item-use-popup{border:4px solid #08090c!important;border-radius:0!important;box-shadow:8px 8px 0 #ff1766!important;}
+/* Calm title backdrop: keep the game title readable instead of using the busy arena art. */
+#screen-title,#screen-game{background:
+  radial-gradient(circle at 50% 40%,rgba(255,23,102,.15),transparent 34%),
+  repeating-linear-gradient(-18deg,rgba(255,255,255,.025) 0 1px,transparent 1px 12px),
+  #0c0d14;}
+#screen-title .floating-capsules{opacity:.18;filter:grayscale(.7);}
+#screen-title .floating-capsules span:nth-child(n+7){display:none;}
+
+/* Generated capsule sprites */
+.capsule:not(.empty){border-radius:0;background-color:transparent!important;background-repeat:no-repeat!important;
+  background-position:center!important;background-size:contain!important;box-shadow:none!important;}
+.capsule.c-player{background-image:url('assets/capsule-blue.png')!important;}
+.capsule.c-ai1{background-image:url('assets/capsule-red.png')!important;}
+.capsule.c-ai2{background-image:url('assets/capsule-yellow.png')!important;}
+.capsule.c-ai3{background-image:url('assets/capsule-purple.png')!important;}
+.capsule.capsule-metal{background-image:url('assets/capsule-metal.png')!important;}
+.capsule.capsule-holo{background-image:url('assets/capsule-holo.png')!important;filter:none;}
+.capsule.empty{border-radius:0;background:url('assets/capsule-empty.png') center/contain no-repeat!important;box-shadow:none!important;}
+/* Special capsules retain their material, with a soft owner-color underglow for quick identification. */
+.capsule.capsule-metal.c-player,.capsule.capsule-holo.c-player{background-color:rgba(79,195,247,.5)!important;color:#4fc3f7;}
+.capsule.capsule-metal.c-ai1,.capsule.capsule-holo.c-ai1{background-color:rgba(255,92,92,.5)!important;color:#ff5c5c;}
+.capsule.capsule-metal.c-ai2,.capsule.capsule-holo.c-ai2{background-color:rgba(255,217,61,.5)!important;color:#ffd93d;}
+.capsule.capsule-metal.c-ai3,.capsule.capsule-holo.c-ai3{background-color:rgba(167,139,250,.5)!important;color:#a78bfa;}
+.capsule.capsule-metal,.capsule.capsule-holo{background-blend-mode:screen;box-shadow:0 0 7px currentColor!important;}
+.capsule-owned-icon .mini-cap{border-radius:0;background-color:transparent!important;background-repeat:no-repeat!important;
+  background-position:center!important;background-size:contain!important;box-shadow:none!important;}
+.capsule-owned-icon .mini-cap.normal{background-image:url('assets/capsule-blue.png')!important;}
+.capsule-owned-icon .mini-cap.metal{background-image:url('assets/capsule-metal.png')!important;}
+.capsule-owned-icon .mini-cap.holo{background-image:url('assets/capsule-holo.png')!important;}
+.capsule-owned-icon .mini-cap.metal,.capsule-owned-icon .mini-cap.holo{background-color:rgba(79,195,247,.5)!important;background-blend-mode:screen;}
+.reveal-capsule.c-player,.reveal-capsule.c-ai1,.reveal-capsule.c-ai2,.reveal-capsule.c-ai3,.reveal-capsule.capsule-metal,.reveal-capsule.capsule-holo{
+  border-radius:0;background-color:transparent!important;background-repeat:no-repeat!important;background-position:center!important;background-size:contain!important;}
+.reveal-capsule.c-player{background-image:url('assets/capsule-blue.png')!important;}
+.reveal-capsule.c-ai1{background-image:url('assets/capsule-red.png')!important;}
+.reveal-capsule.c-ai2{background-image:url('assets/capsule-yellow.png')!important;}
+.reveal-capsule.c-ai3{background-image:url('assets/capsule-purple.png')!important;}
+.reveal-capsule.capsule-metal{background-image:url('assets/capsule-metal.png')!important;}
+.reveal-capsule.capsule-holo{background-image:url('assets/capsule-holo.png')!important;}
+.reveal-capsule.empty{border-radius:0;background:url('assets/capsule-empty.png') center/contain no-repeat!important;}
+/* Capsule symbols used in compact UI: use the same art rather than flat color circles. */
+.capsule-icon{display:inline-block!important;border-radius:0!important;background-color:transparent!important;
+  background-position:center!important;background-repeat:no-repeat!important;background-size:contain!important;box-shadow:none!important;}
+.capsule-icon.empty{background-image:url('assets/capsule-empty.png')!important;}
+.capsule-icon.c-player{background-image:url('assets/capsule-blue.png')!important;}
+.capsule-icon.c-ai1{background-image:url('assets/capsule-red.png')!important;}
+.capsule-icon.c-ai2{background-image:url('assets/capsule-yellow.png')!important;}
+.capsule-icon.c-ai3{background-image:url('assets/capsule-purple.png')!important;}
+.capsule-pick::after{inset:3px;border-radius:0;background:url('assets/capsule-blue.png') center/contain no-repeat;box-shadow:none;}
+/* Generated gacha machine body; live capsule elements remain clipped inside its glass globe. */
+.machine{width:410px;height:568px;background:url('assets/punk-gacha-machine.png') center top/contain no-repeat;}
+.machine-dome{width:280px;height:230px;margin:34px auto 0;background:transparent;border-color:transparent;box-shadow:none;z-index:1;}
+.machine-dome::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:4;
+  background:linear-gradient(135deg,rgba(255,255,255,.14),transparent 36%,transparent 70%,rgba(112,154,255,.1));}
+.machine-neck,.machine-base{background:transparent;box-shadow:none;}
+.draw-slot{background:transparent;border-color:transparent;box-shadow:none;}
+.machine .crank-wrap{z-index:6;}
+/* Collectible item and relic sprite sheets */
+.game-art-icon{display:inline-block;width:34px;height:34px;flex:0 0 34px;vertical-align:middle;
+  background-position:var(--icon-x,0%) var(--icon-y,0%);background-repeat:no-repeat;background-size:400% 400%;}
+.game-art-icon.item-art{background-image:url('assets/item-icons-sheet.png');}
+.game-art-icon.relic-art{background-image:url('assets/relic-icons-sheet.png');}
+.item-slot-icon .game-art-icon{width:28px;height:28px;flex-basis:28px;}
+.shop-card .icon .game-art-icon{width:38px;height:38px;flex-basis:38px;}
+.item-use-popup .headline .icon .game-art-icon{width:38px;height:38px;flex-basis:38px;margin-right:4px;}
+.item-use-entry .entry-icon .game-art-icon{width:21px;height:21px;flex-basis:21px;}
+.player-chip .badges .game-art-icon{width:17px;height:17px;flex-basis:17px;margin-left:2px;}
+/* Log stays out of the way until requested, leaving the betting controls room to breathe. */
+.log-panel{display:none;}
+.log-panel.open{position:absolute;right:12px;bottom:48px;z-index:35;display:flex;width:330px;height:166px;max-height:none;
+  background:rgba(11,12,18,.98);border:3px solid #08090c;box-shadow:6px 6px 0 #ff1766;}
+.log-toggle{position:absolute;right:14px;bottom:12px;z-index:36;padding:7px 12px;font-size:12px;}
+.side-panel{flex:0 0 355px;max-width:430px;}
+.control-panel{flex:1;padding:24px 22px;}
+.control-panel .bet-title{font-size:17px;margin-bottom:13px;}
+.control-panel .bet-title .sub{font-size:13px;line-height:1.45;}
+.control-panel .capsule-pick-wrap{margin:22px 0 16px;}
+.control-panel .capsule-pick-row{gap:14px;}
+.control-panel .capsule-pick{width:60px;height:60px;}
+.control-panel .capsule-pick::after{inset:2px;}
+.control-panel .capsule-pick-label,.control-panel .bet-preview{font-size:13px;}
+/* Remove the retired CSS machine body; only the generated art and the usable crank remain. */
+.machine-siren,.machine-neck,.draw-slot{display:none;}
+.machine-base{position:absolute;inset:0;height:auto;margin:0;pointer-events:none;}
+.machine .crank-wrap{position:absolute;left:auto;right:-292px;top:298px;pointer-events:auto;}
+.crank-plate{background:transparent;border:0;box-shadow:none;}
+.crank-progress .crank-track{stroke:rgba(255,255,255,.28);}.crank-progress .crank-fill{stroke:#35e8af;}
+.crank-arm-bar{background:linear-gradient(180deg,#e9edf6,#657188);}.crank-knob{background:radial-gradient(circle at 35% 30%,#ff7eb3,#e50c65 75%);}
+/* State-specific legacy dome effects have higher selector priority, so explicitly turn each one off. */
+.machine-dome::after{display:none;}
+.machine{filter:none;}
+.machine-dome,.machine-base{border:0!important;box-shadow:none!important;}
+.machine-dome{width:305px;height:235px;margin:80px auto 0;border-radius:153px 153px 27px 27px;clip-path:ellipse(45% 47% at 50% 53%);overflow:hidden;contain:paint;isolation:isolate;}
+.capsule-field{overflow:hidden;contain:paint;clip-path:ellipse(42% 43% at 50% 54%);}
+.target-chip .capsule-icon,.reveal-item .capsule-icon{width:17px;height:17px;vertical-align:-3px;margin-right:4px;}
+/* Let result glows follow the transparent capsule silhouette, not the PNG element's rectangular bounds. */
+.reveal-capsule.c-player.show,.reveal-capsule.c-ai1.show,.reveal-capsule.c-ai2.show,.reveal-capsule.c-ai3.show,
+.reveal-capsule.capsule-metal.show,.reveal-capsule.capsule-holo.show,.reveal-capsule.empty.show{
+  box-shadow:none!important;filter:drop-shadow(0 0 18px currentColor);}
+.machine.danger .machine-dome,.machine.suspense .machine-dome,.machine.suspense.danger .machine-dome,
+.machine-area.item-impact .machine-dome{border-color:transparent;box-shadow:none;animation:none;filter:none;}
+.machine-area.dim .machine-dome{filter:none;}
+/* Owner tint uses the glow only; a filled CSS background made transparent holo PNG margins look square. */
+.capsule.capsule-metal.c-player,.capsule.capsule-holo.c-player,
+.capsule.capsule-metal.c-ai1,.capsule.capsule-holo.c-ai1,
+.capsule.capsule-metal.c-ai2,.capsule.capsule-holo.c-ai2,
+.capsule.capsule-metal.c-ai3,.capsule.capsule-holo.c-ai3{background-color:transparent!important;}
+.capsule-owned-icon .mini-cap.metal,.capsule-owned-icon .mini-cap.holo{background-color:transparent!important;}
+/* The special-capsule glow must respect the PNG alpha silhouette rather than the square element bounds. */
+.capsule.capsule-metal,.capsule.capsule-holo{background-blend-mode:normal;box-shadow:none!important;
+  filter:drop-shadow(0 0 7px currentColor)!important;animation:none!important;}
+/* The metal sprite has more transparent padding than the other capsules. */
+.capsule.capsule-metal,.reveal-capsule.capsule-metal,.capsule-owned-icon .mini-cap.metal{background-size:118%!important;}
 </style>
 </head>
 <body>
@@ -628,6 +784,7 @@ input[type=range]{width:100%;accent-color:var(--accent);}
         <div class="control-panel" id="controlPanel"></div>
         <div class="log-panel" id="logPanel"></div>
       </div>
+      <button class="btn btn-secondary btn-small log-toggle" id="btnLogToggle" aria-expanded="false">📜 로그</button>
 
       <div class="capsule-drawer-overlay" id="capsuleDrawerOverlay">
         <div class="capsule-drawer">
@@ -819,6 +976,21 @@ const CAPSULE_UPGRADE_SHOP = [
   { id:'holo', name:'홀로그램 캡슐 강화', icon:'🌈', cost:3,
     desc:'보유 일반 캡슐 1개를 홀로그램 캡슐로 영구 강화합니다. 뽑히면 소유자가 랜덤 아이템을 받고 결과를 무효화한 뒤 재추첨합니다.' },
 ];
+
+/* Image sprite locations are kept beside the game data, so every UI surface uses the same art. */
+const SPRITE_POS = ['0%','33.333%','66.667%','100%'];
+const RELIC_ICON_CELL = { pocket:0, iron_chain:1, golden_die:2, phoenix:3, punish_heavy:4, dividend:5, lucky_bet:6 };
+const ITEM_ICON_CELL = { peek:0, double:1, purge:2, emptydrop:3, doubledraw:4, shield:5, trap3:6, ward3:7,
+  matchgold:8, gold10:9, swap:10, aging:11, metalcap:12, holocap:13 };
+function spriteIconHTML(type, id){
+  const cell = (type==='relic' ? RELIC_ICON_CELL : ITEM_ICON_CELL)[id];
+  if(cell==null) return '';
+  const col = cell % 4, row = Math.floor(cell / 4);
+  return '<span class="game-art-icon '+(type==='relic'?'relic-art':'item-art')+'" style="--icon-x:'+SPRITE_POS[col]+';--icon-y:'+SPRITE_POS[row]+'" aria-hidden="true"></span>';
+}
+RELICS.forEach(r=>{ r.icon = spriteIconHTML('relic',r.id); });
+ITEMS.forEach(it=>{ it.icon = spriteIconHTML('item',it.id); });
+CAPSULE_UPGRADE_SHOP.forEach(u=>{ u.icon = spriteIconHTML('item',u.id==='metal'?'metalcap':'holocap'); });
 
 /* ============================== AUDIO ============================== */
 const SFX = (function(){
@@ -1061,6 +1233,7 @@ function newMatch(matchIndex, carry){
     shopBought: {},
     roundCapsuleAdds: {},
     roundRankOrder: [],
+    itemUseHistory: [],
     luckyTarget: 1,
     relicCurrency: carry && carry.relicCurrency || 0
   };
@@ -1070,6 +1243,8 @@ function newMatch(matchIndex, carry){
     G.machine.holo[p.id] = 0;
     addCapsulesToMachineFromStock(p, 1);
   });
+  const previousTimeline = document.getElementById('itemUseTimeline');
+  if(previousTimeline) previousTimeline.innerHTML = '';
   addLog('🔮 매치 시작 보급: 모든 참가자에게 [투시 안경] 1개가 지급되었습니다.', 'good');
 }
 
@@ -1412,8 +1587,8 @@ function renderPlayerProgressBars(){
   G.players.forEach(p=>{
     const ratio = clamp(p.gold/target, 0, 1);
     const item = el('div','player-progress-item'+(p.alive?'':' dead'));
-    item.innerHTML = '<span class="dot" style="background:'+p.color+';color:'+p.color+'"></span>'+
-      '<span class="name">'+p.emoji+' '+p.name+'</span>'+
+    item.innerHTML = '<span class="dot capsule-icon '+CCLASS[p.id]+'"></span>'+
+      '<span class="name">'+p.name+'</span>'+
       '<div class="bar-track"><div class="bar-fill" style="width:'+(ratio*100)+'%;background:'+p.color+';"></div></div>'+
       '<span class="amount">'+p.gold+' / '+target+'</span>';
     wrap.appendChild(item);
@@ -1429,8 +1604,8 @@ function renderPlayersRow(){
     const livesStr = '❤️'.repeat(Math.max(0,p.lives)) + '🖤'.repeat(Math.max(0,STARTING_LIVES-p.lives));
     const stockStr = countPlayerStock(p)+'/'+PLAYER_CAPSULE_POOL;
     chip.title = p.name+' · 골드 '+p.gold+'원 · 보유 캡슐 '+stockStr;
-    chip.innerHTML = '<span class="dot" style="background:'+p.color+';color:'+p.color+'"></span>'+
-      '<span>'+p.emoji+' '+p.name+'</span><span class="lives">'+livesStr+'</span><span class="gold">'+p.gold+'</span>'+
+    chip.innerHTML = '<span class="dot capsule-icon '+CCLASS[p.id]+'"></span>'+
+      '<span>'+p.name+'</span><span class="lives">'+livesStr+'</span><span class="gold">'+p.gold+'</span>'+
       '<span class="badges">📦'+stockStr+'</span>'+(badgeStr? '<span class="badges">'+badgeStr+'</span>':'');
     row.appendChild(chip);
   });
@@ -1446,6 +1621,13 @@ function renderLog(){
     panel.appendChild(d);
   });
 }
+$('#btnLogToggle').addEventListener('click', ()=>{
+  const panel = $('#logPanel');
+  const open = panel.classList.toggle('open');
+  const btn = $('#btnLogToggle');
+  btn.setAttribute('aria-expanded', String(open));
+  btn.textContent = open ? '✕ 로그 닫기' : '📜 로그';
+});
 function toast(msg, ms){
   const wrap = $('#toastWrap');
   const t = el('div','toast', msg);
@@ -1717,11 +1899,11 @@ function renderMachineVisual(tempCaps, wardCounts, swapPair, tempEmpty){
   const shown = items.slice(0, cap);
   shown.forEach(it=>{
     const c = el('div','capsule '+it.cls);
-    c.style.left = rand(6,86)+'%';
-    c.style.top = rand(10,78)+'%';
-    c.style.setProperty('--hop-x', rand(-14,14).toFixed(1)+'px');
-    c.style.setProperty('--hop-y', rand(-24,-8).toFixed(1)+'px');
-    c.style.setProperty('--settle-x', rand(-7,7).toFixed(1)+'px');
+    c.style.left = rand(22,65)+'%';
+    c.style.top = rand(28,60)+'%';
+    c.style.setProperty('--hop-x', rand(-6,6).toFixed(1)+'px');
+    c.style.setProperty('--hop-y', rand(-10,-5).toFixed(1)+'px');
+    c.style.setProperty('--settle-x', rand(-3,3).toFixed(1)+'px');
     c.style.setProperty('--settle-y', rand(-4,1).toFixed(1)+'px');
     c.style.setProperty('--bounce-delay', (-Math.random()*0.8).toFixed(2)+'s');
     field.appendChild(c);
@@ -1744,7 +1926,7 @@ function renderCapsuleStats(pool){
   const list = el('div','capsule-stats-list');
 
   const emptyChip = el('div','capsule-stat-chip');
-  emptyChip.innerHTML = '<span class="dot" style="background:var(--empty-color);color:var(--empty-color);"></span>⚪ <b>'+pool.empty+'</b>';
+  emptyChip.innerHTML = '<span class="dot capsule-icon empty"></span><b>'+pool.empty+'</b>';
   list.appendChild(emptyChip);
 
   G.players.filter(p=>p.alive).forEach(p=>{
@@ -1764,7 +1946,7 @@ function renderCapsuleStats(pool){
 
     const chip = el('div','capsule-stat-chip');
     chip.title = p.name+' · 머신 '+sum+'개 · 보유 '+stockLeft+'/'+PLAYER_CAPSULE_POOL+'개';
-    chip.innerHTML = '<span class="dot" style="background:'+p.color+';color:'+p.color+'"></span>'+
+    chip.innerHTML = '<span class="dot capsule-icon '+CCLASS[p.id]+'"></span>'+
       p.emoji+' <b>'+sum+'</b>'+extra+' <small style="opacity:.7;font-size:9px;">/'+stockLeft+'</small>';
     list.appendChild(chip);
   });
@@ -2053,7 +2235,7 @@ async function revealBets(bets){
     await sleep(260);
     SFX.click();
     const item = el('div','reveal-item');
-    item.innerHTML = '<span>'+p.emoji+' '+p.name+'</span><span class="n">'+bets[p.id]+'개</span>';
+    item.innerHTML = '<span><span class="capsule-icon '+CCLASS[p.id]+'"></span>'+p.name+'</span><span class="n">'+bets[p.id]+'개</span>';
     row.appendChild(item);
     requestAnimationFrame(()=> item.classList.add('show'));
   }
@@ -2067,7 +2249,7 @@ async function revealBets(bets){
     await sleep(280);
     SFX.click();
     const penaltyItem = el('div','reveal-item penalty');
-    penaltyItem.innerHTML = '<span>⚠️ '+p.emoji+' '+p.name+'</span><span class="n">최소 투입</span>';
+    penaltyItem.innerHTML = '<span>⚠️ <span class="capsule-icon '+CCLASS[p.id]+'"></span>'+p.name+'</span><span class="n">최소 투입</span>';
     row.appendChild(penaltyItem);
     requestAnimationFrame(()=> penaltyItem.classList.add('show'));
   }
@@ -2757,7 +2939,7 @@ function renderItemSidebar(){
       if(it.targeted){
         const targets = el('div','target-select');
         G.players.filter(p=>p.alive && p.id!=='player').forEach(p=>{
-          const chip = el('div','target-chip'+(G.sidebarTarget===p.id?' sel':''), p.emoji+' '+p.name);
+          const chip = el('div','target-chip'+(G.sidebarTarget===p.id?' sel':''), '<span class="capsule-icon '+CCLASS[p.id]+'"></span>'+p.name);
           chip.addEventListener('click', ()=>{ G.sidebarTarget = p.id; renderItemSidebar(); });
           targets.appendChild(chip);
         });
@@ -3069,7 +3251,9 @@ async function resolveOneDraw(outcomeId, ctx){
   let colorVar = outcomeId==='empty' ? COLOR.empty : COLOR[ownerId];
   revealCap.style.background = colorVar;
   revealCap.style.color = colorVar;
-  revealEmoji.textContent = outcomeId==='empty' ? '⚪' : (kind==='metal'?'🔩':kind==='holo'?'🌈':EMOJI[ownerId]);
+  revealCap.classList.add(outcomeId === 'empty' ? 'empty' : (kind==='metal' ? 'capsule-metal' : kind==='holo' ? 'capsule-holo' : CCLASS[ownerId]));
+  // The generated capsule art already communicates type and owner; do not overlay legacy emoji.
+  revealEmoji.textContent = '';
   revealCap.classList.add('show');
   await sleep(120);
 
