@@ -684,6 +684,9 @@ button,.btn{font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;letter-s
 /* The special-capsule glow must respect the PNG alpha silhouette rather than the square element bounds. */
 .capsule.capsule-metal,.capsule.capsule-holo{background-blend-mode:normal;box-shadow:none!important;
   filter:drop-shadow(0 0 7px currentColor)!important;animation:none!important;}
+.capsule.capsule-ceramic{background:radial-gradient(circle at 35% 28%,#fff5dc 0 12%,#d79b67 14% 54%,#7c452d 56%)!important;filter:drop-shadow(0 0 5px #ffd29a);}
+.capsule.capsule-cushion{background:radial-gradient(circle at 34% 28%,#fff 0 12%,#81e8ff 14% 50%,#4080cf 54%)!important;filter:drop-shadow(0 0 7px #8df3ff);}
+.capsule.capsule-salvage{background:radial-gradient(circle at 34% 28%,#efffc6 0 12%,#88b44b 14% 50%,#3b642d 54%)!important;filter:drop-shadow(0 0 7px #b9ee66);}
 /* The metal sprite has more transparent padding than the other capsules. */
 .capsule.capsule-metal,.reveal-capsule.capsule-metal,.capsule-owned-icon .mini-cap.metal{background-size:118%!important;}
 /* Character chatter mirrors the cat tips from the opposite lower corner. */
@@ -697,6 +700,11 @@ button,.btn{font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;letter-s
 .character-tip-bubble{position:relative;padding:11px 14px;background:#f8f6ef;color:#111118;border:4px solid #08090c;
   box-shadow:7px 7px 0 #35e8af;clip-path:polygon(1% 5%,97% 0,100% 94%,4% 100%,0 52%);font-size:12px;font-weight:700;line-height:1.4;}
 .character-tip-name{display:block;color:#e21659;font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;font-size:14px;letter-spacing:.5px;margin-bottom:2px;}
+.relic-choice-overlay{position:absolute;inset:0;z-index:95;display:none;align-items:center;justify-content:center;background:rgba(3,4,8,.72);backdrop-filter:blur(3px);}
+.relic-choice-overlay.active{display:flex;}
+.relic-choice-card{width:min(720px,86%);padding:22px;background:#f8f6ef;color:#111118;border:5px solid #08090c;box-shadow:10px 10px 0 #35e8af;clip-path:polygon(1% 4%,98% 0,100% 95%,3% 100%,0 45%);}
+.relic-choice-card h3{margin:0 0 5px;font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;font-size:26px;letter-spacing:1px;color:#e21659;}.relic-choice-card p{margin:0 0 14px;font-size:13px;font-weight:700;}
+.relic-choice-options{display:flex;gap:10px;}.relic-choice-options .btn{flex:1;min-height:58px;display:flex;align-items:center;justify-content:center;gap:7px;}
 /* Slow, smooth horizontal black wipe for screen changes. */
 #screenWipe{position:absolute;inset:0;z-index:180;pointer-events:none;background:#050509;transform:translateX(-110%);}
 #screenWipe.play{animation:screenWipeHorizontal 1.05s cubic-bezier(.65,0,.35,1) both;}
@@ -813,6 +821,14 @@ button,.btn{font-family:Impact,'Arial Black','Malgun Gothic',sans-serif;letter-s
           </div>
           <div class="capsule-drawer-summary" id="capsuleDrawerSummary"></div>
           <div class="capsule-grid-30" id="capsuleDrawerGrid"></div>
+        </div>
+      </div>
+
+      <div class="relic-choice-overlay" id="holoCatalogOverlay" role="dialog" aria-modal="true" aria-label="홀로그램 카탈로그">
+        <div class="relic-choice-card">
+          <h3>🌈 홀로그램 카탈로그</h3>
+          <p>획득할 아이템 하나를 선택하세요.</p>
+          <div class="relic-choice-options" id="holoCatalogOptions"></div>
         </div>
       </div>
 
@@ -943,6 +959,22 @@ const RELICS = [
     desc:'매 라운드 시작 시, 머신 속 본인 캡슐 5개당 3골드를 정산하여 획득합니다.' },
   { id:'lucky_bet', name:'행운의 숫자', icon:'🎯', cost:5,
     desc:'매 라운드 무작위 지정된 캡슐 수와 정확히 같은 수의 캡슐을 넣으면 5골드를 획득합니다.' },
+  { id:'repair_kit', name:'응급 정비 키트', icon:'🧰', cost:7,
+    desc:'매치당 1회, 목숨을 잃고 살아남으면 머신 속 내 일반 캡슐을 최대 3개 제거합니다.' },
+  { id:'loyalty_stamp', name:'단골 도장', icon:'🎟️', cost:5,
+    desc:'매 라운드 처음 구매하는 아이템 가격이 1원 감소합니다. (최소 1원)' },
+  { id:'precision_injector', name:'정밀 주입기', icon:'💉', cost:6,
+    desc:'메탈/홀로그램 캡슐화 아이템의 개별 강화 성공률이 75%가 됩니다.' },
+  { id:'recycling_tongs', name:'재활용 집게', icon:'🗜️', cost:5,
+    desc:'매 라운드 첫 실제 페널티 캡슐 투입 시 랜덤 아이템 1개를 획득합니다.' },
+  { id:'emergency_vent', name:'비상 배출 레버', icon:'🧯', cost:7,
+    desc:'매치당 1회 사용: 추첨 전 머신 속 내 일반 캡슐을 최대 4개 제거합니다.' },
+  { id:'holo_catalog', name:'홀로그램 카탈로그', icon:'📚', cost:6,
+    desc:'내 홀로그램 캡슐이 뽑히면 랜덤 대신 후보 최대 3종 중 아이템 1개를 선택합니다.' },
+  { id:'metal_resonator', name:'금속 공명기', icon:'📡', cost:5,
+    desc:'매 라운드 처음 뽑힌 내 메탈 캡슐은 7원을 줍니다. 이후에는 5원입니다.' },
+  { id:'insurance_policy', name:'보험 약관', icon:'📜', cost:6,
+    desc:'매치당 1회, 하트 실드로 피해를 막으면 다음 라운드 시작에 3원을 받습니다.' },
 ];
 
 const ITEMS = [
@@ -974,6 +1006,22 @@ const ITEMS = [
     desc:'머신 속 내 일반 캡슐 최대 3개를 대상으로 각각 50% 확률로 메탈 캡슐로 바꿉니다. 뽑히면 5골드를 획득하고 결과를 무효화한 뒤 재추첨합니다.', count:3 },
   { id:'holocap', name:'홀로그램 캡슐화', icon:'🌈', cost:5, targeted:false, kind:'holo',
     desc:'머신 속 내 일반 캡슐 최대 3개를 대상으로 각각 50% 확률로 홀로그램 캡슐로 바꿉니다. 뽑히면 랜덤 아이템을 획득하고 결과를 무효화한 뒤 재추첨합니다.', count:3 },
+  { id:'trap_cleaner', name:'함정 해제기', icon:'✂️', cost:3, targeted:false, kind:'trapCleaner',
+    desc:'이번 라운드 내게 추가된 임시 일반 캡슐을 최대 4개 제거합니다.', count:4 },
+  { id:'recall_magnet', name:'회수 자석', icon:'🧲', cost:4, targeted:false, kind:'recallMagnet',
+    desc:'머신 속 내 일반 캡슐을 최대 2개 회수해 보유 재고로 돌려놓습니다.', count:2 },
+  { id:'empty_filter', name:'공회전 필터', icon:'🌀', cost:3, targeted:false, kind:'emptyFilter',
+    desc:'머신에 원래 들어 있는 빈 캡슐을 최대 4개 제거합니다. 모두의 일반 캡슐 추첨 확률이 높아집니다.', count:4 },
+  { id:'phase_converter', name:'위상 변환기', icon:'🔄', cost:3, targeted:false, kind:'phase',
+    desc:'머신 속 내 메탈 캡슐 1개와 홀로그램 캡슐 1개 중 한 방향을 선택해 확정 전환합니다.' },
+  { id:'single_draw_pin', name:'단발 고정핀', icon:'📌', cost:3, targeted:false, kind:'singleDraw',
+    desc:'현재 적용된 더블 뽑기를 해제해 추첨을 1회로 되돌립니다.' },
+  { id:'item_exchange', name:'아이템 교환권', icon:'🎫', cost:3, targeted:false, kind:'exchange',
+    desc:'이 교환권과 다른 아이템 1개를 소모하고, 후보 최대 3종 중 1개를 받습니다.' },
+  { id:'reward_seal', name:'보상 봉인 스티커', icon:'🔖', cost:4, targeted:true, kind:'rewardSeal',
+    desc:'이번 라운드 대상의 첫 메탈·홀로그램 캡슐 보상 1회를 막습니다. 재추첨은 유지됩니다.' },
+  { id:'counter_tag', name:'역추적 태그', icon:'🏷️', cost:3, targeted:false, kind:'counterTag',
+    desc:'이후 나에게 첫 함정 사용을 한 상대에게 임시 캡슐 2개를 반격합니다.' },
 ];
 
 const BASE_ITEM_MAX_STOCK = 3;
@@ -990,16 +1038,28 @@ const SHOP_OFFER_SIZE = 4;
 const SHOP_REROLL_COST = 2;
 const SAVE_KEY = 'gachaSurvivalSave_v1';
 const PLAYER_CAPSULE_POOL = 30;
+const PERMANENT_CAPSULE_KINDS = {
+  metal:{name:'메탈', cost:2}, holo:{name:'홀로그램', cost:3},
+  ceramic:{name:'세라믹', cost:3, limit:4}, cushion:{name:'완충', cost:3, limit:3}, salvage:{name:'회수 코어', cost:2, limit:3}
+};
 const CAPSULE_UPGRADE_SHOP = [
   { id:'metal', name:'메탈 캡슐 강화', icon:'🔩', cost:2,
     desc:'보유 일반 캡슐 1개를 메탈 캡슐로 영구 강화합니다. 뽑히면 소유자가 5원을 얻고 결과를 무효화한 뒤 재추첨합니다.' },
   { id:'holo', name:'홀로그램 캡슐 강화', icon:'🌈', cost:3,
     desc:'보유 일반 캡슐 1개를 홀로그램 캡슐로 영구 강화합니다. 뽑히면 소유자가 랜덤 아이템을 받고 결과를 무효화한 뒤 재추첨합니다.' },
+  { id:'ceramic', name:'세라믹 캡슐 강화', icon:'🏺', cost:3,
+    desc:'일반 캡슐 1개를 세라믹으로 영구 강화합니다. 뽑히면 피해 없이 이번 추첨 1회를 안전하게 끝냅니다. (최대 4개)' },
+  { id:'cushion', name:'완충 캡슐 강화', icon:'🫧', cost:3,
+    desc:'일반 캡슐 1개를 완충으로 영구 강화합니다. 뽑히면 다음 라운드 내 일반 캡슐 1개를 빈 취급하고 재추첨합니다. (최대 3개)' },
+  { id:'salvage', name:'회수 코어 강화', icon:'⚙️', cost:2,
+    desc:'일반 캡슐 1개를 회수 코어로 영구 강화합니다. 뽑히면 다음 유물 상점 승리 파편 +2를 예약하고 재추첨합니다. (2매치 전용 · 최대 3개)' },
 ];
 
 /* Image sprite locations are kept beside the game data, so every UI surface uses the same art. */
 const SPRITE_POS = ['0%','33.333%','66.667%','100%'];
-const RELIC_ICON_CELL = { pocket:0, iron_chain:1, golden_die:2, phoenix:3, punish_heavy:4, dividend:5, lucky_bet:6 };
+const RELIC_ICON_CELL = { pocket:0, iron_chain:1, golden_die:2, phoenix:3, punish_heavy:4, dividend:5, lucky_bet:6,
+  repair_kit:7, loyalty_stamp:8, precision_injector:9, recycling_tongs:10, emergency_vent:11,
+  holo_catalog:12, metal_resonator:13, insurance_policy:14 };
 const ITEM_ICON_CELL = { peek:0, double:1, purge:2, emptydrop:3, doubledraw:4, shield:5, trap3:6, ward3:7,
   matchgold:8, gold10:9, swap:10, aging:11, metalcap:12, holocap:13 };
 function spriteIconHTML(type, id){
@@ -1009,8 +1069,8 @@ function spriteIconHTML(type, id){
   return '<span class="game-art-icon '+(type==='relic'?'relic-art':'item-art')+'" style="--icon-x:'+SPRITE_POS[col]+';--icon-y:'+SPRITE_POS[row]+'" aria-hidden="true"></span>';
 }
 RELICS.forEach(r=>{ r.icon = spriteIconHTML('relic',r.id); });
-ITEMS.forEach(it=>{ it.icon = spriteIconHTML('item',it.id); });
-CAPSULE_UPGRADE_SHOP.forEach(u=>{ u.icon = spriteIconHTML('item',u.id==='metal'?'metalcap':'holocap'); });
+ITEMS.forEach(it=>{ it.icon = spriteIconHTML('item',it.id) || it.icon; });
+CAPSULE_UPGRADE_SHOP.forEach(u=>{ u.icon = spriteIconHTML('item',u.id==='metal'?'metalcap':u.id==='holo'?'holocap':'') || u.icon; });
 
 /* ============================== AUDIO ============================== */
 const SFX = (function(){
@@ -1274,17 +1334,32 @@ let G = null;
 const STARTING_LIVES = 2;
 function normalizeCapsuleUpgrades(upgrades){
   const u = upgrades || {};
-  const metal = clamp(parseInt(u.metal || 0, 10) || 0, 0, PLAYER_CAPSULE_POOL);
-  const holo = clamp(parseInt(u.holo || 0, 10) || 0, 0, PLAYER_CAPSULE_POOL - metal);
-  return { metal, holo };
+  const out = {};
+  let remaining = PLAYER_CAPSULE_POOL;
+  Object.keys(PERMANENT_CAPSULE_KINDS).forEach(id=>{
+    const limit = PERMANENT_CAPSULE_KINDS[id].limit==null ? remaining : Math.min(remaining, PERMANENT_CAPSULE_KINDS[id].limit);
+    out[id] = clamp(parseInt(u[id]||0,10)||0,0,limit);
+    remaining -= out[id];
+  });
+  return out;
 }
 function createCapsuleStock(upgrades){
   const u = normalizeCapsuleUpgrades(upgrades);
-  return {
-    normal: PLAYER_CAPSULE_POOL - u.metal - u.holo,
-    metal: u.metal,
-    holo: u.holo
-  };
+  const stock={normal:PLAYER_CAPSULE_POOL-Object.values(u).reduce((a,b)=>a+b,0)};
+  Object.keys(PERMANENT_CAPSULE_KINDS).forEach(id=>stock[id]=u[id]||0);
+  return stock;
+}
+function ensureRelicState(player){
+  if(!player) return {};
+  const state = player.relicState || (player.relicState = {});
+  return state;
+}
+function relicReadyLabel(player, relicId){
+  const state = ensureRelicState(player);
+  if(relicId==='repair_kit') return state.repairKitUsed ? '이번 매치 사용 완료' : '사용 가능';
+  if(relicId==='emergency_vent') return state.emergencyVentUsed ? '이번 매치 사용 완료' : '사용 가능';
+  if(relicId==='insurance_policy') return state.insuranceUsed ? '이번 매치 사용 완료' : (state.insuranceRewardRound ? '다음 라운드 +3원 예약' : '사용 가능');
+  return '';
 }
 function freshPlayers(cfg, carry){
   const roles = ['player'].concat(ROLES.filter(r=>r!=='player').slice(0,cfg.aiCount));
@@ -1298,7 +1373,8 @@ function freshPlayers(cfg, carry){
       relics:(id==='player' && carry && carry.playerRelics) ? carry.playerRelics.slice() : [],
       capsuleUpgrades,
       capsuleStock:createCapsuleStock(capsuleUpgrades),
-      items:{peek:1}, itemAge:{}
+      openingSlot:id==='player' && carry && carry.openingSlot ? carry.openingSlot : {unlocked:false,kind:'random'},
+      items:{peek:1}, itemAge:{}, relicState:{}
     };
   });
 }
@@ -1313,7 +1389,7 @@ function newMatch(matchIndex, carry){
     config: cfg,
     round: 1,
     players: freshPlayers(cfg, carry),
-    machine: { empty: isTutorial ? TUTORIAL_ROUND1_EMPTY : cfg.emptyCapsules, capsules: {}, metal: {}, holo: {} },
+    machine: { empty: isTutorial ? TUTORIAL_ROUND1_EMPTY : cfg.emptyCapsules, capsules: {}, metal: {}, holo:{}, ceramic:{}, cushion:{}, salvage:{} },
     log: [],
     firstRoundEver: matchIndex===0,
     tutorialToppedUp: !isTutorial,
@@ -1329,7 +1405,9 @@ function newMatch(matchIndex, carry){
     G.machine.capsules[p.id] = 0;
     G.machine.metal[p.id] = 0;
     G.machine.holo[p.id] = 0;
-    addCapsulesToMachineFromStock(p, 1);
+    G.machine.ceramic[p.id] = 0; G.machine.cushion[p.id] = 0; G.machine.salvage[p.id] = 0;
+    const forced = p.id==='player' && p.openingSlot && p.openingSlot.unlocked ? p.openingSlot.kind : null;
+    addCapsulesToMachineFromStock(p, 1, forced);
   });
   const previousTimeline = document.getElementById('itemUseTimeline');
   if(previousTimeline) previousTimeline.innerHTML = '';
@@ -1372,7 +1450,10 @@ function loadGame(){
       p.capsuleStock.normal = clamp(parseInt(p.capsuleStock.normal || 0, 10) || 0, 0, PLAYER_CAPSULE_POOL);
       p.capsuleStock.metal = clamp(parseInt(p.capsuleStock.metal || 0, 10) || 0, 0, PLAYER_CAPSULE_POOL);
       p.capsuleStock.holo = clamp(parseInt(p.capsuleStock.holo || 0, 10) || 0, 0, PLAYER_CAPSULE_POOL);
+      ['ceramic','cushion','salvage'].forEach(kind=>p.capsuleStock[kind]=clamp(parseInt(p.capsuleStock[kind]||0,10)||0,0,PLAYER_CAPSULE_POOL));
+      p.openingSlot = p.openingSlot || {unlocked:false,kind:'random'};
       if(!p.itemAge) p.itemAge = {};
+      ensureRelicState(p);
       if(p.items){
         Object.keys(p.items).forEach(id=>{ if(!ITEMS.find(it=>it.id===id)) delete p.items[id]; });
       }
@@ -1389,6 +1470,7 @@ function loadGame(){
     if(G.machine){
       if(!G.machine.metal) G.machine.metal = {};
       if(!G.machine.holo) G.machine.holo = {};
+      ['ceramic','cushion','salvage'].forEach(kind=>{ if(!G.machine[kind]) G.machine[kind]={}; });
       G.players.forEach(p=>{
         if(G.machine.metal[p.id]==null) G.machine.metal[p.id]=0;
         if(G.machine.holo[p.id]==null) G.machine.holo[p.id]=0;
@@ -1694,12 +1776,15 @@ function renderPlayersRow(){
     const chip = el('div','player-chip'+(p.alive?'':' dead'));
     const badgeStr = (p.relics||[]).map(r=>RELICS.find(x=>x.id===r)?.icon || '').join('') +
       Object.keys(p.items||{}).filter(k=>p.items[k]>0).map(k=> ITEMS.find(x=>x.id===k).icon + (p.items[k]>1?p.items[k]:'') ).join(' ');
+    const roundCtx = G.itemWindowCtx;
+    const roundMarks = (roundCtx && roundCtx.rewardSeals && roundCtx.rewardSeals.has(p.id) ? '🔖' : '')+
+      (roundCtx && roundCtx.counterTags && roundCtx.counterTags[p.id]==='armed' ? '🏷️' : '');
     const livesStr = '❤️'.repeat(Math.max(0,p.lives)) + '🖤'.repeat(Math.max(0,STARTING_LIVES-p.lives));
     const stockStr = countPlayerStock(p)+'/'+PLAYER_CAPSULE_POOL;
     chip.title = p.name+' · 골드 '+p.gold+'원 · 보유 캡슐 '+stockStr;
     chip.innerHTML = '<span class="dot capsule-icon '+CCLASS[p.id]+'"></span>'+
       '<span>'+p.name+'</span><span class="lives">'+livesStr+'</span><span class="gold">'+p.gold+'</span>'+
-      '<span class="badges">📦'+stockStr+'</span>'+(badgeStr? '<span class="badges">'+badgeStr+'</span>':'');
+      '<span class="badges">📦'+stockStr+'</span>'+(badgeStr? '<span class="badges">'+badgeStr+'</span>':'')+(roundMarks?'<span class="badges">'+roundMarks+'</span>':'');
     row.appendChild(chip);
   });
   renderGoalBadge();
@@ -1823,6 +1908,7 @@ function getEffectivePool(tempCaps, wardCounts, swapPair, tempEmpty){
     pool[p.id] = count;
     pool['metal:'+p.id] = G.machine.metal[p.id] || 0;
     pool['holo:'+p.id] = G.machine.holo[p.id] || 0;
+    ['ceramic','cushion','salvage'].forEach(kind=>pool[kind+':'+p.id]=(G.machine[kind]&&G.machine[kind][p.id])||0);
   });
   if(swapPair && swapPair.a && swapPair.b){
     const tmp = pool[swapPair.a]; pool[swapPair.a] = pool[swapPair.b]; pool[swapPair.b] = tmp;
@@ -1833,7 +1919,7 @@ function poolTotal(pool){ return Object.values(pool).reduce((a,b)=>a+b,0); }
 
 function countPlayerStock(player){
   if(!player || !player.capsuleStock) return 0;
-  return (player.capsuleStock.normal || 0) + (player.capsuleStock.metal || 0) + (player.capsuleStock.holo || 0);
+  return Object.values(player.capsuleStock).reduce((sum,n)=>sum+(n||0),0);
 }
 
 function countPlayerOwnCapsules(playerId){
@@ -1841,6 +1927,7 @@ function countPlayerOwnCapsules(playerId){
   count += (G.machine.capsules[playerId] || 0);
   count += (G.machine.metal[playerId] || 0);
   count += (G.machine.holo[playerId] || 0);
+  ['ceramic','cushion','salvage'].forEach(kind=>count += (G.machine[kind]&&G.machine[kind][playerId])||0);
   return count;
 }
 
@@ -1925,28 +2012,31 @@ function takeCapsuleKindFromStock(player){
   if(stock.normal > 0) weights.normal = stock.normal;
   if(stock.metal > 0) weights.metal = stock.metal;
   if(stock.holo > 0) weights.holo = stock.holo;
+  ['ceramic','cushion','salvage'].forEach(kind=>{ if(stock[kind]>0) weights[kind]=stock[kind]; });
   if(Object.keys(weights).length===0) return null;
   const kind = weightedPick(weights);
   stock[kind] -= 1;
   return kind;
 }
 
-function addCapsulesToMachineFromStock(player, requestedCount){
-  const added = { normal:0, metal:0, holo:0 };
+function addCapsulesToMachineFromStock(player, requestedCount, forcedKind){
+  const added = { normal:0, metal:0, holo:0, ceramic:0, cushion:0, salvage:0 };
   const limit = Math.max(0, requestedCount || 0);
   for(let i=0;i<limit;i++){
-    const kind = takeCapsuleKindFromStock(player);
+    let kind = forcedKind && player.capsuleStock[forcedKind]>0 ? forcedKind : takeCapsuleKindFromStock(player);
+    if(forcedKind && kind===forcedKind) player.capsuleStock[kind]--;
     if(!kind) break;
     added[kind] += 1;
   }
   G.machine.capsules[player.id] = (G.machine.capsules[player.id] || 0) + added.normal;
   G.machine.metal[player.id] = (G.machine.metal[player.id] || 0) + added.metal;
   G.machine.holo[player.id] = (G.machine.holo[player.id] || 0) + added.holo;
+  ['ceramic','cushion','salvage'].forEach(kind=>G.machine[kind][player.id]=(G.machine[kind][player.id]||0)+added[kind]);
   return added;
 }
 
 function capsuleAddTotal(added){
-  return (added.normal || 0) + (added.metal || 0) + (added.holo || 0);
+  return Object.values(added).reduce((sum,n)=>sum+(n||0),0);
 }
 
 function capsuleAddSummary(added){
@@ -1954,6 +2044,9 @@ function capsuleAddSummary(added){
   if(added.normal) parts.push('일반 '+added.normal+'개');
   if(added.metal) parts.push('🔩메탈 '+added.metal+'개');
   if(added.holo) parts.push('🌈홀로그램 '+added.holo+'개');
+  if(added.ceramic) parts.push('🏺세라믹 '+added.ceramic+'개');
+  if(added.cushion) parts.push('🫧완충 '+added.cushion+'개');
+  if(added.salvage) parts.push('⚙️회수 코어 '+added.salvage+'개');
   return parts.join(', ') || '0개';
 }
 
@@ -1966,6 +2059,10 @@ function consumeCapsuleFromMachine(outcomeId, ctx){
   } else if(outcomeId.startsWith('holo:')){
     const ownerId = outcomeId.slice(5);
     if(G.machine.holo[ownerId] > 0) G.machine.holo[ownerId] -= 1;
+  } else if(/^(ceramic|cushion|salvage):/.test(outcomeId)){
+    const split = outcomeId.indexOf(':');
+    const kind = outcomeId.slice(0,split), ownerId = outcomeId.slice(split+1);
+    if(G.machine[kind] && G.machine[kind][ownerId]>0) G.machine[kind][ownerId] -= 1;
   } else {
     let sourceId = outcomeId;
     if(ctx && ctx.swapPair){
@@ -1974,6 +2071,22 @@ function consumeCapsuleFromMachine(outcomeId, ctx){
     }
     if(G.machine.capsules[sourceId] > 0) G.machine.capsules[sourceId] -= 1;
   }
+}
+function removeOwnNormalCapsules(player, maxCount){
+  if(!player || !G.machine || !G.machine.capsules) return 0;
+  const removed = Math.min(Math.max(0, maxCount||0), G.machine.capsules[player.id]||0);
+  G.machine.capsules[player.id] -= removed;
+  return removed;
+}
+function activateRepairKit(player){
+  const state = ensureRelicState(player);
+  if(!(player.relics||[]).includes('repair_kit') || state.repairKitUsed) return 0;
+  const removed = removeOwnNormalCapsules(player, 3);
+  if(removed > 0){
+    state.repairKitUsed = true;
+    addLog('🧰 [응급 정비 키트] '+player.emoji+' '+player.name+'가 피격 후 일반 캡슐 '+removed+'개를 제거했습니다.', player.id==='player'?'good':'');
+  }
+  return removed;
 }
 
 function renderMachineVisual(tempCaps, wardCounts, swapPair, tempEmpty){
@@ -1986,6 +2099,7 @@ function renderMachineVisual(tempCaps, wardCounts, swapPair, tempEmpty){
     for(let i=0;i<pool[p.id];i++) items.push({cls:CCLASS[p.id]});
     for(let i=0;i<(pool['metal:'+p.id]||0);i++) items.push({cls:CCLASS[p.id]+' capsule-metal'});
     for(let i=0;i<(pool['holo:'+p.id]||0);i++) items.push({cls:CCLASS[p.id]+' capsule-holo'});
+    ['ceramic','cushion','salvage'].forEach(kind=>{ for(let i=0;i<(pool[kind+':'+p.id]||0);i++) items.push({cls:CCLASS[p.id]+' capsule-'+kind}); });
   });
   for(let i=items.length-1;i>0;i--){ const j=randi(0,i); [items[i],items[j]]=[items[j],items[i]]; }
   const cap = 90;
@@ -2026,7 +2140,8 @@ function renderCapsuleStats(pool){
     const normalCount = pool[p.id] || 0;
     const metalCount = pool['metal:'+p.id] || 0;
     const holoCount = pool['holo:'+p.id] || 0;
-    const sum = normalCount + metalCount + holoCount;
+    const ceramicCount = pool['ceramic:'+p.id] || 0, cushionCount = pool['cushion:'+p.id] || 0, salvageCount = pool['salvage:'+p.id] || 0;
+    const sum = normalCount + metalCount + holoCount + ceramicCount + cushionCount + salvageCount;
     const stockLeft = countPlayerStock(p);
     
     let extra = '';
@@ -2034,6 +2149,9 @@ function renderCapsuleStats(pool){
       const parts = [];
       if(metalCount > 0) parts.push('🔩'+metalCount);
       if(holoCount > 0) parts.push('🌈'+holoCount);
+      if(ceramicCount) parts.push('🏺'+ceramicCount);
+      if(cushionCount) parts.push('🫧'+cushionCount);
+      if(salvageCount) parts.push('⚙️'+salvageCount);
       extra = ' <small style="opacity:.8;font-size:9px;">'+parts.join(' ')+'</small>';
     }
 
@@ -2064,13 +2182,24 @@ async function beginRound(isResume){
     }
   });
 
+  // 유물: 보험 약관 — 실드 방어가 예약한 다음 라운드 보상
+  if(!isResume) G.players.filter(p=>p.alive).forEach(p=>{
+    const state = ensureRelicState(p);
+    if(state.insuranceRewardRound === G.round){
+      p.gold += 3;
+      delete state.insuranceRewardRound;
+      addLog('📜 [보험 약관] '+p.emoji+' '+p.name+'가 실드 방어 보상으로 +3원을 획득했습니다.', p.id==='player'?'good':'');
+      if(p.id==='player') toast('📜 보험금 지급: +3원', 2800);
+    }
+  });
+
   // 유물: 황금 배당금
   if(!isResume) G.players.filter(p=>p.alive).forEach(p=>{
     if((p.relics||[]).includes('dividend')){
       const normalC = G.machine.capsules[p.id] || 0;
       const metalC = G.machine.metal[p.id] || 0;
       const holoC = G.machine.holo[p.id] || 0;
-      const totalOwn = normalC + metalC + holoC;
+      const totalOwn = normalC + metalC + holoC + ['ceramic','cushion','salvage'].reduce((s,k)=>s+((G.machine[k]&&G.machine[k][p.id])||0),0);
       const sets = Math.floor(totalOwn / 5);
       if(sets > 0){
         const gain = sets * 3;
@@ -2080,6 +2209,14 @@ async function beginRound(isResume){
       }
     }
   });
+
+  if(!isResume){
+    const startGoldWinner = G.players.find(p=>p.alive && p.gold >= G.config.target);
+    if(startGoldWinner){
+      await matchWinByGold(startGoldWinner);
+      return;
+    }
+  }
 
   // 유물: 행운의 숫자
   if(!isResume){
@@ -2107,6 +2244,8 @@ async function beginRound(isResume){
   G.itemWindowCtx = null;
   G.sidebarExpanded = null;
   G.sidebarTarget = null;
+  G.sidebarPhase = null;
+  G.sidebarMaterial = null;
   renderItemSidebar();
 
   if(!isResume && G.firstRoundEver && G.round===1){
@@ -2426,6 +2565,13 @@ async function applyBetsToMachine(bets, minPlayers){
     G.roundCapsuleAdds[pid] = (G.roundCapsuleAdds[pid]||0) + actualAdded;
     if(actualAdded > 0){
       addLog('⚠️ '+p.emoji+' '+p.name+'는 최소 투입자! 페널티 캡슐 '+actualAdded+'개 추가 ('+capsuleAddSummary(added)+', 보너스 골드 없음)', 'bad');
+      const state = ensureRelicState(p);
+      if((p.relics||[]).includes('recycling_tongs') && state.recyclingRound !== G.round){
+        state.recyclingRound = G.round;
+        const reward = grantRandomItem(p, '재활용 집게');
+        if(reward) addLog('🗜️ [재활용 집게] 실제 페널티 투입 → ['+reward.name+'] 1개 획득!', p.id==='player'?'good':'');
+        else addLog('🗜️ [재활용 집게] 보유 한도 때문에 받을 아이템이 없습니다.', 'bad');
+      }
     } else {
       addLog('⚠️ '+p.emoji+' '+p.name+'는 최소 투입자지만 보유 캡슐이 없어 페널티 캡슐을 추가하지 못했습니다.', 'bad');
     }
@@ -2509,20 +2655,23 @@ function renderPopupShopUI(){
 
   offeredItems.forEach(it=>{
     const count = (human.items||{})[it.id] || 0;
+    const itemCost = getItemPurchaseCost(human, it);
     const boughtThisRound = ((G.shopBought.player)||[]).includes(it.id);
     const atCap = count >= maxStock;
     const card = el('div','shop-card');
     card.innerHTML = 
-      '<div class="card-top"><span class="icon">'+it.icon+'</span><span class="name">'+it.name+' ('+count+'/'+maxStock+')</span><span class="cost">'+it.cost+'원</span></div>'+
+      '<div class="card-top"><span class="icon">'+it.icon+'</span><span class="name">'+it.name+' ('+count+'/'+maxStock+')</span><span class="cost">'+itemCost+'원'+(itemCost<it.cost?' <small>(도장)</small>':'')+'</span></div>'+
       '<div class="desc">'+it.desc+'</div>';
     let label = '구매';
     if(boughtThisRound) label = '구매 완료';
     else if(atCap) label = '최대 보유';
     const btn = el('button','btn btn-small btn-primary', label);
-    btn.disabled = boughtThisRound || atCap || human.gold < it.cost;
+    btn.disabled = boughtThisRound || atCap || human.gold < itemCost;
     btn.addEventListener('click', ()=>{
-      human.gold -= it.cost;
+      if(human.gold < itemCost || boughtThisRound || atCap) return;
+      human.gold -= itemCost;
       human.items[it.id] = (human.items[it.id]||0) + 1;
+      if((human.relics||[]).includes('loyalty_stamp')) ensureRelicState(human).loyaltyRound = G.round;
       G.shopBought.player = G.shopBought.player || [];
       G.shopBought.player.push(it.id);
       SFX.buy();
@@ -2537,6 +2686,12 @@ function renderPopupShopUI(){
 
   $('#btn-popup-shop-reroll').disabled = human.gold < SHOP_REROLL_COST;
   $('#popupShopLog').innerHTML = (G._shopMsgs||[]).map(m=>'<div>'+m+'</div>').join('');
+}
+
+function getItemPurchaseCost(player, item){
+  const state = ensureRelicState(player);
+  const discounted = (player.relics||[]).includes('loyalty_stamp') && state.loyaltyRound !== G.round;
+  return discounted ? Math.max(1, item.cost-1) : item.cost;
 }
 
 function openIngameShopPopup(){
@@ -2609,6 +2764,7 @@ function rollRelicShopOffer(){
 function showRelicShopScreen(carry){
   nextMatchCarryState = carry;
   nextMatchCarryState.capsuleUpgrades = normalizeCapsuleUpgrades(nextMatchCarryState.capsuleUpgrades);
+  nextMatchCarryState.openingSlot = nextMatchCarryState.openingSlot || {unlocked:false,kind:'random'};
   rollRelicShopOffer();
   renderRelicShopUI();
   showScreen('screen-relic-shop');
@@ -2650,7 +2806,7 @@ function renderRelicShopUI(){
 
   grid.appendChild(el('div','shop-section-label','🎛️ 캡슐 강화'));
   const upgrades = normalizeCapsuleUpgrades(nextMatchCarryState.capsuleUpgrades);
-  const normalLeft = PLAYER_CAPSULE_POOL - upgrades.metal - upgrades.holo;
+  const normalLeft = PLAYER_CAPSULE_POOL - Object.values(upgrades).reduce((a,b)=>a+b,0);
   CAPSULE_UPGRADE_SHOP.forEach(u=>{
     const current = upgrades[u.id] || 0;
     const card = el('div','shop-card');
@@ -2658,11 +2814,15 @@ function renderRelicShopUI(){
       '<div class="card-top"><span class="icon">'+u.icon+'</span><span class="name">'+u.name+' ('+current+'개)</span><span class="cost" style="color:var(--accent);">파편 '+u.cost+'개</span></div>'+
       '<div class="desc">'+u.desc+'<br>남은 일반 캡슐: '+normalLeft+'개 / 전체 '+PLAYER_CAPSULE_POOL+'개</div>';
     const btn = el('button','btn btn-small btn-primary', normalLeft > 0 ? '1개 강화' : '강화 완료');
-    btn.disabled = normalLeft <= 0 || nextMatchCarryState.relicCurrency < u.cost;
+    const kindLimit = PERMANENT_CAPSULE_KINDS[u.id].limit;
+    const unavailableHere = u.id==='salvage' && nextMatchCarryState.nextIdx>=2;
+    btn.disabled = normalLeft <= 0 || nextMatchCarryState.relicCurrency < u.cost || (kindLimit!=null && current>=kindLimit) || unavailableHere;
     btn.addEventListener('click', ()=>{
       if(nextMatchCarryState.relicCurrency < u.cost) return;
       const latest = normalizeCapsuleUpgrades(nextMatchCarryState.capsuleUpgrades);
-      if(PLAYER_CAPSULE_POOL - latest.metal - latest.holo <= 0) return;
+      if(PLAYER_CAPSULE_POOL - Object.values(latest).reduce((a,b)=>a+b,0) <= 0) return;
+      if(u.id==='salvage' && nextMatchCarryState.nextIdx>=2) return;
+      if(PERMANENT_CAPSULE_KINDS[u.id].limit!=null && latest[u.id]>=PERMANENT_CAPSULE_KINDS[u.id].limit) return;
       nextMatchCarryState.relicCurrency -= u.cost;
       latest[u.id] = (latest[u.id] || 0) + 1;
       nextMatchCarryState.capsuleUpgrades = normalizeCapsuleUpgrades(latest);
@@ -2672,6 +2832,23 @@ function renderRelicShopUI(){
     card.appendChild(btn);
     grid.appendChild(card);
   });
+
+  const slot = nextMatchCarryState.openingSlot;
+  const slotCard = el('div','shop-card');
+  slotCard.innerHTML='<div class="card-top"><span class="icon">🎯</span><span class="name">시작 투입 슬롯</span><span class="cost" style="color:var(--accent);">파편 4개</span></div><div class="desc">매치 시작에 투입할 캡슐 종류를 지정합니다. 현재: '+(slot.kind==='random'?'무작위':(PERMANENT_CAPSULE_KINDS[slot.kind]?.name||'무작위'))+'</div>';
+  const slotBtn=el('button','btn btn-small btn-primary',slot.unlocked?'종류 선택':'슬롯 해금');
+  slotBtn.disabled=!slot.unlocked && nextMatchCarryState.relicCurrency<4;
+  slotBtn.addEventListener('click',()=>{ if(!slot.unlocked){ if(nextMatchCarryState.relicCurrency<4)return; nextMatchCarryState.relicCurrency-=4; slot.unlocked=true; } const choices=['random'].concat(Object.keys(upgrades).filter(k=>upgrades[k]>0)); slot.kind=choices[(choices.indexOf(slot.kind)+1)%choices.length]; renderRelicShopUI(); });
+  grid.appendChild(slotCard); slotCard.appendChild(slotBtn);
+  const ownedKinds=Object.keys(upgrades).filter(k=>upgrades[k]>0);
+  if(ownedKinds.length){
+    const reforge=el('div','shop-card');
+    const kindOptions=Object.keys(PERMANENT_CAPSULE_KINDS).map(k=>'<option value="'+k+'">'+PERMANENT_CAPSULE_KINDS[k].name+'</option>').join('');
+    reforge.innerHTML='<div class="card-top"><span class="icon">♻️</span><span class="name">강화 재설정</span></div><div class="desc">다음 매치 기본 구성의 강화 1개를 다른 종류로 바꿉니다.</div><div><select class="reforge-from">'+ownedKinds.map(k=>'<option value="'+k+'">'+PERMANENT_CAPSULE_KINDS[k].name+'</option>').join('')+'</select> → <select class="reforge-to">'+kindOptions+'</select></div>';
+    const reforgeBtn=el('button','btn btn-small btn-secondary','재설정');
+    reforgeBtn.addEventListener('click',()=>{const from=reforge.querySelector('.reforge-from').value,to=reforge.querySelector('.reforge-to').value;if(from===to||!upgrades[from])return;if(to==='salvage'&&nextMatchCarryState.nextIdx>=2)return;const limit=PERMANENT_CAPSULE_KINDS[to].limit;if(limit!=null&&upgrades[to]>=limit)return;const cost=1+Math.max(0,PERMANENT_CAPSULE_KINDS[to].cost-PERMANENT_CAPSULE_KINDS[from].cost);if(nextMatchCarryState.relicCurrency<cost)return;upgrades[from]--;upgrades[to]++;nextMatchCarryState.relicCurrency-=cost;nextMatchCarryState.capsuleUpgrades=normalizeCapsuleUpgrades(upgrades);if(nextMatchCarryState.openingSlot.kind===from&&nextMatchCarryState.capsuleUpgrades[from]===0)nextMatchCarryState.openingSlot.kind='random';renderRelicShopUI();});
+    reforge.appendChild(reforgeBtn);grid.appendChild(reforge);
+  }
 
   const rerollBtn = $('#btn-relic-shop-reroll');
   rerollBtn.disabled = nextMatchCarryState.relicCurrency < RELIC_SHOP_REROLL_COST || unownedTotal <= RELIC_SHOP_OFFER_SIZE;
@@ -2691,13 +2868,58 @@ $('#btn-relic-shop-next').addEventListener('click', ()=>{
     wins: nextMatchCarryState.wins,
     playerRelics: nextMatchCarryState.playerRelics,
     relicCurrency: nextMatchCarryState.relicCurrency,
-    capsuleUpgrades: normalizeCapsuleUpgrades(nextMatchCarryState.capsuleUpgrades)
+    capsuleUpgrades: normalizeCapsuleUpgrades(nextMatchCarryState.capsuleUpgrades),
+    openingSlot: nextMatchCarryState.openingSlot
   };
   newMatch(nextIdx, carry);
   startBriefVN();
 });
 
-/* ---- Central item effect dispatcher ---- */
+/* ---- Item validation and central effect dispatcher ---- */
+function phaseDirections(player){
+  const dirs = [];
+  if((G.machine.metal[player.id]||0)>0) dirs.push('metalToHolo');
+  if((G.machine.holo[player.id]||0)>0) dirs.push('holoToMetal');
+  return dirs;
+}
+function exchangeCandidates(player, materialId){
+  if(!materialId || materialId==='item_exchange' || materialId==='aging' || (player.items[materialId]||0)<=0) return [];
+  const maxStock = getMaxItemStock(player);
+  return shuffled(ITEMS.filter(it=>it.id!=='item_exchange' && it.id!=='aging' && it.id!==materialId && (player.items[it.id]||0)<maxStock)).slice(0,3);
+}
+function canUseItem(itemId, user, ctx, targetId){
+  const info = ITEMS.find(x=>x.id===itemId);
+  if(!info || !user || (user.items[itemId]||0)<=0) return false;
+  const target = targetId && G.players.find(p=>p.id===targetId);
+  if(info.targeted && (!target || !target.alive || target.id===user.id)) return false;
+  switch(info.kind){
+    case 'shield': return !ctx.shieldSet.has(user.id);
+    case 'doubleDraw': return !ctx.doubleDraw;
+    case 'targetDouble': return ((G.roundCapsuleAdds&&G.roundCapsuleAdds[target.id])||0)>0;
+    case 'metal': case 'holo': return (G.machine.capsules[user.id]||0)>0;
+    case 'trapCleaner': return (ctx.tempCaps[user.id]||0)>0;
+    case 'recallMagnet': return (G.machine.capsules[user.id]||0)>0 && countPlayerStock(user)<PLAYER_CAPSULE_POOL;
+    case 'emptyFilter': return G.machine.empty>0;
+    case 'phase': return phaseDirections(user).includes(targetId);
+    case 'singleDraw': return !!ctx.doubleDraw;
+    case 'exchange': return exchangeCandidates(user, targetId).length>0;
+    case 'rewardSeal': return ((G.machine.metal[target.id]||0)+(G.machine.holo[target.id]||0)>0) && !ctx.rewardSeals.has(target.id);
+    case 'counterTag': {
+      if(ctx.counterTags[user.id]) return false;
+      const order = G.roundRankOrder||[];
+      return order.slice(order.indexOf(user.id)+1).some(id=>{ const p=G.players.find(x=>x.id===id); return p&&p.alive&&p.id!==user.id; });
+    }
+    default: return true;
+  }
+}
+function triggerCounterTag(ctx, attacker, target, actualAdded){
+  if(actualAdded<=0 || !ctx.counterTags[target.id] || ctx.counterTags[target.id]!=='armed') return false;
+  ctx.counterTags[target.id] = 'triggered';
+  ctx.tempCaps[attacker.id] = (ctx.tempCaps[attacker.id]||0)+2;
+  ctx.peekedOutcome = null;
+  addLog('🏷️ [역추적 태그] '+target.emoji+' '+target.name+'의 반격! '+attacker.emoji+' '+attacker.name+'에게 임시 캡슐 2개를 추가했습니다.', 'bad');
+  return true;
+}
 function applyItemEffect(itemId, user, ctx, targetId){
   const info = ITEMS.find(x=>x.id===itemId);
   if(!info) return;
@@ -2710,7 +2932,7 @@ function applyItemEffect(itemId, user, ctx, targetId){
     case 'peek': {
       const currentPool = getEffectivePool(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
       if(!ctx.peekedOutcome){
-        ctx.peekedOutcome = weightedPick(currentPool);
+        ctx.peekedOutcome = poolTotal(currentPool)>0 ? weightedPick(currentPool) : 'empty';
       }
       let peekText = '';
       if(ctx.peekedOutcome === 'empty'){
@@ -2735,6 +2957,7 @@ function applyItemEffect(itemId, user, ctx, targetId){
       invalidatePeek();
       const added = (G.roundCapsuleAdds && G.roundCapsuleAdds[target.id]) || 0;
       ctx.tempCaps[target.id] = (ctx.tempCaps[target.id]||0) + added;
+      triggerCounterTag(ctx, user, target, added);
       remixMachine = added>0;
       logMsg = target.emoji+' '+target.name+'의 이번 라운드 캡슐 수가 2배가 되었습니다! (+'+added+'개, 보너스 골드 없음)';
       popupTargetName = target.name; popupTargetEmoji = target.emoji; danger = true;
@@ -2744,6 +2967,7 @@ function applyItemEffect(itemId, user, ctx, targetId){
       invalidatePeek();
       const n = info.count||3;
       ctx.tempCaps[target.id] = (ctx.tempCaps[target.id]||0) + n;
+      triggerCounterTag(ctx, user, target, n);
       remixMachine = n>0;
       logMsg = target.emoji+' '+target.name+'에게 임시 캡슐 '+n+'개 추가 (보너스 골드 없음)';
       popupTargetName = target.name; popupTargetEmoji = target.emoji; danger = true;
@@ -2807,23 +3031,89 @@ function applyItemEffect(itemId, user, ctx, targetId){
     case 'metal': {
       const beforeMetal = G.machine.capsules[user.id]||0;
       const attemptsMetal = Math.min(info.count||3, beforeMetal);
+      const successRate = (user.relics||[]).includes('precision_injector') ? 0.75 : CAPSULE_ENCHANT_SUCCESS_RATE;
       let n = 0;
-      for(let i=0;i<attemptsMetal;i++) if(Math.random() < CAPSULE_ENCHANT_SUCCESS_RATE) n++;
+      for(let i=0;i<attemptsMetal;i++) if(Math.random() < successRate) n++;
       G.machine.capsules[user.id] -= n;
       G.machine.metal[user.id] = (G.machine.metal[user.id]||0) + n;
       if(ctx.peekedOutcome===user.id && n>0 && Math.random() < n/beforeMetal) ctx.peekedOutcome = 'metal:'+user.id;
-      logMsg = user.emoji+' '+user.name+'의 일반 캡슐 '+n+'개가 메탈 캡슐로 변했습니다! (시도 '+attemptsMetal+'개, 매치 종료까지 유지)';
+      logMsg = user.emoji+' '+user.name+'의 일반 캡슐 '+n+'개가 메탈 캡슐로 변했습니다! (시도 '+attemptsMetal+'개, 성공률 '+Math.round(successRate*100)+'%, 매치 종료까지 유지)';
       break;
     }
     case 'holo': {
       const beforeHolo = G.machine.capsules[user.id]||0;
       const attemptsHolo = Math.min(info.count||3, beforeHolo);
+      const successRate = (user.relics||[]).includes('precision_injector') ? 0.75 : CAPSULE_ENCHANT_SUCCESS_RATE;
       let n = 0;
-      for(let i=0;i<attemptsHolo;i++) if(Math.random() < CAPSULE_ENCHANT_SUCCESS_RATE) n++;
+      for(let i=0;i<attemptsHolo;i++) if(Math.random() < successRate) n++;
       G.machine.capsules[user.id] -= n;
       G.machine.holo[user.id] = (G.machine.holo[user.id]||0) + n;
       if(ctx.peekedOutcome===user.id && n>0 && Math.random() < n/beforeHolo) ctx.peekedOutcome = 'holo:'+user.id;
-      logMsg = user.emoji+' '+user.name+'의 일반 캡슐 '+n+'개가 홀로그램 캡슐로 변했습니다! (시도 '+attemptsHolo+'개, 매치 종료까지 유지)';
+      logMsg = user.emoji+' '+user.name+'의 일반 캡슐 '+n+'개가 홀로그램 캡슐로 변했습니다! (시도 '+attemptsHolo+'개, 성공률 '+Math.round(successRate*100)+'%, 매치 종료까지 유지)';
+      break;
+    }
+    case 'trapCleaner': {
+      invalidatePeek();
+      const removed = Math.min(info.count||4, ctx.tempCaps[user.id]||0);
+      ctx.tempCaps[user.id] -= removed;
+      remixMachine = removed>0;
+      logMsg = user.emoji+' '+user.name+'의 임시 캡슐 '+removed+'개를 해제했습니다!';
+      break;
+    }
+    case 'recallMagnet': {
+      invalidatePeek();
+      const capacity = Math.max(0, PLAYER_CAPSULE_POOL-countPlayerStock(user));
+      const recalled = Math.min(info.count||2, G.machine.capsules[user.id]||0, capacity);
+      G.machine.capsules[user.id] -= recalled;
+      user.capsuleStock.normal = (user.capsuleStock.normal||0)+recalled;
+      remixMachine = recalled>0;
+      logMsg = user.emoji+' '+user.name+'가 일반 캡슐 '+recalled+'개를 보유 재고로 회수했습니다!';
+      break;
+    }
+    case 'emptyFilter': {
+      invalidatePeek();
+      const removed = Math.min(info.count||4, G.machine.empty||0);
+      G.machine.empty -= removed;
+      remixMachine = removed>0;
+      logMsg = '기본 빈 캡슐 '+removed+'개를 제거했습니다. 모두의 일반 캡슐 위험이 높아집니다!';
+      break;
+    }
+    case 'phase': {
+      invalidatePeek();
+      if(targetId==='metalToHolo'){
+        G.machine.metal[user.id] -= 1;
+        G.machine.holo[user.id] = (G.machine.holo[user.id]||0)+1;
+        logMsg = user.emoji+' '+user.name+'의 메탈 캡슐 1개를 홀로그램으로 전환했습니다!';
+      } else {
+        G.machine.holo[user.id] -= 1;
+        G.machine.metal[user.id] = (G.machine.metal[user.id]||0)+1;
+        logMsg = user.emoji+' '+user.name+'의 홀로그램 캡슐 1개를 메탈로 전환했습니다!';
+      }
+      remixMachine = true;
+      break;
+    }
+    case 'singleDraw': {
+      ctx.doubleDraw = false;
+      logMsg = '더블 뽑기를 해제했습니다. 이번 라운드는 1회만 추첨합니다.';
+      break;
+    }
+    case 'exchange': {
+      const materialId = targetId;
+      const candidates = exchangeCandidates(user, materialId);
+      user.items[materialId] -= 1;
+      logMsg = user.emoji+' '+user.name+'가 ['+(ITEMS.find(x=>x.id===materialId)||{}).name+']을 교환 재료로 사용했습니다.';
+      chooseExchangeItem(user, candidates);
+      break;
+    }
+    case 'rewardSeal': {
+      ctx.rewardSeals.add(target.id);
+      logMsg = target.emoji+' '+target.name+'의 첫 강화 캡슐 보상이 이번 라운드 봉인됩니다!';
+      popupTargetName = target.name; popupTargetEmoji = target.emoji; danger = true;
+      break;
+    }
+    case 'counterTag': {
+      ctx.counterTags[user.id] = 'armed';
+      logMsg = user.emoji+' '+user.name+'가 역추적 태그를 설치했습니다. 이후 첫 함정 사용자를 반격합니다!';
       break;
     }
     default: {
@@ -2832,6 +3122,7 @@ function applyItemEffect(itemId, user, ctx, targetId){
   }
 
   if(remixMachine) showMachineRemix();
+  if(user.gold >= G.config.target) ctx.goldWinner = user.id;
   addLog('✨ '+logMsg, danger?'bad':'good');
   recordItemUse(info, user, target);
   if(user.isAI) showCharacterTip(user.id,'item');
@@ -2854,6 +3145,7 @@ function purgeRandomCapsules(n){
       const holoKey = 'holo:'+p.id;
       const holoLeft = (G.machine.holo[p.id]||0) - (removedCounts[holoKey]||0);
       if(holoLeft>0) weights[holoKey] = holoLeft;
+      ['ceramic','cushion','salvage'].forEach(kind=>{ const key=kind+':'+p.id; const left=((G.machine[kind]&&G.machine[kind][p.id])||0)-(removedCounts[key]||0); if(left>0) weights[key]=left; });
     });
     if(Object.keys(weights).length===0) break;
     const key = weightedPick(weights);
@@ -2869,6 +3161,7 @@ function purgeRandomCapsules(n){
       const id = key.slice(5);
       G.machine.holo[id] = (G.machine.holo[id]||0) - removedCounts[key];
     }
+    else if(/^(ceramic|cushion|salvage):/.test(key)){ const split=key.indexOf(':'); const kind=key.slice(0,split), id=key.slice(split+1); G.machine[kind][id]=(G.machine[kind][id]||0)-removedCounts[key]; }
     else G.machine.capsules[key] = (G.machine.capsules[key]||0) - removedCounts[key];
   });
   return Object.keys(removedCounts).map(key=>{
@@ -2877,6 +3170,7 @@ function purgeRandomCapsules(n){
     let id = key;
     if(key.indexOf('metal:')===0){ kind = ' 메탈'; id = key.slice(6); }
     else if(key.indexOf('holo:')===0){ kind = ' 홀로그램'; id = key.slice(5); }
+    else if(/^(ceramic|cushion|salvage):/.test(key)){ const split=key.indexOf(':'); kind=' '+PERMANENT_CAPSULE_KINDS[key.slice(0,split)].name; id=key.slice(split+1); }
     const p = G.players.find(x=>x.id===id);
     return (p? p.emoji+' '+p.name : id)+kind+' '+removedCounts[key]+'개';
   }).join(', ');
@@ -2892,13 +3186,26 @@ function aiTryUseItems(ai, ctx){
   const usedThisTurn = ctx.aiUsedItemIds[ai.id] || (ctx.aiUsedItemIds[ai.id] = new Set());
   const targetFor = info=>{
     if(!info.targeted || !targets.length) return null;
-    return targets.slice().sort((a,b)=>{
+    const eligible = info.kind==='rewardSeal' ? targets.filter(p=>(G.machine.metal[p.id]||0)+(G.machine.holo[p.id]||0)>0) : targets;
+    if(!eligible.length) return null;
+    return eligible.slice().sort((a,b)=>{
       const aCaps=(pool[a.id]||0)+(pool['metal:'+a.id]||0)+(pool['holo:'+a.id]||0);
       const bCaps=(pool[b.id]||0)+(pool['metal:'+b.id]||0)+(pool['holo:'+b.id]||0);
       const aThreat=(a.gold/G.config.target)*4+(aCaps/Math.max(1,total))*3+(a.lives<=1?2:0);
       const bThreat=(b.gold/G.config.target)*4+(bCaps/Math.max(1,total))*3+(b.lives<=1?2:0);
       return bThreat-aThreat;
     })[0].id;
+  };
+  const payloadFor = info=>{
+    if(info.targeted) return targetFor(info);
+    if(info.kind==='phase'){
+      const dirs=phaseDirections(ai);
+      return dirs.includes('metalToHolo') && (ai.gold>=G.config.target-8 || getAvailableItems(ai).length===0) ? 'metalToHolo' : dirs[0]||null;
+    }
+    if(info.kind==='exchange'){
+      return Object.keys(ai.items||{}).find(id=>id!=='item_exchange' && id!=='aging' && (ai.items[id]||0)>0) || null;
+    }
+    return null;
   };
   const scored = [];
   for(const id of Object.keys(ai.items||{})){
@@ -2917,8 +3224,17 @@ function aiTryUseItems(ai, ctx){
     else if(info.kind==='instantGold') score=deficit>8?4:1;
     else if(info.kind==='matchGold') score=G.roundCapsuleAdds[ai.id]>0?2.5:0;
     else if(info.kind==='doubleDraw') score=deficit>10?3:1;
+    else if(info.kind==='trapCleaner') score=(ctx.tempCaps[ai.id]||0)>0 ? 4 : 0;
+    else if(info.kind==='recallMagnet') score=danger>0.18 ? 2.5 : 0;
+    else if(info.kind==='emptyFilter') score=(total>0 && own/total<0.3 && ai.lives>1) ? 2.3 : 0;
+    else if(info.kind==='phase') score=phaseDirections(ai).length ? 2 : 0;
+    else if(info.kind==='singleDraw') score=ctx.doubleDraw && (danger>0.2 || ai.gold>G.config.target*.7) ? 4 : 0;
+    else if(info.kind==='rewardSeal') score=targets.some(p=>(G.machine.metal[p.id]||0)+(G.machine.holo[p.id]||0)>0) ? 2.5 : 0;
+    else if(info.kind==='counterTag') score=danger>0.15 ? 1.8 : 0;
+    else if(info.kind==='exchange') score=2;
     score += Math.random()*0.5;
-    if(score>0) scored.push({id, info, score, targetId:targetFor(info)});
+    const targetId = payloadFor(info);
+    if(score>0 && canUseItem(id, ai, ctx, targetId)) scored.push({id, info, score, targetId});
   }
   if(!scored.length) return false;
   scored.sort((a,b)=>b.score-a.score);
@@ -2933,7 +3249,12 @@ function aiTryUseItems(ai, ctx){
 /* ---- Item usage window ---- */
 async function runItemWindow(){
   const human = G.players.find(p=>p.id==='player');
-  const ctx = { tempCaps:{}, wardCounts:{}, shieldSet:new Set(), swapPair:null, doubleDraw:false, peekedOutcome:null, tempEmpty:0, aiUsedItemIds:{} };
+  const ctx = { tempCaps:{}, wardCounts:{}, shieldSet:new Set(), swapPair:null, doubleDraw:false, peekedOutcome:null, tempEmpty:0, aiUsedItemIds:{}, rewardSeals:new Set(), counterTags:{} };
+  G.players.filter(p=>p.alive && (p.cushionNext||0)>0).forEach(p=>{
+    ctx.wardCounts[p.id] = Math.min(2,p.cushionNext);
+    addLog('🫧 [완충 캡슐] '+p.name+'의 다음 라운드 완충 '+ctx.wardCounts[p.id]+'개가 적용됩니다.', p.id==='player'?'good':'');
+    p.cushionNext = 0;
+  });
   G.itemUseHistory = [];
   renderItemUseTimeline();
   G.itemWindowActive = true;
@@ -2961,7 +3282,8 @@ async function runItemWindow(){
       continue;
     }
     const humanUsable = ITEMS.some(it=>it.kind!=='aging' && (human.items[it.id]||0)>0);
-    if(!humanUsable) continue;
+    const ventUsable = (human.relics||[]).includes('emergency_vent') && !ensureRelicState(human).emergencyVentUsed && (G.machine.capsules[human.id]||0)>0;
+    if(!humanUsable && !ventUsable) continue;
     const panel = $('#controlPanel');
     panel.innerHTML = '';
     const rankPosition = order.indexOf(current.id)+1;
@@ -2987,6 +3309,11 @@ async function runItemWindow(){
   G.sidebarExpanded = null;
   G.sidebarTarget = null;
   renderItemSidebar();
+  const goldWinner = ctx.goldWinner && G.players.find(p=>p.id===ctx.goldWinner && p.alive);
+  if(goldWinner){
+    await matchWinByGold(goldWinner);
+    return;
+  }
   await finalizeAndDraw(ctx);
 }
 
@@ -3013,6 +3340,14 @@ function renderItemSidebar(){
   wrap.appendChild(openCapsulesBtn);
   const human = G.players.find(p=>p.id==='player');
   if(!human){ return; }
+  if((human.relics||[]).includes('emergency_vent')){
+    const state = ensureRelicState(human);
+    const ventBtn = el('button','btn btn-small btn-danger','🧯 비상 배출 레버 · '+relicReadyLabel(human,'emergency_vent'));
+    const canVent = G.itemWindowActive && G.itemTurnPlayerId==='player' && !state.emergencyVentUsed && (G.machine.capsules[human.id]||0)>0;
+    ventBtn.disabled = !canVent;
+    ventBtn.addEventListener('click', useEmergencyVent);
+    wrap.appendChild(ventBtn);
+  }
   const owned = ITEMS.filter(it=> (human.items && human.items[it.id]||0) > 0);
   if(owned.length===0){
     wrap.appendChild(el('div','item-sidebar-empty','보유한 아이템이<br>없습니다'));
@@ -3028,6 +3363,8 @@ function renderItemSidebar(){
     head.addEventListener('click', ()=>{
       G.sidebarExpanded = expanded ? null : it.id;
       G.sidebarTarget = null;
+      G.sidebarPhase = null;
+      G.sidebarMaterial = null;
       renderItemSidebar();
     });
     slot.appendChild(head);
@@ -3043,6 +3380,25 @@ function renderItemSidebar(){
         });
         detail.appendChild(targets);
       }
+      if(it.kind==='phase'){
+        const choices = el('div','target-select');
+        const labels = {metalToHolo:'🔩 메탈 → 🌈 홀로', holoToMetal:'🌈 홀로 → 🔩 메탈'};
+        phaseDirections(human).forEach(direction=>{
+          const chip = el('div','target-chip'+(G.sidebarPhase===direction?' sel':''), labels[direction]);
+          chip.addEventListener('click', ()=>{ G.sidebarPhase=direction; renderItemSidebar(); });
+          choices.appendChild(chip);
+        });
+        detail.appendChild(choices);
+      }
+      if(it.kind==='exchange'){
+        const choices = el('div','target-select');
+        ITEMS.filter(other=>other.id!==it.id && other.id!=='aging' && (human.items[other.id]||0)>0).forEach(other=>{
+          const chip = el('div','target-chip'+(G.sidebarMaterial===other.id?' sel':''), other.icon+' '+other.name+' x'+human.items[other.id]);
+          chip.addEventListener('click', ()=>{ G.sidebarMaterial=other.id; renderItemSidebar(); });
+          choices.appendChild(chip);
+        });
+        detail.appendChild(choices);
+      }
       const isAging = it.kind==='aging';
       if(isAging){
         detail.appendChild(el('div','item-slot-hint','※ 이 아이템은 사용 효과가 없어요. 보유할수록 판매가가 오릅니다!'));
@@ -3052,7 +3408,8 @@ function renderItemSidebar(){
       const btnRow = el('div','item-slot-btns');
       if(!isAging){
         const useBtn = el('button','btn btn-small btn-danger','사용');
-        const canUse = G.itemWindowActive && G.itemTurnPlayerId==='player' && (!it.targeted || G.sidebarTarget);
+        const payload = it.targeted ? G.sidebarTarget : (it.kind==='phase' ? G.sidebarPhase : it.kind==='exchange' ? G.sidebarMaterial : null);
+        const canUse = G.itemWindowActive && G.itemTurnPlayerId==='player' && canUseItem(it.id, human, G.itemWindowCtx, payload);
         useBtn.disabled = !canUse;
         useBtn.addEventListener('click', ()=> useItemFromSidebar(it.id));
         btnRow.appendChild(useBtn);
@@ -3067,18 +3424,38 @@ function renderItemSidebar(){
   });
 }
 
+function useEmergencyVent(){
+  const human = G.players.find(p=>p.id==='player');
+  if(!human || !G.itemWindowActive || G.itemTurnPlayerId!=='player' || !G.itemWindowCtx) return;
+  const state = ensureRelicState(human);
+  if(state.emergencyVentUsed || (G.machine.capsules[human.id]||0)<=0) return;
+  const removed = removeOwnNormalCapsules(human, 4);
+  if(!removed) return;
+  state.emergencyVentUsed = true;
+  G.itemWindowCtx.peekedOutcome = null;
+  addLog('🧯 [비상 배출 레버] 머신 속 플레이어의 일반 캡슐 '+removed+'개를 제거했습니다. 예측 결과는 초기화되었습니다.', 'good');
+  toast('🧯 비상 배출: 일반 캡슐 '+removed+'개 제거', 3200);
+  showMachineRemix();
+  renderPlayersRow();
+  renderMachineVisual(G.itemWindowCtx.tempCaps, G.itemWindowCtx.wardCounts, G.itemWindowCtx.swapPair, G.itemWindowCtx.tempEmpty);
+  renderItemSidebar();
+}
+
 function useItemFromSidebar(itemId){
   const human = G.players.find(p=>p.id==='player');
   if(!G.itemWindowActive || G.itemTurnPlayerId!=='player' || !G.itemWindowCtx || (human.items[itemId]||0)<=0) return;
   const info = ITEMS.find(x=>x.id===itemId);
   if(!info || info.kind==='aging') return;
-  if(info.targeted && !G.sidebarTarget) return;
+  const payload = info.targeted ? G.sidebarTarget : (info.kind==='phase' ? G.sidebarPhase : info.kind==='exchange' ? G.sidebarMaterial : null);
+  if(!canUseItem(itemId, human, G.itemWindowCtx, payload)) return;
   const ctx = G.itemWindowCtx;
   human.items[itemId] -= 1;
-  applyItemEffect(itemId, human, ctx, info.targeted ? G.sidebarTarget : null);
+  applyItemEffect(itemId, human, ctx, payload);
   SFX.buy();
   G.sidebarExpanded = null;
   G.sidebarTarget = null;
+  G.sidebarPhase = null;
+  G.sidebarMaterial = null;
   renderPlayersRow();
   renderMachineVisual(ctx.tempCaps, ctx.wardCounts, ctx.swapPair, ctx.tempEmpty);
   renderItemSidebar();
@@ -3100,21 +3477,86 @@ function sellItemFromSidebar(itemId){
   renderItemSidebar();
 }
 
-function grantCompensationItem(player){
-  if(!player || !player.alive) return;
+function getAvailableItems(player){
+  if(!player) return [];
   const maxStock = getMaxItemStock(player);
   player.items = player.items || {};
-  const availItems = ITEMS.filter(it => (player.items[it.id] || 0) < maxStock);
+  return ITEMS.filter(it => (player.items[it.id] || 0) < maxStock);
+}
+function grantRandomItem(player, reason){
+  if(!player || !player.alive) return null;
+  const availItems = getAvailableItems(player);
   if(availItems.length > 0){
     const picked = availItems[randi(0, availItems.length - 1)];
     player.items[picked.id] = (player.items[picked.id] || 0) + 1;
+    const label = reason || '보상';
     if(player.id === 'player'){
-      addLog('🎁 [피격 보상] 플레이어가 보상 아이템 [' + picked.name + '] 1개를 획득했습니다!', 'good');
-      toast('🎁 피격 위로 보상: ' + picked.name, 3500);
+      addLog('🎁 ['+label+'] 플레이어가 [' + picked.name + '] 1개를 획득했습니다!', 'good');
+      toast('🎁 '+label+': ' + picked.name, 3500);
     } else {
-      addLog('🎁 [피격 보상] ' + player.emoji + ' ' + player.name + '가 [' + picked.name + '] 1개를 받았습니다.');
+      addLog('🎁 ['+label+'] ' + player.emoji + ' ' + player.name + '가 [' + picked.name + '] 1개를 받았습니다.');
     }
+    return picked;
   }
+  return null;
+}
+function grantCompensationItem(player){
+  return grantRandomItem(player, '피격 보상');
+}
+function chooseHoloCatalogItem(player){
+  const candidates = shuffled(getAvailableItems(player)).slice(0, 3);
+  if(!candidates.length) return Promise.resolve(null);
+  if(candidates.length===1 || player.id!=='player'){
+    const picked = candidates[0];
+    player.items[picked.id] = (player.items[picked.id]||0)+1;
+    addLog('🌈 [홀로그램 카탈로그] '+player.emoji+' '+player.name+'가 ['+picked.name+']을 선택했습니다.', 'good');
+    return Promise.resolve(picked);
+  }
+  return new Promise(resolve=>{
+    const overlay = $('#holoCatalogOverlay'), options = $('#holoCatalogOptions');
+    const card = overlay.querySelector('.relic-choice-card');
+    card.querySelector('h3').textContent = '🌈 홀로그램 카탈로그';
+    card.querySelector('p').textContent = '획득할 아이템 하나를 선택하세요.';
+    options.innerHTML = '';
+    candidates.forEach(item=>{
+      const btn = el('button','btn btn-primary', item.icon+' '+item.name);
+      btn.addEventListener('click', ()=>{
+        player.items[item.id] = (player.items[item.id]||0)+1;
+        overlay.classList.remove('active');
+        addLog('🌈 [홀로그램 카탈로그] 플레이어가 ['+item.name+']을 선택했습니다.', 'good');
+        resolve(item);
+      }, {once:true});
+      options.appendChild(btn);
+    });
+    overlay.classList.add('active');
+  });
+}
+function chooseExchangeItem(player, candidates){
+  if(!candidates.length) return;
+  const receive = item=>{
+    player.items[item.id] = (player.items[item.id]||0)+1;
+    addLog('🎫 [아이템 교환권] '+player.emoji+' '+player.name+'가 ['+item.name+']을 받았습니다.', player.id==='player'?'good':'');
+    renderPlayersRow();
+    renderItemSidebar();
+  };
+  if(candidates.length===1 || player.id!=='player'){
+    receive(candidates[0]);
+    return;
+  }
+  const overlay = $('#holoCatalogOverlay'), card = overlay.querySelector('.relic-choice-card');
+  const title = card.querySelector('h3'), desc = card.querySelector('p'), options = $('#holoCatalogOptions');
+  title.textContent = '🎫 아이템 교환권';
+  desc.textContent = '교환으로 받을 아이템 하나를 선택하세요.';
+  options.innerHTML = '';
+  candidates.forEach(item=>{
+    const btn = el('button','btn btn-primary', item.icon+' '+item.name);
+    btn.addEventListener('click', ()=>{
+      overlay.classList.remove('active');
+      receive(item);
+    }, {once:true});
+    options.appendChild(btn);
+  });
+  overlay.classList.add('active');
 }
 
 /* ---- Finalize pool, danger check, draw sequence ---- */
@@ -3133,7 +3575,7 @@ async function finalizeAndDraw(ctx){
   await runCrankInteraction();
   await runDrawAnimation(danger);
 
-  let outcomeId = ctx.peekedOutcome || weightedPick(pool);
+  let outcomeId = ctx.peekedOutcome || (poolTotal(pool)>0 ? weightedPick(pool) : 'empty');
   let result = await resolveOneDraw(outcomeId, ctx);
   while(result && result.reroll){
     toast('🔄 탈락자 캡슐 노 카운트! 즉시 재추첨합니다...', 2000);
@@ -3345,11 +3787,14 @@ async function resolveOneDraw(outcomeId, ctx){
   let kind = 'normal', ownerId = outcomeId;
   if(outcomeId.indexOf && outcomeId.indexOf('metal:')===0){ kind='metal'; ownerId = outcomeId.slice(6); }
   else if(outcomeId.indexOf && outcomeId.indexOf('holo:')===0){ kind='holo'; ownerId = outcomeId.slice(5); }
+  else if(outcomeId.indexOf && outcomeId.indexOf('ceramic:')===0){ kind='ceramic'; ownerId = outcomeId.slice(8); }
+  else if(outcomeId.indexOf && outcomeId.indexOf('cushion:')===0){ kind='cushion'; ownerId = outcomeId.slice(8); }
+  else if(outcomeId.indexOf && outcomeId.indexOf('salvage:')===0){ kind='salvage'; ownerId = outcomeId.slice(8); }
 
   let colorVar = outcomeId==='empty' ? COLOR.empty : COLOR[ownerId];
   revealCap.style.background = colorVar;
   revealCap.style.color = colorVar;
-  revealCap.classList.add(outcomeId === 'empty' ? 'empty' : (kind==='metal' ? 'capsule-metal' : kind==='holo' ? 'capsule-holo' : CCLASS[ownerId]));
+  revealCap.classList.add(outcomeId === 'empty' ? 'empty' : (kind==='normal' ? CCLASS[ownerId] : 'capsule-'+kind));
   // The generated capsule art already communicates type and owner; do not overlay legacy emoji.
   revealEmoji.textContent = '';
   revealCap.classList.add('show');
@@ -3370,14 +3815,40 @@ async function resolveOneDraw(outcomeId, ctx){
   consumeCapsuleFromMachine(outcomeId, ctx);
   renderMachineVisual(ctx ? ctx.tempCaps : null, ctx ? ctx.wardCounts : null, ctx ? ctx.swapPair : null, ctx ? ctx.tempEmpty : 0);
 
+  if(kind==='ceramic'){
+    banner.textContent = '🏺 세라믹 캡슐! 피해 없이 이번 추첨을 안전하게 종료합니다.';
+    banner.classList.add('show','safe'); SFX.safe();
+    addLog('🏺 세라믹 캡슐이 소모되어 이번 유효 추첨을 안전하게 종료했습니다.', 'good');
+    renderPlayersRow(); await sleep(1200);
+    return {ended:false, reroll:false};
+  }
+  if(kind==='cushion'){
+    const owner=G.players.find(p=>p.id===ownerId);
+    if(owner && owner.alive){ owner.cushionNext=Math.min(2,(owner.cushionNext||0)+1); addLog('🫧 [완충 캡슐] '+owner.name+'의 다음 라운드 완충 예약 +1 (총 '+owner.cushionNext+'/2)', 'good'); }
+    banner.textContent='🫧 완충 캡슐! 다음 라운드 방어를 예약하고 재추첨'; banner.classList.add('show','safe');
+    renderPlayersRow(); await sleep(1100); return {ended:false,reroll:true};
+  }
+  if(kind==='salvage'){
+    const owner=G.players.find(p=>p.id===ownerId);
+    if(owner && owner.alive && G.matchIndex<2){ owner.pendingWinFragments=Math.min(6,(owner.pendingWinFragments||0)+2); addLog('⚙️ [회수 코어] '+owner.name+'의 다음 상점 파편 +2 예약 (총 '+owner.pendingWinFragments+'/6)', 'good'); }
+    banner.textContent='⚙️ 회수 코어! 다음 상점 파편을 예약하고 재추첨'; banner.classList.add('show','safe');
+    renderPlayersRow(); await sleep(1100); return {ended:false,reroll:true};
+  }
+
   if(kind==='metal'){
     const owner = G.players.find(p=>p.id===ownerId);
+    const sealed = ctx && ctx.rewardSeals && ctx.rewardSeals.has(ownerId);
+    if(sealed) ctx.rewardSeals.delete(ownerId);
     if(owner && owner.alive){
-      owner.gold += 5;
-      banner.textContent = '🔩 메탈 캡슐! '+owner.emoji+' '+owner.name+'가 5원 획득 · 결과 무효화 후 재추첨';
+      const state = ensureRelicState(owner);
+      const resonated = !sealed && (owner.relics||[]).includes('metal_resonator') && state.metalResonatorRound !== G.round;
+      const gain = sealed ? 0 : (resonated ? 7 : 5);
+      owner.gold += gain;
+      if(resonated) state.metalResonatorRound = G.round;
+      banner.textContent = sealed ? '🔖 메탈 캡슐 보상 봉인! 결과 무효화 후 재추첨' : '🔩 메탈 캡슐! '+owner.emoji+' '+owner.name+'가 '+gain+'원 획득 · 결과 무효화 후 재추첨';
       banner.classList.add('show','safe');
       SFX.coin();
-      addLog('🔩 메탈 캡슐 결과 무효화: '+owner.emoji+' '+owner.name+'가 +5원을 획득하고 즉시 재추첨합니다.', 'good');
+      addLog(sealed ? '🔖 [보상 봉인 스티커] '+owner.emoji+' '+owner.name+'의 메탈 캡슐 보상을 봉인하고 재추첨합니다.' : '🔩 메탈 캡슐 결과 무효화: '+owner.emoji+' '+owner.name+'가 +'+gain+'원을 획득'+(resonated?' ([금속 공명기] 첫 발동)':'')+'하고 즉시 재추첨합니다.', 'good');
     } else {
       banner.textContent = '✅ 메탈 캡슐 결과 무효화 · 재추첨';
       banner.classList.add('show','safe');
@@ -3385,16 +3856,26 @@ async function resolveOneDraw(outcomeId, ctx){
     }
     renderPlayersRow();
     await sleep(1200);
+    if(owner && owner.gold >= G.config.target){
+      await matchWinByGold(owner);
+      return { ended:true, reroll:false };
+    }
     return { ended: false, reroll: true };
   }
 
   if(kind==='holo'){
     const owner = G.players.find(p=>p.id===ownerId);
-    banner.textContent = '🌈 홀로그램 캡슐! '+(owner?owner.emoji+' '+owner.name:ownerId)+'가 랜덤 아이템 획득 · 결과 무효화 후 재추첨';
+    const sealed = ctx && ctx.rewardSeals && ctx.rewardSeals.has(ownerId);
+    if(sealed) ctx.rewardSeals.delete(ownerId);
+    const catalog = owner && (owner.relics||[]).includes('holo_catalog');
+    banner.textContent = sealed ? '🔖 홀로그램 캡슐 보상 봉인! 결과 무효화 후 재추첨' : '🌈 홀로그램 캡슐! '+(owner?owner.emoji+' '+owner.name:ownerId)+'가 '+(catalog?'카탈로그에서 아이템 선택':'랜덤 아이템 획득')+' · 결과 무효화 후 재추첨';
     banner.classList.add('show','safe');
     SFX.coin();
-    if(owner && owner.alive) grantCompensationItem(owner);
-    addLog('🌈 홀로그램 캡슐 결과 무효화: '+(owner?owner.emoji+' '+owner.name:ownerId)+'에게 랜덤 아이템을 지급하고 즉시 재추첨합니다.', 'good');
+    if(!sealed && owner && owner.alive){
+      if((owner.relics||[]).includes('holo_catalog')) await chooseHoloCatalogItem(owner);
+      else grantRandomItem(owner, '홀로그램 보상');
+    }
+    addLog(sealed ? '🔖 [보상 봉인 스티커] '+(owner?owner.emoji+' '+owner.name:ownerId)+'의 홀로그램 캡슐 보상을 봉인하고 재추첨합니다.' : '🌈 홀로그램 캡슐 결과 무효화: '+(owner?owner.emoji+' '+owner.name:ownerId)+'에게 '+(catalog?'카탈로그 선택권':'랜덤 아이템')+'을 지급하고 즉시 재추첨합니다.', 'good');
     renderPlayersRow();
     await sleep(1200);
     return { ended: false, reroll: true };
@@ -3446,6 +3927,12 @@ async function resolveOneDraw(outcomeId, ctx){
     banner.classList.add('show','safe');
     SFX.safe();
     addLog('💗 '+shielded.emoji+' '+shielded.name+'의 하트 실드가 발동해 목숨 손실을 막았습니다! (해당 캡슐은 머신에서 제거됨)', 'good');
+    const state = ensureRelicState(shielded);
+    if((shielded.relics||[]).includes('insurance_policy') && !state.insuranceUsed){
+      state.insuranceUsed = true;
+      state.insuranceRewardRound = G.round + 1;
+      addLog('📜 [보험 약관] 실드 방어 성공! 다음 라운드 시작에 +3원이 예약되었습니다.', shielded.id==='player'?'good':'');
+    }
   } else if(!hitPlayer && !eliminatedPlayer){
     banner.textContent = outcomeId==='empty' ? '✅ 빈 캡슐! (머신에서 제거됨)' : '✅ 다음 라운드로 진행';
     banner.classList.add('show','safe');
@@ -3471,7 +3958,9 @@ async function resolveOneDraw(outcomeId, ctx){
     banner.classList.add('show','lose');
     SFX.hit();
     addLog('💥 플레이어의 캡슐이 뽑혀 머신에서 제거되었습니다! 목숨 하나를 잃었습니다. (남은 목숨 '+hitPlayer.lives+')', 'bad');
+    const repaired = activateRepairKit(hitPlayer);
     grantCompensationItem(hitPlayer);
+    if(repaired) banner.textContent += ' · 🧰 일반 캡슐 '+repaired+'개 정비';
     if(hitPlayer.lives===1) showCatTip('목숨이 하나뿐이다냥… 다음 추첨은 특히 조심하라냥!', 'danger');
     else showCatTip('괜찮다냥! 아직 기회가 남아 있다냥.', 'danger');
   } else {
@@ -3479,7 +3968,9 @@ async function resolveOneDraw(outcomeId, ctx){
     banner.classList.add('show','win');
     SFX.hit();
     addLog('💥 '+hitPlayer.emoji+' '+hitPlayer.name+'의 캡슐이 뽑혀 머신에서 제거되었습니다! 목숨 하나를 잃었습니다. (남은 목숨 '+hitPlayer.lives+')', 'hot');
+    const repaired = activateRepairKit(hitPlayer);
     grantCompensationItem(hitPlayer);
+    if(repaired) banner.textContent += ' · 🧰 정비 '+repaired+'개';
     showCharacterTip(hitPlayer.id,'hit');
   }
 
@@ -3547,8 +4038,9 @@ function finishMatch(won, desc){
         nextIdx,
         wins: G.wins + 1,
         playerRelics: human ? (human.relics || []).slice() : [],
-        relicCurrency: totalFragments,
-        capsuleUpgrades: human ? normalizeCapsuleUpgrades(human.capsuleUpgrades) : normalizeCapsuleUpgrades()
+        relicCurrency: totalFragments + (human && human.pendingWinFragments || 0),
+        capsuleUpgrades: human ? normalizeCapsuleUpgrades(human.capsuleUpgrades) : normalizeCapsuleUpgrades(),
+        openingSlot: human && human.openingSlot
       });
     };
   } else if(won){
